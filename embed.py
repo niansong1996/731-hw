@@ -5,12 +5,15 @@
 '''
 
 from typing import List
+from torch import Tensor
+import vocab
 
-def corpus_to_embedding(corpus: List[List[str]]) -> Tensor:
+# look_up the dict to convert to indices and do the padding
+def corpus_to_indices(vocab: vocab.VocabEntry, corpus: List[List[str]]) -> Tensor:
 
     raise NotImplementedError()
 
-
-def embedding_to_corpus(embedding: Tensor) -> List[List[str]]:
+# look up the dict for indices and convert to varied length sents
+def indices_to_corpus(vocab: vocab.VocabEntry, indices: Tensor) -> List[List[str]]:
 
     raise NotImplementedError()

@@ -105,3 +105,9 @@ venv.bak/
 
 # py charm
 .idea
+
+# vs code
+.vscode
+
+# tutorial
+./tutorial

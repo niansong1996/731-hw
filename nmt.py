@@ -49,6 +49,14 @@ from nltk.translate.bleu_score import corpus_bleu, sentence_bleu, SmoothingFunct
 
 from utils import read_corpus, batch_iter
 from vocab import Vocab, VocabEntry
+from embed import corpus_to_indices, indices_to_corpus
+
+import torch
+import torch.nn as nn
+import torch.Tensor as Tensor
+import torch.nn.functional as F
+
+
 
 
 Hypothesis = namedtuple('Hypothesis', ['value', 'score'])
@@ -56,15 +64,28 @@ Hypothesis = namedtuple('Hypothesis', ['value', 'score'])
 
 class NMT(object):
 
-    def __init__(self, embed_size, hidden_size, vocab, dropout_rate=0.2):
+    def __init__(self, embed_size, hidden_size, vocab: Vocab, dropout_rate=0.2):
         super(NMT, self).__init__()
 
         self.embed_size = embed_size
         self.hidden_size = hidden_size
         self.dropout_rate = dropout_rate
         self.vocab = vocab
+        input_size = len(vocab.src)
+        output_size = len(vocab.tgt)
 
         # initialize neural network layers...
+        # could add drop-out and bidirectional arguments
+        # could also change the units to GRU
+        self.encoder_embed = nn.Embedding(input_size, embed_size)
+        self.encoder_lstm = nn.LSTM(hidden_size, embed_size)
+
+        self.decoder_embed = nn.Embedding(output_size, embed_size)
+        self.decoder_lstm = nn.LSTM(hidden_size, hidden_size)
+        self.decoder_out = nn.Linear(hidden_size, output_size)
+        self.decoder_softmax = nn.LogSoftmax(dim=1)
+
+        self.criterion = nn.NLLLoss()
 
     def __call__(self, src_sents: List[List[str]], tgt_sents: List[List[str]]) -> Tensor:
         """
@@ -98,6 +119,15 @@ class NMT(object):
             decoder_init_state: decoder GRU/LSTM's initial state, computed from source encodings
         """
 
+        # first the the vecotrized representation of the batch
+        init_hidden = torch.zeros(1, 1, self.hidden_size)
+        input = corpus_to_indices(self.vocab.src, src_sents)
+        embedded = self.encoder_embed(input).view(1, 1, -1)
+        output = embedded
+        output, hidden = self.encoder_lstm(output, init_hidden)
+        src_encodings = output
+        decoder_init_state = hidden
+
         return src_encodings, decoder_init_state
 
     def decode(self, src_encodings: Tensor, decoder_init_state: Any, tgt_sents: List[List[str]]) -> Tensor:
@@ -115,6 +145,17 @@ class NMT(object):
                 log-likelihood of generating the gold-standard target sentence for 
                 each example in the input batch
         """
+        # the following line takes batch-size = 1 as default
+        input = corpus_to_indices(self.vocab.tgt, [["<s>"]])
+        output = self.decoder_embed(input).view(1, 1, -1)
+        output = F.relu(output)
+        output, hidden = self.decoder_lstm(output, decoder_init_state)
+        output = self.decoder_softmax(self.decoder_out(output[0])) # need explanation
+
+        # convert the target sentences to indices
+        target_output = corpus_to_indices(self.vocab.tgt, tgt_sents)
+        # not sure about the next line
+        scores = self.criterion(output, target_output)
 
         return scores
 
