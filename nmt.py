@@ -42,7 +42,7 @@ import time
 from collections import namedtuple
 
 import numpy as np
-from typing import List, Tuple, Dict, Set, Union
+from typing import *
 from docopt import docopt
 from tqdm import tqdm
 from nltk.translate.bleu_score import corpus_bleu, sentence_bleu, SmoothingFunction
@@ -53,7 +53,7 @@ from embed import corpus_to_indices, indices_to_corpus
 
 import torch
 import torch.nn as nn
-import torch.Tensor as Tensor
+import torch.tensor as Tensor
 import torch.nn.functional as F
 
 
@@ -64,7 +64,7 @@ Hypothesis = namedtuple('Hypothesis', ['value', 'score'])
 
 class NMT(object):
 
-    def __init__(self, embed_size, hidden_size, vocab: Vocab, dropout_rate=0.2):
+    def __init__(self, embed_size, hidden_size, vocab, dropout_rate=0.2):
         super(NMT, self).__init__()
 
         self.embed_size = embed_size
@@ -78,11 +78,11 @@ class NMT(object):
         # could add drop-out and bidirectional arguments
         # could also change the units to GRU
         self.encoder_embed = nn.Embedding(input_size, embed_size)
-        self.encoder_lstm = nn.LSTM(hidden_size, embed_size)
+        self.encoder_lstm = nn.LSTM(embed_size, hidden_size)
 
         self.decoder_embed = nn.Embedding(output_size, embed_size)
-        self.decoder_lstm = nn.LSTM(hidden_size, hidden_size)
-        self.decoder_out = nn.Linear(hidden_size, output_size)
+        self.decoder_lstm = nn.LSTM(embed_size, hidden_size)
+        self.decoder_out = nn.Linear(embed_size, output_size)
         self.decoder_softmax = nn.LogSoftmax(dim=1)
 
         self.criterion = nn.NLLLoss()
@@ -101,7 +101,7 @@ class NMT(object):
                 log-likelihood of generating the gold-standard target sentence for 
                 each example in the input batch
         """
-        src_encodings, decoder_init_state = self.encode(src_sents, tgt_sents)
+        src_encodings, decoder_init_state = self.encode(src_sents)
         scores = self.decode(src_encodings, decoder_init_state, tgt_sents)
 
         return scores
@@ -119,12 +119,14 @@ class NMT(object):
             decoder_init_state: decoder GRU/LSTM's initial state, computed from source encodings
         """
 
+        batch_size = len(src_sents)
+
         # first the the vecotrized representation of the batch
-        init_hidden = torch.zeros(1, 1, self.hidden_size)
+        init_hidden = torch.zeros(1, batch_size, self.hidden_size)
         input = corpus_to_indices(self.vocab.src, src_sents)
-        embedded = self.encoder_embed(input).view(1, 1, -1)
+        embedded = self.encoder_embed(input).view(batch_size, -1, self.embed_size)
         output = embedded
-        output, hidden = self.encoder_lstm(output, init_hidden)
+        output, hidden = self.encoder_lstm(init_hidden, output)
         src_encodings = output
         decoder_init_state = hidden
 
@@ -145,8 +147,7 @@ class NMT(object):
                 log-likelihood of generating the gold-standard target sentence for 
                 each example in the input batch
         """
-        # the following line takes batch-size = 1 as default
-        input = corpus_to_indices(self.vocab.tgt, [["<s>"]])
+        input = corpus_to_indices(self.vocab.tgt, [["<s>"] for i in range(len(tgt_sents))])
         output = self.decoder_embed(input).view(1, 1, -1)
         output = F.relu(output)
         output, hidden = self.decoder_lstm(output, decoder_init_state)
