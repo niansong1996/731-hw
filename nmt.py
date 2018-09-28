@@ -62,7 +62,7 @@ import torch.nn.functional as F
 Hypothesis = namedtuple('Hypothesis', ['value', 'score'])
 
 
-class NMT(object):
+class NMT(nn.Module):
 
     def __init__(self, embed_size, hidden_size, vocab, dropout_rate=0.2):
         super(NMT, self).__init__()
@@ -72,7 +72,7 @@ class NMT(object):
         self.dropout_rate = dropout_rate
         self.vocab = vocab
         input_size = len(vocab.src)
-        output_size = len(vocab.tgt)
+        self.output_size = len(vocab.tgt)
 
         # initialize neural network layers...
         # could add drop-out and bidirectional arguments
@@ -80,14 +80,14 @@ class NMT(object):
         self.encoder_embed = nn.Embedding(input_size, embed_size)
         self.encoder_lstm = nn.LSTM(embed_size, hidden_size)
 
-        self.decoder_embed = nn.Embedding(output_size, hidden_size)
-        self.decoder_lstm = nn.LSTM(hidden_size, hidden_size)
-        self.decoder_out = nn.Linear(hidden_size, output_size)
+        self.decoder_embed = nn.Embedding(self.output_size, embed_size)
+        self.decoder_lstm = nn.LSTM(embed_size, hidden_size)
+        self.decoder_out = nn.Linear(hidden_size, self.output_size)
         self.decoder_softmax = nn.LogSoftmax(dim=1)
 
         self.criterion = nn.NLLLoss()
 
-    def __call__(self, src_sents: List[List[str]], tgt_sents: List[List[str]]) -> Tensor:
+    def forward(self, src_sents: List[List[str]], tgt_sents: List[List[str]]) -> Tensor:
         """
         take a mini-batch of source and target sentences, compute the log-likelihood of 
         target sentences.
@@ -148,29 +148,35 @@ class NMT(object):
                 each example in the input batch
         """
         batch_size = len(tgt_sents)
-        target_indices = corpus_to_indices(self.vocab.tgt, tgt_sents).view(-1, batch_size)
-        max_tgt_sent_len = target_indices.shape[0]
-        # a mask to mask out the sentences that are already beyond compare (reached the smaller length of the pair)
-        mask = torch.ones(batch_size)
-        output_words_probs = []
-
-        # input as the initial start token <s>
-        input = corpus_to_indices(self.vocab.tgt, [["<s>"] for i in range(len(tgt_sents))])
-        output = self.decoder_embed(input).view(-1, batch_size, self.embed_size)
-        hidden_state = decoder_init_state
-        for i in range(max_tgt_sent_len):
-            output = F.relu(output)
-            output, (hidden_state, _) = self.decoder_lstm(output, (hidden_state, torch.zeros(decoder_init_state.shape)))
-
-            output_vocab = self.decoder_out(output)
-            output_vocab = self.decoder_softmax(output_vocab) 
-            output_words_probs.append(output_vocab)
-
-        # convert the target sentences to indices
+        loss_mask = torch.ones(batch_size)  # the mask for calculating loss
+        input = corpus_to_indices(self.vocab.tgt, [["<s>"] for i in range(batch_size)])
+        decoder_input = self.decoder_embed(input).view(-1, batch_size, self.embed_size)
+        decoder_input = F.relu(decoder_input)
+        scores = torch.zeros(batch_size)
+        h_t = decoder_init_state
+        c_t = torch.zeros(decoder_init_state.shape)
+        # convert the target sentences to indices, dim = (batch_size, max_sent_len)
         target_output = corpus_to_indices(self.vocab.tgt, tgt_sents)
-        # not sure about the next line
-        scores = self.criterion(output, target_output)
-
+        # skip the '<s>' in the tgt_sents since the output starts from the word after '<s>'
+        for i in range(1, target_output.shape[1]):
+            # TODO: need to calculate the new input as the embedding of the last output word
+            _, (h_t, c_t) = self.decoder_lstm(decoder_input, (h_t, c_t))
+            vocab_size_output = self.decoder_out(h_t)
+            top_v, top_i = torch.topk(vocab_size_output, 1, dim=2)  # pick the word with the top score for each batch
+            input_indices = top_i.squeeze().detach() # dim = (batch_size) after squeeze
+            # get the input for the next layer from the embed of the top words
+            decoder_input = self.decoder_embed(input_indices).view(-1, batch_size, self.embed_size)
+            # dim = (1, batch_size, vocab_size)
+            softmax_output = self.decoder_softmax(vocab_size_output)  
+            for j in range(batch_size):
+                target_word_idx = target_output[j,i].reshape(1)  # reshape to have dim = (1) for calculating loss 
+                vocab_prob = softmax_output[0][j].reshape(1, -1)  # reshape to have dim = (1, vocab_size) for calculating loss 
+                score_delta = self.criterion(vocab_prob, target_word_idx)
+                scores[j] += score_delta * loss_mask[j]
+                # mask all the loss after '</s>' as 0
+                if input_indices[j] == self.vocab.tgt.word2id['</s>'] or \
+                 target_word_idx == self.vocab.tgt.word2id['</s>']:
+                    loss_mask[j] = 0
         return scores
 
     def beam_search(self, src_sent: List[str], beam_size: int=5, max_decoding_time_step: int=70) -> List[Hypothesis]:
