@@ -122,11 +122,11 @@ class NMT(object):
         batch_size = len(src_sents)
 
         # first the the vecotrized representation of the batch
-        init_hidden = torch.zeros(1, batch_size, self.hidden_size)
         input = corpus_to_indices(self.vocab.src, src_sents)
-        embedded = self.encoder_embed(input).view(batch_size, -1, self.embed_size)
+        embedded = self.encoder_embed(input)
+        embedded = embedded.view(-1, batch_size, self.embed_size)
         output = embedded
-        output, hidden = self.encoder_lstm(init_hidden, output)
+        output, (hidden, _) = self.encoder_lstm(output)
         src_encodings = output
         decoder_init_state = hidden
 
@@ -150,7 +150,7 @@ class NMT(object):
         input = corpus_to_indices(self.vocab.tgt, [["<s>"] for i in range(len(tgt_sents))])
         output = self.decoder_embed(input).view(1, 1, -1)
         output = F.relu(output)
-        output, hidden = self.decoder_lstm(output, decoder_init_state)
+        output, hidden = self.decoder_lstm(output, (decoder_init_state,))
         output = self.decoder_softmax(self.decoder_out(output[0])) # need explanation
 
         # convert the target sentences to indices
