@@ -82,7 +82,7 @@ class NMT(object):
 
         self.decoder_embed = nn.Embedding(output_size, embed_size)
         self.decoder_lstm = nn.LSTM(embed_size, hidden_size)
-        self.decoder_out = nn.Linear(embed_size, output_size)
+        self.decoder_out = nn.Linear(hidden_size, output_size)
         self.decoder_softmax = nn.LogSoftmax(dim=1)
 
         self.criterion = nn.NLLLoss()
@@ -147,11 +147,13 @@ class NMT(object):
                 log-likelihood of generating the gold-standard target sentence for 
                 each example in the input batch
         """
+        batch_size = len(tgt_sents)
         input = corpus_to_indices(self.vocab.tgt, [["<s>"] for i in range(len(tgt_sents))])
-        output = self.decoder_embed(input).view(1, 1, -1)
+        output = self.decoder_embed(input).view(-1, batch_size, self.embed_size)
         output = F.relu(output)
-        output, hidden = self.decoder_lstm(output, (decoder_init_state,))
-        output = self.decoder_softmax(self.decoder_out(output[0])) # need explanation
+        output, hidden = self.decoder_lstm(output, (decoder_init_state, torch.zeros(decoder_init_state.shape)))
+        output = self.decoder_out(output)
+        output = self.decoder_softmax(output) # need explanation
 
         # convert the target sentences to indices
         target_output = corpus_to_indices(self.vocab.tgt, tgt_sents)
