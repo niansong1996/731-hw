@@ -12,8 +12,9 @@ import vocab
 
 # look_up the dict to convert to indices and do the padding
 def corpus_to_indices(vocab: vocab.VocabEntry, corpus: List[List[str]]) -> Tensor:
-    max_sent_len = reduce((lambda x, y: max(len(x), len(y))), corpus)
-    indices = torch.zeros(len(corpus), max_sent_len, dtype=torch.int32) # indices are initialized with the index of '<pad>'
+    max_sent_len = max(map((lambda x: len(x)), corpus))
+    # indices are initialized with the index of '<pad>'
+    indices = torch.zeros(len(corpus), max_sent_len, dtype=torch.int32)
     for i, sent in enumerate(corpus):
         sent_indices = np.zeros((1, max_sent_len))
         for j, word in enumerate(sent):
@@ -32,3 +33,4 @@ def indices_to_corpus(vocab: vocab.VocabEntry, indices: Tensor) -> List[List[str
                 break
             sent.append(vocab.id2word(idx))
         corpus.append(sent)
+    return corpus
