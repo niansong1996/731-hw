@@ -146,6 +146,8 @@ class NMT(nn.Module):
             scores: could be a variable of shape (batch_size, ) representing the 
                 log-likelihood of generating the gold-standard target sentence for 
                 each example in the input batch
+                (extra note) we need this to be in the shape of (batch_size, output_vocab_size) 
+                for beam search
         """
         batch_size = len(tgt_sents)
         loss_mask = torch.ones(batch_size)  # the mask for calculating loss
@@ -193,6 +195,10 @@ class NMT(nn.Module):
                 value: List[str]: the decoded target sentence, represented as a list of words
                 score: float: the log-likelihood of the target sentence
         """
+
+        src_encodings, decoder_init_state = self.encode([src_sent])
+        scores = self.decode(src_encodings, decoder_init_state).squeeze() # in shape (1, output_vocab_size)
+
 
         return hypotheses
 
@@ -295,6 +301,11 @@ def train(args: Dict[str, str]):
     train_time = begin_time = time.time()
     print('begin Maximum Likelihood training')
 
+    # set the optimizers
+    learning_rate = float(args['--lr'])
+    model_params = model.parameters()
+    optimizer = torch.optim.SGD(model_params, lr=learning_rate)
+
     while True:
         epoch += 1
 
@@ -304,7 +315,13 @@ def train(args: Dict[str, str]):
             batch_size = len(src_sents)
 
             # (batch_size)
-            loss = -model(src_sents, tgt_sents)
+            # start training routine
+            optimizer.zero_grad()
+            #loss_v = model(src_sents, tgt_sents)
+            _, loss_v = model.encode(src_sents)
+            loss = torch.mean(loss_v)
+            loss.backward()
+            optimizer.step()
 
             report_loss += loss
             cum_loss += loss
