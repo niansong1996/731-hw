@@ -80,8 +80,8 @@ class NMT(object):
         self.encoder_embed = nn.Embedding(input_size, embed_size)
         self.encoder_lstm = nn.LSTM(embed_size, hidden_size)
 
-        self.decoder_embed = nn.Embedding(output_size, embed_size)
-        self.decoder_lstm = nn.LSTM(embed_size, hidden_size)
+        self.decoder_embed = nn.Embedding(output_size, hidden_size)
+        self.decoder_lstm = nn.LSTM(hidden_size, hidden_size)
         self.decoder_out = nn.Linear(hidden_size, output_size)
         self.decoder_softmax = nn.LogSoftmax(dim=1)
 
@@ -148,12 +148,23 @@ class NMT(object):
                 each example in the input batch
         """
         batch_size = len(tgt_sents)
+        target_indices = corpus_to_indices(self.vocab.tgt, tgt_sents).view(-1, batch_size)
+        max_tgt_sent_len = target_indices.shape[0]
+        # a mask to mask out the sentences that are already beyond compare (reached the smaller length of the pair)
+        mask = torch.ones(batch_size)
+        output_words_probs = []
+
+        # input as the initial start token <s>
         input = corpus_to_indices(self.vocab.tgt, [["<s>"] for i in range(len(tgt_sents))])
         output = self.decoder_embed(input).view(-1, batch_size, self.embed_size)
-        output = F.relu(output)
-        output, hidden = self.decoder_lstm(output, (decoder_init_state, torch.zeros(decoder_init_state.shape)))
-        output = self.decoder_out(output)
-        output = self.decoder_softmax(output) # need explanation
+        hidden_state = decoder_init_state
+        for i in range(max_tgt_sent_len):
+            output = F.relu(output)
+            output, (hidden_state, _) = self.decoder_lstm(output, (hidden_state, torch.zeros(decoder_init_state.shape)))
+
+            output_vocab = self.decoder_out(output)
+            output_vocab = self.decoder_softmax(output_vocab) 
+            output_words_probs.append(output_vocab)
 
         # convert the target sentences to indices
         target_output = corpus_to_indices(self.vocab.tgt, tgt_sents)
