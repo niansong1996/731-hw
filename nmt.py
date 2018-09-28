@@ -124,8 +124,7 @@ class NMT(nn.Module):
         # first the the vecotrized representation of the batch
         input = corpus_to_indices(self.vocab.src, src_sents)
         embedded = self.encoder_embed(input)
-        embedded = embedded.view(-1, batch_size, self.embed_size)
-        output = embedded
+        output = embedded.view(-1, batch_size, self.embed_size)
         output, (hidden, _) = self.encoder_lstm(output)
         src_encodings = output
         decoder_init_state = hidden
@@ -150,7 +149,9 @@ class NMT(nn.Module):
         batch_size = len(tgt_sents)
         loss_mask = torch.ones(batch_size)  # the mask for calculating loss
         input = corpus_to_indices(self.vocab.tgt, [["<s>"] for i in range(batch_size)])
+        # dim = (batch_size, 1 (sent_len), embed_size)
         embeded = self.decoder_embed(input)
+        # dim = (1 (sent_len), batch_size, embed_size)
         decoder_input = embeded.view(-1, batch_size, self.embed_size)
         decoder_input = F.relu(decoder_input)
         scores = torch.zeros(batch_size)
@@ -180,16 +181,6 @@ class NMT(nn.Module):
             loss_mask = loss_mask * eos_mask
             # update scores
             scores = scores + score_delta * loss_mask
-
-            # for j in range(batch_size):
-            #     target_word_idx = target_output[j,i].reshape(1)  # reshape to have dim = (1) for calculating loss 
-            #     vocab_prob = softmax_output[0][j].reshape(1, -1)  # reshape to have dim = (1, vocab_size) for calculating loss 
-            #     score_delta = self.criterion(vocab_prob, target_word_idx)
-            #     scores[j] += score_delta * loss_mask[j]
-            #     # mask all the loss after '</s>' as 0
-            #     if input_indices[j] == self.vocab.tgt.word2id['</s>'] or \
-            #      target_word_idx == self.vocab.tgt.word2id['</s>']:
-            #         loss_mask[j] = 0
         return scores
 
     def beam_search(self, src_sent: List[str], beam_size: int=5, max_decoding_time_step: int=70) -> List[Hypothesis]:
