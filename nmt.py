@@ -150,11 +150,14 @@ class NMT(nn.Module):
         batch_size = len(tgt_sents)
         loss_mask = torch.ones(batch_size)  # the mask for calculating loss
         input = corpus_to_indices(self.vocab.tgt, [["<s>"] for i in range(batch_size)])
-        decoder_input = self.decoder_embed(input).view(-1, batch_size, self.embed_size)
+        embeded = self.decoder_embed(input)
+        decoder_input = embeded.view(-1, batch_size, self.embed_size)
         decoder_input = F.relu(decoder_input)
         scores = torch.zeros(batch_size)
         h_t = decoder_init_state
         c_t = torch.zeros(decoder_init_state.shape)
+        zero_mask = torch.zeros(batch_size)
+        one_mask = torch.ones(batch_size)
         # convert the target sentences to indices, dim = (batch_size, max_sent_len)
         target_output = corpus_to_indices(self.vocab.tgt, tgt_sents)
         # skip the '<s>' in the tgt_sents since the output starts from the word after '<s>'
@@ -166,17 +169,27 @@ class NMT(nn.Module):
             input_indices = top_i.squeeze().detach() # dim = (batch_size) after squeeze
             # get the input for the next layer from the embed of the top words
             decoder_input = self.decoder_embed(input_indices).view(-1, batch_size, self.embed_size)
-            # dim = (1, batch_size, vocab_size)
-            softmax_output = self.decoder_softmax(vocab_size_output)  
-            for j in range(batch_size):
-                target_word_idx = target_output[j,i].reshape(1)  # reshape to have dim = (1) for calculating loss 
-                vocab_prob = softmax_output[0][j].reshape(1, -1)  # reshape to have dim = (1, vocab_size) for calculating loss 
-                score_delta = self.criterion(vocab_prob, target_word_idx)
-                scores[j] += score_delta * loss_mask[j]
-                # mask all the loss after '</s>' as 0
-                if input_indices[j] == self.vocab.tgt.word2id['</s>'] or \
-                 target_word_idx == self.vocab.tgt.word2id['</s>']:
-                    loss_mask[j] = 0
+            # dim = (batch_size, vocab_size)
+            softmax_output = self.decoder_softmax(vocab_size_output).squeeze()
+            # dim = (batch_size)
+            target_word_idx = target_output[:,i].reshape(batch_size)
+            score_delta = self.criterion(softmax_output, target_word_idx)
+            # mask 0 if eos is reached
+            eos_mask = torch.where((input_indices != self.vocab.tgt.word2id['</s>']) * \
+            (target_word_idx != self.vocab.tgt.word2id['</s>']), one_mask, zero_mask)
+            loss_mask = loss_mask * eos_mask
+            # update scores
+            scores = scores + score_delta * loss_mask
+
+            # for j in range(batch_size):
+            #     target_word_idx = target_output[j,i].reshape(1)  # reshape to have dim = (1) for calculating loss 
+            #     vocab_prob = softmax_output[0][j].reshape(1, -1)  # reshape to have dim = (1, vocab_size) for calculating loss 
+            #     score_delta = self.criterion(vocab_prob, target_word_idx)
+            #     scores[j] += score_delta * loss_mask[j]
+            #     # mask all the loss after '</s>' as 0
+            #     if input_indices[j] == self.vocab.tgt.word2id['</s>'] or \
+            #      target_word_idx == self.vocab.tgt.word2id['</s>']:
+            #         loss_mask[j] = 0
         return scores
 
     def beam_search(self, src_sent: List[str], beam_size: int=5, max_decoding_time_step: int=70) -> List[Hypothesis]:
