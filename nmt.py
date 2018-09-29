@@ -317,7 +317,7 @@ def train(args: Dict[str, str]):
 
         for src_sents, tgt_sents in batch_iter(train_data, batch_size=train_batch_size, shuffle=True):
             train_iter += 1
-            print("#", end='')
+            print("#", end="")
             batch_size = len(src_sents)
 
             # (batch_size)
