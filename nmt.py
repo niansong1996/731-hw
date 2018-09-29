@@ -165,7 +165,6 @@ class NMT(nn.Module):
         target_output = corpus_to_indices(self.vocab.tgt, tgt_sents)
         # skip the '<s>' in the tgt_sents since the output starts from the word after '<s>'
         for i in range(1, target_output.shape[1]):
-            # TODO: need to calculate the new input as the embedding of the last output word
             _, (h_t, c_t) = self.decoder_lstm(decoder_input, (h_t, c_t))
             vocab_size_output = self.decoder_out(h_t)
             # dim = (1, batch_size, vocab_size)
@@ -200,11 +199,38 @@ class NMT(nn.Module):
                 value: List[str]: the decoded target sentence, represented as a list of words
                 score: float: the log-likelihood of the target sentence
         """
-
-        src_encodings, decoder_init_state = self.encode([src_sent])
-        scores = self.decode(src_encodings, decoder_init_state).squeeze() # in shape (1, output_vocab_size)
-
-
+        hypotheses = []
+        hypotheses_cand = [([["<s>"]], 0)]  # candidates for best hypotheses
+        _, decoder_init_state = self.encode([src_sent])
+        h_t = decoder_init_state
+        c_t = torch.zeros(decoder_init_state.shape)
+        for i in range(max_decoding_time_step):
+            # get the new input words from the last word of every candidate
+            input_words = [sent[-1] for sent in hypotheses_cand[0]]
+            input = corpus_to_indices(self.vocab.tgt, input_words)
+            # dim = (len(hypotheses_cand), 1 (single_word), embed_size)
+            embeded = self.decoder_embed(input)
+            # dim = (1 (single_word), len(hypotheses_cand), embed_size)
+            decoder_input = embeded.transpose(0, 1)
+            _, (h_t, c_t) = self.decoder_lstm(decoder_input, (h_t, c_t))
+            # dim = (1 (single_word), len(hypotheses_cand), vocab_size)
+            vocab_size_output = self.decoder_out(h_t)
+            # dim = (1 (single_word), len(hypotheses_cand), beam_size)
+            top_v, top_i = torch.topk(vocab_size_output, beam_size, dim=2)
+            # dim = (len(hypotheses_cand), vocab_size)
+            softmax_output = self.decoder_softmax(vocab_size_output).squeeze()
+            new_hypotheses_cand = []
+            for candidate_idx in range(len(hypotheses_cand)):
+                sent, log_likelihood = hypotheses_cand[candidate_idx]
+                for word_idx in top_i[0][candidate_idx]:
+                    new_hypotheses_cand.append((sent + [self.vocab.tgt.id2word(word_idx)],
+                                                log_likelihood + softmax_output[candidate_idx][word_idx]))
+            # combine ending sentences with new candidates to form new hypotheses
+            hypotheses = [x for x in hypotheses if x[0][-1] == '</s>'] + new_hypotheses_cand
+            hypotheses = sorted(hypotheses, key=lambda x: x[1], reverse=True)[:beam_size]
+            hypotheses_cand = [x for x in hypotheses if x[0][-1] != '</s>']
+            if len(hypotheses_cand) == 0:
+                break
         return hypotheses
 
     def evaluate_ppl(self, dev_data: List[Any], batch_size: int=32):
@@ -214,7 +240,7 @@ class NMT(nn.Module):
         Args:
             dev_data: a list of dev sentences
             batch_size: batch size
-        
+
         Returns:
             ppl: the perplexity on dev sentences
         """
@@ -246,14 +272,14 @@ class NMT(nn.Module):
             model: the loaded model
         """
 
-        return model
+        return torch.load(model_path)
 
     def save(self, path: str):
         """
         Save current model to file
         """
+        torch.save(self, path)
 
-        raise NotImplementedError()
 
 
 def compute_corpus_level_bleu_score(references: List[List[str]], hypotheses: List[Hypothesis]) -> float:
