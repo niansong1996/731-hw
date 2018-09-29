@@ -124,7 +124,7 @@ class NMT(nn.Module):
         # first the the vecotrized representation of the batch
         input = corpus_to_indices(self.vocab.src, src_sents)
         embedded = self.encoder_embed(input)
-        output = embedded.view(-1, batch_size, self.embed_size)
+        output = embedded.transpose(0, 1)
         output, (hidden, _) = self.encoder_lstm(output)
         src_encodings = output
         decoder_init_state = hidden
@@ -154,7 +154,7 @@ class NMT(nn.Module):
         # dim = (batch_size, 1 (sent_len), embed_size)
         embeded = self.decoder_embed(input)
         # dim = (1 (sent_len), batch_size, embed_size)
-        decoder_input = embeded.view(-1, batch_size, self.embed_size)
+        decoder_input = embeded.transpose(0, 1)
         decoder_input = F.relu(decoder_input)
         scores = torch.zeros(batch_size)
         h_t = decoder_init_state
@@ -315,14 +315,14 @@ def train(args: Dict[str, str]):
 
         for src_sents, tgt_sents in batch_iter(train_data, batch_size=train_batch_size, shuffle=True):
             train_iter += 1
-
+            print("train_iter = %d" % train_iter)
             batch_size = len(src_sents)
 
             # (batch_size)
             # start training routine
             optimizer.zero_grad()
-            #loss_v = model(src_sents, tgt_sents)
-            _, loss_v = model.encode(src_sents)
+            loss_v = model(src_sents, tgt_sents)
+            # _, loss_v = model.encode(src_sents)
             loss = torch.mean(loss_v)
             loss.backward()
             optimizer.step()
