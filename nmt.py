@@ -151,11 +151,11 @@ class NMT(nn.Module):
         batch_size = len(tgt_sents)
         loss_mask = torch.ones(batch_size)  # the mask for calculating loss
         input = corpus_to_indices(self.vocab.tgt, [["<s>"] for i in range(batch_size)])
-        # dim = (batch_size, 1 (sent_len), embed_size)
+        # dim = (batch_size, 1 (single_word), embed_size)
         embeded = self.decoder_embed(input)
-        # dim = (1 (sent_len), batch_size, embed_size)
+        # dim = (1 (single_word), batch_size, embed_size)
         decoder_input = embeded.transpose(0, 1)
-        decoder_input = F.relu(decoder_input)
+        # decoder_input = F.relu(decoder_input)
         scores = torch.zeros(batch_size)
         h_t = decoder_init_state
         c_t = torch.zeros(decoder_init_state.shape)
@@ -168,6 +168,7 @@ class NMT(nn.Module):
             # TODO: need to calculate the new input as the embedding of the last output word
             _, (h_t, c_t) = self.decoder_lstm(decoder_input, (h_t, c_t))
             vocab_size_output = self.decoder_out(h_t)
+            # dim = (1, batch_size, vocab_size)
             top_v, top_i = torch.topk(vocab_size_output, 1, dim=2)  # pick the word with the top score for each batch
             input_indices = top_i.squeeze().detach() # dim = (batch_size) after squeeze
             # dim = (batch_size, vocab_size)
