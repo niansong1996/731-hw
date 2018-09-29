@@ -170,19 +170,19 @@ class NMT(nn.Module):
             vocab_size_output = self.decoder_out(h_t)
             top_v, top_i = torch.topk(vocab_size_output, 1, dim=2)  # pick the word with the top score for each batch
             input_indices = top_i.squeeze().detach() # dim = (batch_size) after squeeze
-            # get the input for the next layer from the embed of the top words
-            decoder_input = self.decoder_embed(input_indices).view(-1, batch_size, self.embed_size)
             # dim = (batch_size, vocab_size)
             softmax_output = self.decoder_softmax(vocab_size_output).squeeze()
             # dim = (batch_size)
-            target_word_idx = target_output[:,i].reshape(batch_size)
-            score_delta = self.criterion(softmax_output, target_word_idx)
+            target_word_idices = target_output[:,i].reshape(batch_size)
+            score_delta = self.criterion(softmax_output, target_word_idices)
             # mask 0 if eos is reached
             eos_mask = torch.where((input_indices != self.vocab.tgt.word2id['</s>']) * \
-            (target_word_idx != self.vocab.tgt.word2id['</s>']), one_mask, zero_mask)
+            (target_word_idices != self.vocab.tgt.word2id['</s>']), one_mask, zero_mask)
             loss_mask = loss_mask * eos_mask
             # update scores
             scores = scores + score_delta * loss_mask
+            # get the input for the next layer from the embed of the target words
+            decoder_input = self.decoder_embed(target_word_idices).view(-1, batch_size, self.embed_size)
         return scores
 
     def beam_search(self, src_sent: List[str], beam_size: int=5, max_decoding_time_step: int=70) -> List[Hypothesis]:
