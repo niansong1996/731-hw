@@ -226,17 +226,17 @@ class NMT(nn.Module):
         # you may want to wrap the following code using a context manager provided
         # by the NN library to signal the backend to not to keep gradient information
         # e.g., `torch.no_grad()`
+        with torch.no_grad():
+            for src_sents, tgt_sents in batch_iter(dev_data, batch_size):
+                loss = -model(src_sents, tgt_sents).sum()
 
-        for src_sents, tgt_sents in batch_iter(dev_data, batch_size):
-            loss = -model(src_sents, tgt_sents).sum()
+                cum_loss += loss
+                tgt_word_num_to_predict = sum(len(s[1:]) for s in tgt_sents)  # omitting the leading `<s>`
+                cum_tgt_words += tgt_word_num_to_predict
 
-            cum_loss += loss
-            tgt_word_num_to_predict = sum(len(s[1:]) for s in tgt_sents)  # omitting the leading `<s>`
-            cum_tgt_words += tgt_word_num_to_predict
+            ppl = np.exp(cum_loss / cum_tgt_words)
 
-        ppl = np.exp(cum_loss / cum_tgt_words)
-
-        return ppl
+            return ppl
 
     @staticmethod
     def load(model_path: str):
@@ -247,7 +247,7 @@ class NMT(nn.Module):
             model: the loaded model
         """
 
-        return model
+        raise NotImplementedError()
 
     def save(self, path: str):
         """
@@ -308,19 +308,21 @@ def train(args: Dict[str, str]):
     print('begin Maximum Likelihood training')
 
     # set the optimizers
-    learning_rate = float(args['--lr'])
+    lr = float(args['--lr'])
     model_params = model.parameters()
     for param in model_params:
         print(type(param.data), param.size())
-    optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
     while True:
         epoch += 1
 
         for src_sents, tgt_sents in batch_iter(train_data, batch_size=train_batch_size, shuffle=True):
             train_iter += 1
-            print("#", end="", flush=True)
             batch_size = len(src_sents)
+
+            if train_iter % 5 == 0:
+                print("#", end="", flush=True)
 
             # (batch_size)
             # start training routine
@@ -330,7 +332,6 @@ def train(args: Dict[str, str]):
             loss = torch.sum(loss_v)
             loss.backward()
             optimizer.step()
-            print("=", end="", flush=True)
 
             report_loss += loss
             cum_loss += loss
@@ -348,7 +349,7 @@ def train(args: Dict[str, str]):
                                                                                          math.exp(report_loss / report_tgt_words),
                                                                                          cumulative_examples,
                                                                                          report_tgt_words / (time.time() - train_time),
-                                                                                         time.time() - begin_time), file=sys.stderr)
+                                                                                         time.time() - begin_time), flush=True)
 
                 train_time = time.time()
                 report_loss = report_tgt_words = report_examples = 0.
@@ -363,54 +364,54 @@ def train(args: Dict[str, str]):
                 print('epoch %d, iter %d, cum. loss %.2f, cum. ppl %.2f cum. examples %d' % (epoch, train_iter,
                                                                                          cum_loss / cumulative_examples,
                                                                                          np.exp(cum_loss / cumulative_tgt_words),
-                                                                                         cumulative_examples), file=sys.stderr)
+                                                                                         cumulative_examples))
 
                 cum_loss = cumulative_examples = cumulative_tgt_words = 0.
                 valid_num += 1
 
-                print('begin validation ...', file=sys.stderr)
+                print('begin validation ...')
 
                 # compute dev. ppl and bleu
                 dev_ppl = model.evaluate_ppl(dev_data, batch_size=128)   # dev batch size can be a bit larger
                 valid_metric = -dev_ppl
 
-                print('validation: iter %d, dev. ppl %f' % (train_iter, dev_ppl), file=sys.stderr)
+                print('validation: iter %d, dev. ppl %f' % (train_iter, dev_ppl))
 
                 is_better = len(hist_valid_scores) == 0 or valid_metric > max(hist_valid_scores)
                 hist_valid_scores.append(valid_metric)
 
                 if is_better:
                     patience = 0
-                    print('save currently the best model to [%s]' % model_save_path, file=sys.stderr)
+                    print('save currently the best model to [%s]' % model_save_path)
                     model.save(model_save_path)
 
                     # You may also save the optimizer's state
                 elif patience < int(args['--patience']):
                     patience += 1
-                    print('hit patience %d' % patience, file=sys.stderr)
+                    print('hit patience %d' % patience)
 
                     if patience == int(args['--patience']):
                         num_trial += 1
-                        print('hit #%d trial' % num_trial, file=sys.stderr)
+                        print('hit #%d trial' % num_trial)
                         if num_trial == int(args['--max-num-trial']):
-                            print('early stop!', file=sys.stderr)
+                            print('early stop!')
                             exit(0)
 
                         # decay learning rate, and restore from previously best checkpoint
                         lr = lr * float(args['--lr-decay'])
-                        print('load previously best model and decay learning rate to %f' % lr, file=sys.stderr)
+                        print('load previously best model and decay learning rate to %f' % lr)
 
                         # load model
                         model_save_path
 
-                        print('restore parameters of the optimizers', file=sys.stderr)
+                        print('restore parameters of the optimizers')
                         # You may also need to load the state of the optimizer saved before
 
                         # reset patience
                         patience = 0
 
                 if epoch == int(args['--max-epoch']):
-                    print('reached maximum number of epochs!', file=sys.stderr)
+                    print('reached maximum number of epochs!')
                     exit(0)
 
 
@@ -436,7 +437,7 @@ def decode(args: Dict[str, str]):
     if args['TEST_TARGET_FILE']:
         test_data_tgt = read_corpus(args['TEST_TARGET_FILE'], source='tgt')
 
-    print(f"load model from {args['MODEL_PATH']}", file=sys.stderr)
+    print(f"load model from {args['MODEL_PATH']}")
     model = NMT.load(args['MODEL_PATH'])
 
     hypotheses = beam_search(model, test_data_src,
@@ -446,7 +447,7 @@ def decode(args: Dict[str, str]):
     if args['TEST_TARGET_FILE']:
         top_hypotheses = [hyps[0] for hyps in hypotheses]
         bleu_score = compute_corpus_level_bleu_score(test_data_tgt, top_hypotheses)
-        print(f'Corpus BLEU: {bleu_score}', file=sys.stderr)
+        print(f'Corpus BLEU: {bleu_score}')
 
     with open(args['OUTPUT_FILE'], 'w') as f:
         for src_sent, hyps in zip(test_data_src, hypotheses):
