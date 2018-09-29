@@ -401,9 +401,14 @@ def train(args: Dict[str, str]):
 
                 # compute dev. ppl and bleu
                 dev_ppl = model.evaluate_ppl(dev_data, batch_size=128)   # dev batch size can be a bit larger
+                dev_hyps = []
+                for dev_src_sent in dev_data_src:
+                    dev_hyp_sent = model.beam_search(dev_src_sent)
+                    dev_hyps.append(dev_hyp_sent)
+                dev_bleu = compute_corpus_level_bleu_score(dev_data_tgt, dev_hyps)
                 valid_metric = -dev_ppl
 
-                print('validation: iter %d, dev. ppl %f' % (train_iter, dev_ppl))
+                print('validation: iter %d, dev. ppl %f dev. bleu %f' % (train_iter, dev_ppl, dev_bleu))
 
                 is_better = len(hist_valid_scores) == 0 or valid_metric > max(hist_valid_scores)
                 hist_valid_scores.append(valid_metric)
