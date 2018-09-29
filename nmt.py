@@ -57,7 +57,9 @@ import torch.tensor as Tensor
 import torch.nn.functional as F
 
 
-
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+if torch.cuda.is_available():
+    print(torch.cuda.get_device_name(torch.cuda.current_device()))
 
 Hypothesis = namedtuple('Hypothesis', ['value', 'score'])
 
@@ -122,7 +124,7 @@ class NMT(nn.Module):
         batch_size = len(src_sents)
 
         # first the the vecotrized representation of the batch
-        input = corpus_to_indices(self.vocab.src, src_sents)
+        input = corpus_to_indices(self.vocab.src, src_sents).to(device)
         embedded = self.encoder_embed(input)
         output = embedded.transpose(0, 1)
         output, (hidden, _) = self.encoder_lstm(output)
@@ -149,20 +151,20 @@ class NMT(nn.Module):
                 for beam search
         """
         batch_size = len(tgt_sents)
-        loss_mask = torch.ones(batch_size)  # the mask for calculating loss
-        input = corpus_to_indices(self.vocab.tgt, [["<s>"] for i in range(batch_size)])
+        loss_mask = torch.ones(batch_size, device=device)  # the mask for calculating loss
+        input = corpus_to_indices(self.vocab.tgt, [["<s>"] for i in range(batch_size)]).to(device)
         # dim = (batch_size, 1 (sent_len), embed_size)
         embeded = self.decoder_embed(input)
         # dim = (1 (sent_len), batch_size, embed_size)
         decoder_input = embeded.transpose(0, 1)
         decoder_input = F.relu(decoder_input)
-        scores = torch.zeros(batch_size)
+        scores = torch.zeros(batch_size, device=device)
         h_t = decoder_init_state
-        c_t = torch.zeros(decoder_init_state.shape)
-        zero_mask = torch.zeros(batch_size)
-        one_mask = torch.ones(batch_size)
+        c_t = torch.zeros(decoder_init_state.shape, device=device)
+        zero_mask = torch.zeros(batch_size, device=device)
+        one_mask = torch.ones(batch_size, device=device)
         # convert the target sentences to indices, dim = (batch_size, max_sent_len)
-        target_output = corpus_to_indices(self.vocab.tgt, tgt_sents)
+        target_output = corpus_to_indices(self.vocab.tgt, tgt_sents).to(device)
         # skip the '<s>' in the tgt_sents since the output starts from the word after '<s>'
         for i in range(1, target_output.shape[1]):
             # TODO: need to calculate the new input as the embedding of the last output word
@@ -296,7 +298,7 @@ def train(args: Dict[str, str]):
     model = NMT(embed_size=int(args['--embed-size']),
                 hidden_size=int(args['--hidden-size']),
                 dropout_rate=float(args['--dropout']),
-                vocab=vocab)
+                vocab=vocab).to(device)
 
     num_trial = 0
     train_iter = patience = cum_loss = report_loss = cumulative_tgt_words = report_tgt_words = 0
