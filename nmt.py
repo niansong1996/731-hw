@@ -202,39 +202,43 @@ class NMT(nn.Module):
                 value: List[str]: the decoded target sentence, represented as a list of words
                 score: float: the log-likelihood of the target sentence
         """
-        hypotheses = []
-        hypotheses_cand = [([["<s>"]], 0)]  # candidates for best hypotheses
+        # candidates for best hypotheses
+        hypotheses_cand = [Hypothesis(['<s>'], 0)] + [Hypothesis(['</s>'], float('-Inf')) for _ in range(beam_size - 1)]
+        # dim = (1, 1, embed_size)
         _, decoder_init_state = self.encode([src_sent])
-        h_t = decoder_init_state
-        c_t = torch.zeros(decoder_init_state.shape)
+        # dim = (1, beam_size, embed_size)
+        h_t = torch.cat((decoder_init_state,) * beam_size, dim=1)
+        c_t = torch.zeros(h_t.shape)
         for i in range(max_decoding_time_step):
             # get the new input words from the last word of every candidate
-            input_words = [sent[-1] for sent in hypotheses_cand[0]]
+            input_words = [hyp.value for hyp in hypotheses_cand]
             input = corpus_to_indices(self.vocab.tgt, input_words)
-            # dim = (len(hypotheses_cand), 1 (single_word), embed_size)
+            # dim = (beam_size, 1 (single_word), embed_size)
             embeded = self.decoder_embed(input)
-            # dim = (1 (single_word), len(hypotheses_cand), embed_size)
+            # dim = (1 (single_word), beam_size, embed_size)
             decoder_input = embeded.transpose(0, 1)
             _, (h_t, c_t) = self.decoder_lstm(decoder_input, (h_t, c_t))
-            # dim = (1 (single_word), len(hypotheses_cand), vocab_size)
+            # dim = (1 (single_word), beam_size, vocab_size)
             vocab_size_output = self.decoder_out(h_t)
-            # dim = (1 (single_word), len(hypotheses_cand), beam_size)
-            top_v, top_i = torch.topk(vocab_size_output, beam_size, dim=2)
-            # dim = (len(hypotheses_cand), vocab_size)
-            softmax_output = self.decoder_softmax(vocab_size_output).squeeze()
+            # dim = (1 (single_word), beam_size, beam_size)
+            _, top_i = torch.topk(vocab_size_output, beam_size, dim=2)
+            # dim = (beam_size, vocab_size)
+            softmax_output = self.decoder_softmax(vocab_size_output)[0]
             new_hypotheses_cand = []
             for candidate_idx in range(len(hypotheses_cand)):
                 sent, log_likelihood = hypotheses_cand[candidate_idx]
-                for word_idx in top_i[0][candidate_idx]:
-                    new_hypotheses_cand.append((sent + [self.vocab.tgt.id2word(word_idx)],
-                                                log_likelihood + softmax_output[candidate_idx][word_idx]))
+                if sent[-1] == '</s>':
+                    continue
+                for word_idx_tensor in top_i[0][candidate_idx]:
+                    word_idx = word_idx_tensor.item()
+                    new_hypotheses_cand.append(Hypothesis(sent + [self.vocab.tgt.id2word[word_idx]],
+                                                          log_likelihood + softmax_output[candidate_idx][word_idx]))
             # combine ending sentences with new candidates to form new hypotheses
-            hypotheses = [x for x in hypotheses if x[0][-1] == '</s>'] + new_hypotheses_cand
-            hypotheses = sorted(hypotheses, key=lambda x: x[1], reverse=True)[:beam_size]
-            hypotheses_cand = [x for x in hypotheses if x[0][-1] != '</s>']
-            if len(hypotheses_cand) == 0:
+            hypotheses_cand = hypotheses_cand + new_hypotheses_cand
+            hypotheses_cand = sorted(hypotheses_cand, key=lambda hyp: hyp.score, reverse=True)[:beam_size]
+            if all(h.value[-1] == '</s>' for h in hypotheses_cand):
                 break
-        return hypotheses
+        return hypotheses_cand
 
     def evaluate_ppl(self, dev_data: List[Any], batch_size: int=32):
         """
@@ -256,7 +260,7 @@ class NMT(nn.Module):
         # e.g., `torch.no_grad()`
         with torch.no_grad():
             for src_sents, tgt_sents in batch_iter(dev_data, batch_size):
-                loss = -model(src_sents, tgt_sents).sum()
+                loss = -self(src_sents, tgt_sents).sum()
 
                 cum_loss += loss
                 tgt_word_num_to_predict = sum(len(s[1:]) for s in tgt_sents)  # omitting the leading `<s>`
@@ -362,7 +366,7 @@ def train(args: Dict[str, str]):
             optimizer.step()
 
             report_loss += loss
-            cum_loss += loss
+            cum_loss += loss.detach()
 
             tgt_words_num_to_predict = sum(len(s[1:]) for s in tgt_sents)  # omitting leading `<s>`
             report_tgt_words += tgt_words_num_to_predict
