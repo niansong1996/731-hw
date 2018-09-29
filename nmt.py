@@ -208,11 +208,11 @@ class NMT(nn.Module):
         _, decoder_init_state = self.encode([src_sent])
         # dim = (1, beam_size, embed_size)
         h_t = torch.cat((decoder_init_state,) * beam_size, dim=1)
-        c_t = torch.zeros(h_t.shape)
+        c_t = torch.zeros(h_t.shape, device=device)
         for i in range(max_decoding_time_step):
             # get the new input words from the last word of every candidate
             input_words = [hyp.value for hyp in hypotheses_cand]
-            input = corpus_to_indices(self.vocab.tgt, input_words)
+            input = corpus_to_indices(self.vocab.tgt, input_words).to(device)
             # dim = (beam_size, 1 (single_word), embed_size)
             embeded = self.decoder_embed(input)
             # dim = (1 (single_word), beam_size, embed_size)

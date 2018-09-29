@@ -113,4 +113,4 @@ venv.bak/
 ./tutorial
 
 # model
-/workdir
+work_dir/
