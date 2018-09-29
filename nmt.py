@@ -319,7 +319,7 @@ def train(args: Dict[str, str]):
 
         for src_sents, tgt_sents in batch_iter(train_data, batch_size=train_batch_size, shuffle=True):
             train_iter += 1
-            print("#", end="")
+            print("#", end="", flush=True)
             batch_size = len(src_sents)
 
             # (batch_size)
@@ -330,6 +330,7 @@ def train(args: Dict[str, str]):
             loss = torch.sum(loss_v)
             loss.backward()
             optimizer.step()
+            print("=", end="", flush=True)
 
             report_loss += loss
             cum_loss += loss
