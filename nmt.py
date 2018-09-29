@@ -73,19 +73,19 @@ class NMT(nn.Module):
         self.hidden_size = hidden_size
         self.dropout_rate = dropout_rate
         self.vocab = vocab
-        input_size = len(vocab.src)
-        self.output_size = len(vocab.tgt)
+        src_vocab_size = len(vocab.src)
+        self.tgt_vocab_size = len(vocab.tgt)
 
         # initialize neural network layers...
         # could add drop-out and bidirectional arguments
         # could also change the units to GRU
-        self.encoder_embed = nn.Embedding(input_size, embed_size)
+        self.encoder_embed = nn.Embedding(src_vocab_size, embed_size)
         self.encoder_lstm = nn.LSTM(embed_size, hidden_size)
 
-        self.decoder_embed = nn.Embedding(self.output_size, embed_size)
+        self.decoder_embed = nn.Embedding(self.tgt_vocab_size, embed_size)
         self.decoder_lstm = nn.LSTM(embed_size, hidden_size)
-        self.decoder_out = nn.Linear(hidden_size, self.output_size)
-        self.decoder_softmax = nn.LogSoftmax(dim=1)
+        self.decoder_out = nn.Linear(hidden_size, self.tgt_vocab_size)
+        self.decoder_softmax = nn.LogSoftmax(dim=2)
 
         self.criterion = nn.NLLLoss()
 
@@ -152,12 +152,11 @@ class NMT(nn.Module):
         """
         batch_size = len(tgt_sents)
         loss_mask = torch.ones(batch_size, device=device)  # the mask for calculating loss
-        input = corpus_to_indices(self.vocab.tgt, [["<s>"] for i in range(batch_size)]).to(device)
+        input = corpus_to_indices(self.vocab.tgt, [["<s>"] for _ in range(batch_size)]).to(device)
         # dim = (batch_size, 1 (sent_len), embed_size)
-        embeded = self.decoder_embed(input)
+        embedded = self.decoder_embed(input)
         # dim = (1 (single_word), batch_size, embed_size)
-        decoder_input = embeded.transpose(0, 1)
-        # decoder_input = F.relu(decoder_input)
+        decoder_input = embedded.transpose(0, 1)
         scores = torch.zeros(batch_size, device=device)
         h_t = decoder_init_state
         c_t = torch.zeros(decoder_init_state.shape, device=device)
@@ -168,14 +167,15 @@ class NMT(nn.Module):
         # skip the '<s>' in the tgt_sents since the output starts from the word after '<s>'
         for i in range(1, target_output.shape[1]):
             _, (h_t, c_t) = self.decoder_lstm(decoder_input, (h_t, c_t))
+            # dim = (1, batch_size, vocab_size)
             vocab_size_output = self.decoder_out(h_t)
             # dim = (1, batch_size, vocab_size)
             top_v, top_i = torch.topk(vocab_size_output, 1, dim=2)  # pick the word with the top score for each batch
-            input_indices = top_i.squeeze().detach() # dim = (batch_size) after squeeze
+            input_indices = top_i.squeeze().detach()  # dim = (batch_size) after squeeze
             # dim = (batch_size, vocab_size)
             softmax_output = self.decoder_softmax(vocab_size_output).squeeze()
             # dim = (batch_size)
-            target_word_idices = target_output[:,i].reshape(batch_size)
+            target_word_idices = target_output[:, i].reshape(batch_size)
             score_delta = self.criterion(softmax_output, target_word_idices)
             # mask 0 if eos is reached
             eos_mask = torch.where((input_indices != self.vocab.tgt.word2id['</s>']) * \
@@ -184,7 +184,8 @@ class NMT(nn.Module):
             # update scores
             scores = scores + score_delta * loss_mask
             # get the input for the next layer from the embed of the target words
-            decoder_input = self.decoder_embed(target_word_idices).view(-1, batch_size, self.embed_size)
+            embedded = self.decoder_embed(target_word_idices.view(-1, 1))
+            decoder_input = embedded.transpose(0, 1)
         return scores
 
     def beam_search(self, src_sent: List[str], beam_size: int=5, max_decoding_time_step: int=70) -> List[Hypothesis]:
