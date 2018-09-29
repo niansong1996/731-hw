@@ -203,7 +203,7 @@ class NMT(nn.Module):
                 score: float: the log-likelihood of the target sentence
         """
         # candidates for best hypotheses
-        hypotheses_cand = [(['<s>'], 0)] + [(['</s>'], float('-Inf')) for _ in range(beam_size - 1)]
+        hypotheses_cand = [Hypothesis(['<s>'], 0)] + [Hypothesis(['</s>'], float('-Inf')) for _ in range(beam_size - 1)]
         # dim = (1, 1, embed_size)
         _, decoder_init_state = self.encode([src_sent])
         # dim = (1, beam_size, embed_size)
@@ -211,7 +211,7 @@ class NMT(nn.Module):
         c_t = torch.zeros(h_t.shape)
         for i in range(max_decoding_time_step):
             # get the new input words from the last word of every candidate
-            input_words = [hypo[0] for hypo in hypotheses_cand]
+            input_words = [hyp.value for hyp in hypotheses_cand]
             input = corpus_to_indices(self.vocab.tgt, input_words)
             # dim = (beam_size, 1 (single_word), embed_size)
             embeded = self.decoder_embed(input)
@@ -231,12 +231,12 @@ class NMT(nn.Module):
                     continue
                 for word_idx_tensor in top_i[0][candidate_idx]:
                     word_idx = word_idx_tensor.item()
-                    new_hypotheses_cand.append((sent + [self.vocab.tgt.id2word[word_idx]],
-                                                log_likelihood + softmax_output[candidate_idx][word_idx]))
+                    new_hypotheses_cand.append(Hypothesis(sent + [self.vocab.tgt.id2word[word_idx]],
+                                                          log_likelihood + softmax_output[candidate_idx][word_idx]))
             # combine ending sentences with new candidates to form new hypotheses
             hypotheses_cand = hypotheses_cand + new_hypotheses_cand
-            hypotheses_cand = sorted(hypotheses_cand, key=lambda x: x[1], reverse=True)[:beam_size]            
-            if all(h[0][-1] == '</s>' for h in hypotheses_cand):
+            hypotheses_cand = sorted(hypotheses_cand, key=lambda hyp: hyp.score, reverse=True)[:beam_size]
+            if all(h.value[-1] == '</s>' for h in hypotheses_cand):
                 break
         return hypotheses_cand
 
