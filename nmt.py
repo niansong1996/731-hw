@@ -309,14 +309,16 @@ def train(args: Dict[str, str]):
     # set the optimizers
     learning_rate = float(args['--lr'])
     model_params = model.parameters()
-    optimizer = torch.optim.SGD(model_params, lr=learning_rate)
+    for param in model_params:
+        print(type(param.data), param.size())
+    optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
 
     while True:
         epoch += 1
 
         for src_sents, tgt_sents in batch_iter(train_data, batch_size=train_batch_size, shuffle=True):
             train_iter += 1
-            print("train_iter = %d" % train_iter)
+            print("#", end="")
             batch_size = len(src_sents)
 
             # (batch_size)
@@ -324,7 +326,7 @@ def train(args: Dict[str, str]):
             optimizer.zero_grad()
             loss_v = model(src_sents, tgt_sents)
             # _, loss_v = model.encode(src_sents)
-            loss = torch.mean(loss_v)
+            loss = torch.sum(loss_v)
             loss.backward()
             optimizer.step()
 
