@@ -364,6 +364,7 @@ def train(args: Dict[str, str]):
             # _, loss_v = model.encode(src_sents)
             loss = torch.sum(loss_v)
             loss.backward()
+            torch.nn.utils.clip_grad_norm(model.parameters(), clip_grad)
             optimizer.step()
 
             report_loss += loss
@@ -410,9 +411,14 @@ def train(args: Dict[str, str]):
                 print("dev. ppl %f" % dev_ppl)
                 dev_hyps = []
                 for dev_src_sent in dev_data_src:
+<<<<<<< HEAD
+                    dev_hyp_sent = model.beam_search(dev_src_sent)[0]
+                    dev_hyps.append(dev_hyp_sent)
+=======
                     print(".", end="", flush=True)
                     dev_hyp_sent = model.beam_search(dev_src_sent)
                     dev_hyps.append(dev_hyp_sent[0])
+>>>>>>> 37ea5575fcbaca14c751c1f337bbb42f6baf11cb
                 dev_bleu = compute_corpus_level_bleu_score(dev_data_tgt, dev_hyps)
                 '''
                 valid_metric = -dev_ppl
