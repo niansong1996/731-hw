@@ -80,10 +80,10 @@ class NMT(nn.Module):
         # could add drop-out and bidirectional arguments
         # could also change the units to GRU
         self.encoder_embed = nn.Embedding(src_vocab_size, embed_size)
-        self.encoder_lstm = nn.LSTM(embed_size, hidden_size)
+        self.encoder_gru = nn.GRU(embed_size, hidden_size)
 
         self.decoder_embed = nn.Embedding(self.tgt_vocab_size, embed_size)
-        self.decoder_lstm = nn.LSTM(embed_size, hidden_size)
+        self.decoder_gru = nn.GRU(embed_size, hidden_size)
         self.decoder_out = nn.Linear(hidden_size, self.tgt_vocab_size)
         self.decoder_softmax = nn.LogSoftmax(dim=2)
 
@@ -127,7 +127,7 @@ class NMT(nn.Module):
         input = corpus_to_indices(self.vocab.src, src_sents).to(device)
         embedded = self.encoder_embed(input)
         output = embedded.transpose(0, 1)
-        output, (hidden, _) = self.encoder_lstm(output)
+        output, hidden = self.encoder_gru(output)
         src_encodings = output
         decoder_init_state = hidden
 
@@ -160,14 +160,13 @@ class NMT(nn.Module):
         decoder_input = embedded.transpose(0, 1)
         scores = torch.zeros(batch_size, device=device)
         h_t = decoder_init_state
-        c_t = torch.zeros(decoder_init_state.shape, device=device)
         zero_mask = torch.zeros(batch_size, device=device)
         one_mask = torch.ones(batch_size, device=device)
         # convert the target sentences to indices, dim = (batch_size, max_sent_len)
         target_output = corpus_to_indices(self.vocab.tgt, tgt_sents).to(device)
         # skip the '<s>' in the tgt_sents since the output starts from the word after '<s>'
         for i in range(1, target_output.shape[1]):
-            _, (h_t, c_t) = self.decoder_lstm(decoder_input, (h_t, c_t))
+            _, h_t = self.decoder_gru(decoder_input, h_t)
             # dim = (1, batch_size, vocab_size)
             vocab_size_output = self.decoder_out(h_t)
             # dim = (1, batch_size, vocab_size)

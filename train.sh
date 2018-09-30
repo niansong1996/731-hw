@@ -23,6 +23,7 @@ python nmt.py \
     --dev-tgt ${dev_tgt} \
     --save-to ${work_dir}/model.bin \
     --valid-niter 1200 \
+    --lr 0.01 \
     --log-every 50 \
     --batch-size 128 \
     --hidden-size 256 \
