@@ -42,7 +42,10 @@ def batch_iter(data, batch_size, shuffle=True):
     # sort the pairs w.r.t. the length of the src sent
     data = sorted(data, key=lambda e: len(e[0]), reverse=True)
 
-    for i in np.random.shuffle(list(range(batch_num))):
+    batch_idx = list(range(batch_num))
+    if shuffle:
+        np.random.shuffle(batch_idx)
+    for i in batch_idx:
         indices = index_array[i * batch_size: (i + 1) * batch_size]
         examples = [data[idx] for idx in indices]
 
