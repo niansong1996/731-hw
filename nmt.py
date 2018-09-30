@@ -260,7 +260,7 @@ class NMT(nn.Module):
         # e.g., `torch.no_grad()`
         with torch.no_grad():
             for src_sents, tgt_sents in batch_iter(dev_data, batch_size):
-                loss = -self(src_sents, tgt_sents).sum()
+                loss = self(src_sents, tgt_sents).sum()
 
                 cum_loss += loss
                 tgt_word_num_to_predict = sum(len(s[1:]) for s in tgt_sents)  # omitting the leading `<s>`
@@ -363,6 +363,7 @@ def train(args: Dict[str, str]):
             # _, loss_v = model.encode(src_sents)
             loss = torch.sum(loss_v)
             loss.backward()
+            torch.nn.utils.clip_grad_norm(model.parameters(), clip_grad)
             optimizer.step()
 
             report_loss += loss
@@ -407,7 +408,7 @@ def train(args: Dict[str, str]):
                 dev_ppl = model.evaluate_ppl(dev_data, batch_size=128)   # dev batch size can be a bit larger
                 dev_hyps = []
                 for dev_src_sent in dev_data_src:
-                    dev_hyp_sent = model.beam_search(dev_src_sent)
+                    dev_hyp_sent = model.beam_search(dev_src_sent)[0]
                     dev_hyps.append(dev_hyp_sent)
                 dev_bleu = compute_corpus_level_bleu_score(dev_data_tgt, dev_hyps)
                 valid_metric = -dev_ppl
