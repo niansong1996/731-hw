@@ -177,12 +177,11 @@ class NMT(nn.Module):
             # dim = (batch_size)
             target_word_idices = target_output[:, i].reshape(batch_size)
             score_delta = self.criterion(softmax_output, target_word_idices)
-            # mask 0 if eos is reached
-            eos_mask = torch.where((input_indices != self.vocab.tgt.word2id['</s>']) * \
-            (target_word_idices != self.vocab.tgt.word2id['</s>']), one_mask, zero_mask)
-            loss_mask = loss_mask * eos_mask
             # update scores
             scores = scores + score_delta * loss_mask
+            # mask 0 if eos is reached
+            eos_mask = torch.where((target_word_idices == self.vocab.tgt.word2id['</s>']), zero_mask, one_mask)
+            loss_mask = loss_mask * eos_mask
             # get the input for the next layer from the embed of the target words
             embedded = self.decoder_embed(target_word_idices.view(-1, 1))
             decoder_input = embedded.transpose(0, 1)
@@ -414,14 +413,9 @@ def train(args: Dict[str, str]):
                 print("dev. ppl %f" % dev_ppl)
                 dev_hyps = []
                 for dev_src_sent in dev_data_src:
-<<<<<<< HEAD
-                    dev_hyp_sent = model.beam_search(dev_src_sent)[0]
-                    dev_hyps.append(dev_hyp_sent)
-=======
                     print(".", end="", flush=True)
                     dev_hyp_sent = model.beam_search(dev_src_sent)
                     dev_hyps.append(dev_hyp_sent[0])
->>>>>>> 37ea5575fcbaca14c751c1f337bbb42f6baf11cb
                 dev_bleu = compute_corpus_level_bleu_score(dev_data_tgt, dev_hyps)
                 '''
                 valid_metric = -dev_ppl
