@@ -208,11 +208,11 @@ class NMT(nn.Module):
         _, decoder_init_state = self.encode([src_sent])
         # dim = (1, beam_size, embed_size)
         h_t = torch.cat((decoder_init_state,) * beam_size, dim=1)
-        c_t = torch.zeros(h_t.shape)
+        c_t = torch.zeros(h_t.shape, device=device)
         for i in range(max_decoding_time_step):
             # get the new input words from the last word of every candidate
             input_words = [hyp.value for hyp in hypotheses_cand]
-            input = corpus_to_indices(self.vocab.tgt, input_words)
+            input = corpus_to_indices(self.vocab.tgt, input_words).to(device)
             # dim = (beam_size, 1 (single_word), embed_size)
             embeded = self.decoder_embed(input)
             # dim = (1 (single_word), beam_size, embed_size)
@@ -402,18 +402,27 @@ def train(args: Dict[str, str]):
                 cum_loss = cumulative_examples = cumulative_tgt_words = 0.
                 valid_num += 1
 
-                print('begin validation ...')
+                print('begin validation ... size %d %d' % (len(dev_data), len(dev_data_src)))
 
                 # compute dev. ppl and bleu
                 dev_ppl = model.evaluate_ppl(dev_data, batch_size=128)   # dev batch size can be a bit larger
+                '''
+                print("dev. ppl %f" % dev_ppl)
                 dev_hyps = []
                 for dev_src_sent in dev_data_src:
+<<<<<<< HEAD
                     dev_hyp_sent = model.beam_search(dev_src_sent)[0]
                     dev_hyps.append(dev_hyp_sent)
+=======
+                    print(".", end="", flush=True)
+                    dev_hyp_sent = model.beam_search(dev_src_sent)
+                    dev_hyps.append(dev_hyp_sent[0])
+>>>>>>> 37ea5575fcbaca14c751c1f337bbb42f6baf11cb
                 dev_bleu = compute_corpus_level_bleu_score(dev_data_tgt, dev_hyps)
+                '''
                 valid_metric = -dev_ppl
 
-                print('validation: iter %d, dev. ppl %f dev. bleu %f' % (train_iter, dev_ppl, dev_bleu))
+                print('validation: iter %d, dev. ppl %f' % (train_iter, dev_ppl))
 
                 is_better = len(hist_valid_scores) == 0 or valid_metric > max(hist_valid_scores)
                 hist_valid_scores.append(valid_metric)
