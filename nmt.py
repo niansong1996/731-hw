@@ -202,46 +202,48 @@ class NMT(nn.Module):
                 value: List[str]: the decoded target sentence, represented as a list of words
                 score: float: the log-likelihood of the target sentence
         """
-        # candidates for best hypotheses
-        hypotheses_cand = [Hypothesis(['<s>'], 0)] + [Hypothesis(['</s>'], float('-Inf')) for _ in range(beam_size - 1)]
-        # dim = (1, 1, embed_size)
-        _, decoder_init_state = self.encode([src_sent])
-        # dim = (1, beam_size, embed_size)
-        h_t = torch.cat((decoder_init_state,) * beam_size, dim=1)
-        c_t = torch.zeros(h_t.shape, device=device)
-        for i in range(max_decoding_time_step):
-            # get the new input words from the last word of every candidate
-            input_words = [[hyp.value[-1]] for hyp in hypotheses_cand]
-            input = corpus_to_indices(self.vocab.tgt, input_words).to(device)
-            # dim = (beam_size, 1 (single_word), embed_size)
-            embeded = self.decoder_embed(input)
-            # dim = (1 (single_word), beam_size, embed_size)
-            decoder_input = embeded.transpose(0, 1)
-            _, (h_t, c_t) = self.decoder_lstm(decoder_input, (h_t, c_t))
-            # dim = (1 (single_word), beam_size, vocab_size)
-            vocab_size_output = self.decoder_out(h_t)
-            # dim = (1 (single_word), beam_size, beam_size)
-            top_v, top_i = torch.topk(vocab_size_output, beam_size, dim=2)
-            # dim = (beam_size, vocab_size)
-            softmax_output = self.decoder_softmax(vocab_size_output)[0]
-            new_hypotheses_cand = []
-            for candidate_idx in range(len(hypotheses_cand)):
-                sent, log_likelihood = hypotheses_cand[candidate_idx]
-                # skip ended sentences
-                if sent[-1] == '</s>':
-                    continue
-                for word_idx_tensor in top_i[0][candidate_idx]:
-                    word_idx = word_idx_tensor.item()
-                    new_hypotheses_cand.append(Hypothesis(sent + [self.vocab.tgt.id2word[word_idx]],
-                                                          log_likelihood + softmax_output[candidate_idx][word_idx]))
-            # combine ended sentences with new candidates to form new hypotheses
-            hypotheses_cand = [h for h in hypotheses_cand if h.value[-1] == '</s>'] + new_hypotheses_cand
-            hypotheses_cand = sorted(hypotheses_cand, key=lambda hyp: hyp.score, reverse=True)[:beam_size]
-            # break if all sentences have ended
-            if all(h.value[-1] == '</s>' for h in hypotheses_cand):
-                break
-        return hypotheses_cand
+        with torch.no_grad():
+            # candidates for best hypotheses
+            hypotheses_cand = [Hypothesis(['<s>'], 0)] + [Hypothesis(['</s>'], float('-Inf')) for _ in range(beam_size - 1)]
+            # dim = (1, 1, embed_size)
+            _, decoder_init_state = self.encode([src_sent])
+            # dim = (1, beam_size, embed_size)
+            h_t = torch.cat((decoder_init_state,) * beam_size, dim=1)
+            c_t = torch.zeros(h_t.shape, device=device)
+            for i in range(max_decoding_time_step):
+                # get the new input words from the last word of every candidate
+                input_words = [[hyp.value[-1]] for hyp in hypotheses_cand]
+                input = corpus_to_indices(self.vocab.tgt, input_words).to(device)
+                # dim = (beam_size, 1 (single_word), embed_size)
+                embeded = self.decoder_embed(input)
+                # dim = (1 (single_word), beam_size, embed_size)
+                decoder_input = embeded.transpose(0, 1)
+                _, (h_t, c_t) = self.decoder_lstm(decoder_input, (h_t, c_t))
+                # dim = (1 (single_word), beam_size, vocab_size)
+                vocab_size_output = self.decoder_out(h_t)
+                # dim = (1 (single_word), beam_size, beam_size)
+                top_v, top_i = torch.topk(vocab_size_output, beam_size, dim=2)
+                # dim = (beam_size, vocab_size)
+                softmax_output = self.decoder_softmax(vocab_size_output)[0]
+                new_hypotheses_cand = []
+                for candidate_idx in range(len(hypotheses_cand)):
+                    sent, log_likelihood = hypotheses_cand[candidate_idx]
+                    # skip ended sentences
+                    if sent[-1] == '</s>':
+                        continue
+                    for word_idx_tensor in top_i[0][candidate_idx]:
+                        word_idx = word_idx_tensor.item()
+                        new_hypotheses_cand.append(Hypothesis(sent + [self.vocab.tgt.id2word[word_idx]],
+                                                              log_likelihood + softmax_output[candidate_idx][word_idx]))
+                # combine ended sentences with new candidates to form new hypotheses
+                hypotheses_cand = [h for h in hypotheses_cand if h.value[-1] == '</s>'] + new_hypotheses_cand
+                hypotheses_cand = sorted(hypotheses_cand, key=lambda hyp: hyp.score, reverse=True)[:beam_size]
+                # break if all sentences have ended
+                if all(h.value[-1] == '</s>' for h in hypotheses_cand):
+                    break
+            return hypotheses_cand
 
+        
     def evaluate_ppl(self, dev_data: List[Any], batch_size: int=32):
         """
         Evaluate perplexity on dev sentences
@@ -365,6 +367,7 @@ def train(args: Dict[str, str]):
             # _, loss_v = model.encode(src_sents)
             loss = torch.sum(loss_v)
             loss.backward()
+            torch.nn.utils.clip_grad_norm(model.parameters(), clip_grad)
             optimizer.step()
 
             report_loss += loss
@@ -403,18 +406,27 @@ def train(args: Dict[str, str]):
                 cum_loss = cumulative_examples = cumulative_tgt_words = 0.
                 valid_num += 1
 
-                print('begin validation ...')
+                print('begin validation ... size %d %d' % (len(dev_data), len(dev_data_src)))
 
                 # compute dev. ppl and bleu
                 dev_ppl = model.evaluate_ppl(dev_data, batch_size=128)   # dev batch size can be a bit larger
+                '''
+                print("dev. ppl %f" % dev_ppl)
                 dev_hyps = []
                 for dev_src_sent in dev_data_src:
+<<<<<<< HEAD
+                    dev_hyp_sent = model.beam_search(dev_src_sent)[0]
+                    dev_hyps.append(dev_hyp_sent)
+=======
+                    print(".", end="", flush=True)
                     dev_hyp_sent = model.beam_search(dev_src_sent)
                     dev_hyps.append(dev_hyp_sent[0])
+>>>>>>> 37ea5575fcbaca14c751c1f337bbb42f6baf11cb
                 dev_bleu = compute_corpus_level_bleu_score(dev_data_tgt, dev_hyps)
+                '''
                 valid_metric = -dev_ppl
 
-                print('validation: iter %d, dev. ppl %f dev. bleu %f' % (train_iter, dev_ppl, dev_bleu))
+                print('validation: iter %d, dev. ppl %f' % (train_iter, dev_ppl))
 
                 is_better = len(hist_valid_scores) == 0 or valid_metric > max(hist_valid_scores)
                 hist_valid_scores.append(valid_metric)
