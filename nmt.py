@@ -76,6 +76,7 @@ class NMT(nn.Module):
         self.vocab = vocab
         src_vocab_size = len(vocab.src)
         self.tgt_vocab_size = len(vocab.tgt)
+        self.DECODER_PAD_IDX = self.vocab.tgt.word2id['<pad>']
 
         # initialize neural network layers...
         # could add drop-out and bidirectional arguments
@@ -169,7 +170,6 @@ class NMT(nn.Module):
                 for beam search
         """
         batch_size = len(tgt_sents)
-        loss_mask = torch.ones(batch_size, device=device)  # the mask for calculating loss
         input = corpus_to_indices(self.vocab.tgt, [["<s>"] for _ in range(batch_size)]).to(device)
         # dim = (batch_size, 1 (sent_len), embed_size)
         embedded = self.decoder_embed(input)
@@ -188,11 +188,11 @@ class NMT(nn.Module):
             # dim = (batch_size)
             target_word_indices = target_output[:, i].reshape(batch_size)
             score_delta = self.criterion(softmax_output, target_word_indices)
+            # mask '<pad>' with 0
+            pad_mask = torch.where((target_word_indices == self.DECODER_PAD_IDX), zero_mask, one_mask)
+            masked_score_delta = score_delta * pad_mask
             # update scores
-            scores = scores + score_delta * loss_mask
-            # mask 0 if eos is reached
-            eos_mask = torch.where((target_word_indices == self.vocab.tgt.word2id['</s>']), zero_mask, one_mask)
-            loss_mask = loss_mask * eos_mask
+            scores = scores + masked_score_delta
             # get the input for the next layer from the embed of the target words
             embedded = self.decoder_embed(target_word_indices.view(-1, 1))
             decoder_input = embedded.transpose(0, 1)
