@@ -101,6 +101,10 @@ class NMT(nn.Module):
         self.D = 10
         self.decoder_W_s = nn.Linear(hidden_size * 2, self.tgt_vocab_size, bias=False)
 
+        # initialize the parameters using uniform distribution
+        for param in self.parameters():
+            nn.init.uniform_(param.data, a=-0.1, b=0.1)
+
     def forward(self, src_sents: List[List[str]], tgt_sents: List[List[str]]) -> Tensor:
         """
         take a mini-batch of source and target sentences, compute the log-likelihood of 
