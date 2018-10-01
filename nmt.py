@@ -529,7 +529,7 @@ def train(args: Dict[str, str]):
                     patience = 0
                     print('save currently the best model to [%s]' % model_save_path)
                     model.save(model_save_path)
-                    torch.save(optimizer_save_path)
+                    torch.save(optimizer, optimizer_save_path)
 
                 elif patience < int(args['--patience']):
                     patience += 1
