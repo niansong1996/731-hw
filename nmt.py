@@ -166,7 +166,7 @@ class NMT(nn.Module):
         decoder_input = embedded.transpose(0, 1)
         scores = torch.zeros(batch_size, device=device)
         h_t = decoder_init_state
-        c_t = torch.zeros(decoder_init_state.shape)
+        c_t = torch.zeros(decoder_init_state.shape, device=device)
         zero_mask = torch.zeros(batch_size, device=device)
         one_mask = torch.ones(batch_size, device=device)
         # convert the target sentences to indices, dim = (batch_size, max_sent_len)

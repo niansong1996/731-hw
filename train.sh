@@ -27,7 +27,7 @@ python nmt.py \
     --lr 0.1 \
     --log-every 50 \
     --max-epoch 100 \
-    --batch-size 64 \
+    --batch-size 128 \
     --hidden-size 256 \
     --embed-size 256 \
     --uniform-init 0.1 \
