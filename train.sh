@@ -23,9 +23,9 @@ python nmt.py \
     --dev-tgt ${dev_tgt} \
     --save-to ${work_dir}/model.bin \
     --valid-niter 1200 \
-    --lr 0.01 \
-    --log-every 50 \
-    --batch-size 128 \
+    --lr 0.1 \
+    --log-every 100 \
+    --batch-size 64 \
     --hidden-size 256 \
     --embed-size 256 \
     --uniform-init 0.1 \
