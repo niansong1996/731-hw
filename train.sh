@@ -24,6 +24,7 @@ python nmt.py \
     --save-to ${work_dir}/model.bin \
     --save-opt ${work_dir}/optimizer.bin \
     --valid-niter 1200 \
+    --lr 0.001 \
     --log-every 50 \
     --batch-size 128 \
     --hidden-size 256 \

@@ -544,17 +544,15 @@ def train(args: Dict[str, str]):
                             print('early stop!')
                             exit(0)
 
+                        # load model
+                        model = model.load(model_save_path)
+                        optimizer = torch.load(optimizer_save_path)
+
                         # decay learning rate, and restore from previously best checkpoint
                         lr = lr * float(args['--lr-decay'])
                         for param_group in optimizer.param_groups:
                             param_group['lr'] = lr
                         print('load previously best model and decay learning rate to %f' % lr)
-
-                        # load model
-                        model = model.load(model_save_path)
-                        optimizer = torch.load(optimizer_save_path)
-
-                        print('restore parameters of the optimizers')
 
                         # reset patience
                         patience = 0
