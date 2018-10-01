@@ -30,6 +30,7 @@ Options:
     --lr=<float>                            learning rate [default: 0.001]
     --uniform-init=<float>                  uniformly initialize all parameters [default: 0.1]
     --save-to=<file>                        model save path
+    --save-opt=<file>                       optimizer state save path
     --valid-niter=<int>                     perform validation after how many iterations [default: 2000]
     --dropout=<float>                       dropout [default: 0.2]
     --max-decoding-time-step=<int>          maximum number of decoding time steps [default: 70]
@@ -423,6 +424,7 @@ def train(args: Dict[str, str]):
     valid_niter = int(args['--valid-niter'])
     log_every = int(args['--log-every'])
     model_save_path = args['--save-to']
+    optimizer_save_path = args['--save-opt']
 
     vocab = pickle.load(open(args['--vocab'], 'rb'))
 
@@ -455,11 +457,9 @@ def train(args: Dict[str, str]):
             if train_iter % 5 == 0:
                 print("#", end="", flush=True)
 
-            # (batch_size)
             # start training routine
             optimizer.zero_grad()
             loss_v = model(src_sents, tgt_sents)
-            # _, loss_v = model.encode(src_sents)
             loss = torch.sum(loss_v)
             loss.backward()
             torch.nn.utils.clip_grad_norm(model.parameters(), clip_grad)
@@ -525,8 +525,8 @@ def train(args: Dict[str, str]):
                     patience = 0
                     print('save currently the best model to [%s]' % model_save_path)
                     model.save(model_save_path)
+                    torch.save(optimizer_save_path)
 
-                    # You may also save the optimizer's state
                 elif patience < int(args['--patience']):
                     patience += 1
                     print('hit patience %d' % patience)
@@ -540,13 +540,15 @@ def train(args: Dict[str, str]):
 
                         # decay learning rate, and restore from previously best checkpoint
                         lr = lr * float(args['--lr-decay'])
+                        for param_group in optimizer.param_groups:
+                            param_group['lr'] = lr
                         print('load previously best model and decay learning rate to %f' % lr)
 
                         # load model
-                        model_save_path
+                        model = model.load(model_save_path)
+                        optimizer = torch.load(optimizer_save_path)
 
                         print('restore parameters of the optimizers')
-                        # You may also need to load the state of the optimizer saved before
 
                         # reset patience
                         patience = 0
