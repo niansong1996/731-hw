@@ -25,7 +25,8 @@ python nmt.py \
     --save-opt ${work_dir}/opt.bin \
     --valid-niter 1200 \
     --lr 0.1 \
-    --log-every 100 \
+    --log-every 50 \
+    --max-epoch 100 \
     --batch-size 64 \
     --hidden-size 256 \
     --embed-size 256 \
