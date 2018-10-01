@@ -22,6 +22,7 @@ python nmt.py \
     --dev-src ${dev_src} \
     --dev-tgt ${dev_tgt} \
     --save-to ${work_dir}/model.bin \
+    --save-opt ${work_dir}/opt.bin \
     --valid-niter 1200 \
     --lr 0.1 \
     --log-every 100 \
