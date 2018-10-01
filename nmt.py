@@ -84,6 +84,7 @@ class NMT(nn.Module):
         self.encoder_lstm = nn.LSTM(embed_size, hidden_size)
 
         self.decoder_embed = nn.Embedding(self.tgt_vocab_size, embed_size)
+        self.dropout = nn.Dropout(dropout_rate)
         self.decoder_lstm = nn.LSTM(embed_size, hidden_size)
         self.decoder_out = nn.Linear(hidden_size, self.tgt_vocab_size)
         self.decoder_softmax = nn.LogSoftmax(dim=2)
@@ -173,7 +174,7 @@ class NMT(nn.Module):
         target_output = corpus_to_indices(self.vocab.tgt, tgt_sents).to(device)
         # skip the '<s>' in the tgt_sents since the output starts from the word after '<s>'
         for i in range(1, target_output.shape[1]):
-            decoder_input = F.relu(decoder_input)
+            decoder_input = self.dropout(decoder_input)
             _, (h_t, c_t) = self.decoder_lstm(decoder_input, (h_t, c_t))
             # dim = (1, batch_size, vocab_size)
             vocab_size_output = self.decoder_out(h_t)

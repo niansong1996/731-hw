@@ -24,7 +24,7 @@ python nmt.py \
     --save-to ${work_dir}/model.bin \
     --save-opt ${work_dir}/opt.bin \
     --valid-niter 1200 \
-    --lr 0.1 \
+    --lr 0.01 \
     --log-every 50 \
     --max-epoch 100 \
     --batch-size 128 \
