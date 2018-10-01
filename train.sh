@@ -22,6 +22,7 @@ python nmt.py \
     --dev-src ${dev_src} \
     --dev-tgt ${dev_tgt} \
     --save-to ${work_dir}/model.bin \
+    --save-opt ${work_dir}/optimizer.bin \
     --valid-niter 1200 \
     --log-every 50 \
     --batch-size 128 \
