@@ -312,6 +312,8 @@ class NMT(nn.Module):
             # dim = (1, 1, embed_size)
             src_encodings, decoder_init_state = self.encode([src_sent])
             # dim = (1, beam_size, embed_size)
+            src_encodings = torch.cat((src_encodings,) * beam_size, dim=1)
+            # dim = (1, beam_size, embed_size)
             h_t = torch.cat((decoder_init_state,) * beam_size, dim=1)
             c_t = torch.zeros(h_t.shape, device=device)
             for i in range(max_decoding_time_step):
