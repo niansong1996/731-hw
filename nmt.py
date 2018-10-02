@@ -87,7 +87,8 @@ class NMT(nn.Module):
         self.encoder_embed = nn.Embedding(src_vocab_size, embed_size, padding_idx=0)
         self.encoder_lstm = nn.LSTM(embed_size, hidden_size, bidirectional=True)
 
-        self.decoder_embed = nn.Embedding(self.tgt_vocab_size, embed_size)
+        self.decoder_embed = nn.Embedding(self.tgt_vocab_size, embed_size, padding_idx=0)
+        self.decoder_state_transform = nn.Linear(hidden_size * 2, hidden_size * 2)
         self.decoder_lstm = nn.LSTM(embed_size, 2 * hidden_size)
         self.decoder_out = nn.Linear(hidden_size, self.tgt_vocab_size)
         # W_p for attention
@@ -185,8 +186,8 @@ class NMT(nn.Module):
         # dim = (1 (single_word), batch_size, embed_size)
         decoder_input = embedded.transpose(0, 1)
         scores = torch.zeros(batch_size, device=device)
-        h_t = decoder_init_state[0]
-        c_t = decoder_init_state[1]
+        c_t = self.decoder_state_transform(decoder_init_state[1])
+        h_t = F.tanh(c_t)
         zero_mask = torch.zeros(batch_size, device=device)
         one_mask = torch.ones(batch_size, device=device)
         # convert the target sentences to indices, dim = (batch_size, max_tgt_len)
