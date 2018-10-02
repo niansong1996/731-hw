@@ -146,10 +146,12 @@ class NMT(nn.Module):
         embedded = self.encoder_embed(input)
         # dim = (max_src_len, batch_size, embed_size)
         encoder_input = embedded.transpose(0, 1)
-        output, (_, _) = self.encoder_lstm(encoder_input)
+        output, (h_n, c_n) = self.encoder_lstm(encoder_input)
         # dim = (max_src_len, batch_size, 2 * hidden_size)
         src_encodings = output
-        return src_encodings, torch.unsqueeze(src_encodings[-1], 0)
+        h_n = torch.unsqueeze(torch.cat((h_n[0], h_n[1]), dim=1), 0)
+        c_n = torch.unsqueeze(torch.cat((c_n[0], c_n[1]), dim=1), 0)
+        return src_encodings, (h_n, c_n)
 
     def decode(self, src_encodings: Tensor, decoder_init_state: Tensor, tgt_sents: List[List[str]]) -> Tensor:
         """
@@ -176,8 +178,8 @@ class NMT(nn.Module):
         # dim = (1 (single_word), batch_size, embed_size)
         decoder_input = embedded.transpose(0, 1)
         scores = torch.zeros(batch_size, device=device)
-        h_t = decoder_init_state
-        c_t = torch.zeros(decoder_init_state.shape, device=device)
+        h_t = decoder_init_state[0]
+        c_t = decoder_init_state[1]
         zero_mask = torch.zeros(batch_size, device=device)
         one_mask = torch.ones(batch_size, device=device)
         # convert the target sentences to indices, dim = (batch_size, max_tgt_len)
