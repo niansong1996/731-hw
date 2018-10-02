@@ -56,6 +56,9 @@ import torch
 import torch.nn as nn
 import torch.tensor as Tensor
 import torch.nn.functional as F
+from torch.nn.utils.rnn import pad_sequence
+from torch.nn.utils.rnn import pack_padded_sequence
+from torch.nn.utils.rnn import pad_packed_sequence
 
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -142,15 +145,21 @@ class NMT(nn.Module):
         batch_size = len(src_sents)
 
         # first the the vecotrized representation of the batch; dim = (batch_size, max_src_len)
-        input = corpus_to_indices(self.vocab.src, src_sents).to(device)
-        # dim = (batch_size, max_src_len, embed_size)
-        embedded = self.encoder_embed(input)
-        # dim = (max_src_len, batch_size, embed_size)
-        encoder_input = embedded.transpose(0, 1)
-        output, (_, _) = self.encoder_lstm(encoder_input)
+        sent_length = torch.tensor([len(sent) for sent in src_sents]).to(device)
+        sent_indices = self.vocab.src.words2indices(src_sents)
+        sent_indices_padded = pad_sequence([torch.tensor(sent) for sent in sent_indices]).to(device)
+        # embed padded seq
+        padded_embedding = self.encoder_embed(sent_indices_padded)
+        packed_seqs = pack_padded_sequence(padded_embedding, sent_length)
+
+        output, (h_n, c_n) = self.encoder_lstm(packed_seqs)
         # dim = (max_src_len, batch_size, 2 * hidden_size)
-        src_encodings = output
-        return src_encodings, torch.unsqueeze(src_encodings[-1], 0)
+        h_n = torch.unsqueeze(torch.cat((h_n[0], h_n[1]), dim=1), 0)
+        c_n = torch.unsqueeze(torch.cat((c_n[0], c_n[1]), dim=1), 0)
+
+        # unpack the source encodings
+        src_encodings = pad_packed_sequence(output)[0]
+        return src_encodings.data, (h_n, c_n)
 
     def decode(self, src_encodings: Tensor, decoder_init_state: Tensor, tgt_sents: List[List[str]]) -> Tensor:
         """
@@ -176,8 +185,8 @@ class NMT(nn.Module):
         # dim = (1 (single_word), batch_size, embed_size)
         decoder_input = embedded.transpose(0, 1)
         scores = torch.zeros(batch_size, device=device)
-        h_t = decoder_init_state
-        c_t = torch.zeros(decoder_init_state.shape, device=device)
+        h_t = decoder_init_state[0]
+        c_t = decoder_init_state[1]
         zero_mask = torch.zeros(batch_size, device=device)
         one_mask = torch.ones(batch_size, device=device)
         # convert the target sentences to indices, dim = (batch_size, max_tgt_len)
@@ -528,7 +537,7 @@ def train(args: Dict[str, str]):
                     patience = 0
                     print('save currently the best model to [%s]' % model_save_path)
                     model.save(model_save_path)
-                    # torch.save(optimizer_save_path)
+                    torch.save(optimizer, optimizer_save_path)
 
                 elif patience < int(args['--patience']):
                     patience += 1
@@ -541,17 +550,15 @@ def train(args: Dict[str, str]):
                             print('early stop!')
                             exit(0)
 
+                        # load model
+                        model = model.load(model_save_path)
+                        optimizer = torch.load(optimizer_save_path)
+
                         # decay learning rate, and restore from previously best checkpoint
                         lr = lr * float(args['--lr-decay'])
                         for param_group in optimizer.param_groups:
                             param_group['lr'] = lr
                         print('load previously best model and decay learning rate to %f' % lr)
-
-                        # load model
-                        model = model.load(model_save_path)
-                        optimizer = torch.load(optimizer_save_path)
-
-                        print('restore parameters of the optimizers')
 
                         # reset patience
                         patience = 0
