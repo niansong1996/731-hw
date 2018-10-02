@@ -56,6 +56,9 @@ import torch
 import torch.nn as nn
 import torch.tensor as Tensor
 import torch.nn.functional as F
+from torch.nn.utils.rnn import pad_sequence
+from torch.nn.utils.rnn import pack_padded_sequence
+from torch.nn.utils.rnn import pad_packed_sequence
 
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -141,17 +144,21 @@ class NMT(nn.Module):
         batch_size = len(src_sents)
 
         # first the the vecotrized representation of the batch; dim = (batch_size, max_src_len)
-        input = corpus_to_indices(self.vocab.src, src_sents).to(device)
-        # dim = (batch_size, max_src_len, embed_size)
-        embedded = self.encoder_embed(input)
-        # dim = (max_src_len, batch_size, embed_size)
-        encoder_input = embedded.transpose(0, 1)
-        output, (h_n, c_n) = self.encoder_lstm(encoder_input)
+        sent_length = torch.tensor([len(sent) for sent in src_sents])
+        sent_indices = self.vocab.src.words2indices(src_sents)
+        sent_indices_padded = pad_sequence([torch.tensor(sent) for sent in sent_indices])
+        # embed padded seq
+        padded_embedding = self.encoder_embed(sent_indices_padded)
+        packed_seqs = pack_padded_sequence(padded_embedding, sent_length)
+
+        output, (h_n, c_n) = self.encoder_lstm(packed_seqs)
         # dim = (max_src_len, batch_size, 2 * hidden_size)
-        src_encodings = output
         h_n = torch.unsqueeze(torch.cat((h_n[0], h_n[1]), dim=1), 0)
         c_n = torch.unsqueeze(torch.cat((c_n[0], c_n[1]), dim=1), 0)
-        return src_encodings, (h_n, c_n)
+
+        # unpack the source encodings
+        src_encodings = pad_packed_sequence(output)[0]
+        return src_encodings.data, (h_n, c_n)
 
     def decode(self, src_encodings: Tensor, decoder_init_state: Tensor, tgt_sents: List[List[str]]) -> Tensor:
         """
