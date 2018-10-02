@@ -144,8 +144,8 @@ class NMT(nn.Module):
         batch_size = len(src_sents)
 
         # first the the vecotrized representation of the batch; dim = (batch_size, max_src_len)
-        sent_length = torch.tensor([len(sent) for sent in src_sents])
-        sent_indices = self.vocab.src.words2indices(src_sents)
+        sent_length = torch.tensor([len(sent) for sent in src_sents]).to(device)
+        sent_indices = self.vocab.src.words2indices(src_sents).to(device)
         sent_indices_padded = pad_sequence([torch.tensor(sent) for sent in sent_indices])
         # embed padded seq
         padded_embedding = self.encoder_embed(sent_indices_padded)
