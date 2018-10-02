@@ -90,11 +90,6 @@ class NMT(nn.Module):
         self.decoder_embed = nn.Embedding(self.tgt_vocab_size, embed_size)
         self.decoder_lstm = nn.LSTM(2 * hidden_size + embed_size, 2 * hidden_size)
         self.decoder_out = nn.Linear(hidden_size, self.tgt_vocab_size)
-        # W_p for attention
-        self.decoder_W_p = nn.Linear(hidden_size * 2, 50, bias=False)
-        # v_p for attention
-        self.decoder_v_p = nn.Linear(50, 1, bias=False)
-        self.decoder_sigmoid = nn.Sigmoid()
         # W_a for attention
         self.decoder_W_a = nn.Linear(hidden_size * 2, hidden_size * 2, bias=False)
         # W_c for attention
@@ -102,7 +97,6 @@ class NMT(nn.Module):
         self.decoder_softmax = nn.LogSoftmax(dim=2)
         self.tanh = nn.Tanh()
         self.criterion = nn.NLLLoss()
-        self.D = 10
         self.decoder_W_s = nn.Linear(hidden_size * 2, self.tgt_vocab_size, bias=False)
 
         # initialize the parameters using uniform distribution
@@ -141,9 +135,6 @@ class NMT(nn.Module):
             decoder_init_state: decoder GRU/LSTM's initial state, computed from source encodings,
                 with dim (1, batch_size, encoding_dim)
         """
-
-        batch_size = len(src_sents)
-
         # first the the vecotrized representation of the batch; dim = (batch_size, max_src_len)
         sent_length = torch.tensor([len(sent) for sent in src_sents]).to(device)
         sent_indices = self.vocab.src.words2indices(src_sents)
@@ -251,29 +242,6 @@ class NMT(nn.Module):
         # dim = (batch_size, 1, 4 * hidden_size)
         cat_c_h = torch.cat((c_t, h_t_), 2)
         return self.tanh(self.decoder_W_c(cat_c_h))
-
-    def local_attention(self, h_s: Tensor, h_t: Tensor):
-        """
-        Calculate general attention score
-
-        :param h_s: source hidden state of size (max_src_len, batch_size, 2 * hidden_size)
-        :param h_t: decoder hidden state of size (1 (single word), batch_size, 2 * hidden_size)
-        :return: an align score of size (batch_size, 1, max_src_len)
-        """
-        raise NotImplementedError
-
-    def align_local(self, h_s: Tensor, h_t: Tensor):
-        """
-        Calculate a local align
-
-        :param h_s: source hidden state of size (max_src_len, batch_size, 2 * hidden_size)
-        :param h_t: decoder hidden state of size (1 (single word), batch_size, 2 * hidden_size)
-        :return: an align score of size (batch_size, 1, max_src_len)
-        """
-        # dim = (1 (single word), batch_size, 50)
-        W_p_h_t = self.decoder_W_p(h_t)
-        # dim = (1 (single word), batch_size, 1)
-        raise NotImplementedError
 
     def align_global(self, h_s: Tensor, h_t: Tensor):
         """
