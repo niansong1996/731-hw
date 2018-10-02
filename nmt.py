@@ -307,45 +307,42 @@ class NMT(nn.Module):
                 score: float: the log-likelihood of the target sentence
         """
         with torch.no_grad():
-            # candidates for best hypotheses
-            hypotheses_cand = [Hypothesis(['<s>'], 0)] + [Hypothesis(['</s>'], float('-Inf')) for _ in range(beam_size - 1)]
             # dim = (1, 1, embed_size)
             src_encodings, decoder_init_state = self.encode([src_sent])
-            # dim = (1, beam_size, embed_size)
-            src_encodings = torch.cat((src_encodings,) * beam_size, dim=1)
-            # dim = (1, beam_size, embed_size)
-            h_t = torch.cat((decoder_init_state,) * beam_size, dim=1)
-            c_t = torch.zeros(h_t.shape, device=device)
+            # dim = (1, 1, embed_size)
+            h_t_0 = decoder_init_state
+            c_t_0 = torch.zeros(h_t_0.shape, device=device)
+            # candidates for best hypotheses
+            hypotheses_cand = [(Hypothesis(['<s>'], 0), h_t_0, c_t_0)]
             for i in range(max_decoding_time_step):
-                # get the new input words from the last word of every candidate
-                input_words = [[hyp.value[-1]] for hyp in hypotheses_cand]
-                input = corpus_to_indices(self.vocab.tgt, input_words).to(device)
-                # dim = (beam_size, 1 (single_word), embed_size)
-                embeded = self.decoder_embed(input)
-                # dim = (1 (single_word), beam_size, embed_size)
-                decoder_input = embeded.transpose(0, 1)
-                # softmax_output.shape = [beam_size, vocab_size]
-                h_t, c_t, softmax_output = self.decoder_step(src_encodings, decoder_input, h_t, c_t)
-                # dim = (beam_size, beam_size)
-                top_v, top_i = torch.topk(softmax_output, beam_size, dim=1)
                 new_hypotheses_cand = []
-                for candidate_idx in range(len(hypotheses_cand)):
-                    sent, log_likelihood = hypotheses_cand[candidate_idx]
-                    # skip ended sentences
-                    if sent[-1] == '</s>':
+                for (sent, log_likelihood), h_t, c_t in hypotheses_cand:
+                    input_word = [sent[-1]]
+                    # skip ended sentence
+                    if input_word == '</s>':
+                        # directly add ended sentence to new candidates
+                        new_hypotheses_cand.append((Hypothesis(sent, log_likelihood), h_t, c_t))
                         continue
-                    for word_idx_tensor in top_i[candidate_idx]:
+                    # dim = (1, 1 (single_word), embed_size)
+                    embeded = self.decoder_embed(corpus_to_indices(self.vocab.tgt, [input_word]).to(device))
+                    # dim = (1 (single_word), 1, embed_size)
+                    decoder_input = embeded.transpose(0, 1)
+                    # softmax_output.shape = [vocab_size]
+                    h_t, c_t, softmax_output = self.decoder_step(src_encodings, decoder_input, h_t, c_t)
+                    # dim = (1, beam_size)
+                    top_v, top_i = torch.topk(softmax_output.unsqueeze(0), beam_size, dim=1)
+                    for word_idx_tensor in top_i[0]:
                         word_idx = word_idx_tensor.item()
-                        new_hypotheses_cand.append(Hypothesis(sent + [self.vocab.tgt.id2word[word_idx]],
-                                                              log_likelihood + softmax_output[candidate_idx][word_idx]))
+                        new_hyp = Hypothesis(sent + [self.vocab.tgt.id2word[word_idx]],
+                                             log_likelihood + softmax_output[word_idx])
+                        new_hypotheses_cand.append((new_hyp, h_t, c_t))
                 # combine ended sentences with new candidates to form new hypotheses
-                hypotheses_cand = [h for h in hypotheses_cand if h.value[-1] == '</s>'] + new_hypotheses_cand
-                hypotheses_cand = sorted(hypotheses_cand, key=lambda hyp: hyp.score, reverse=True)[:beam_size]
+                hypotheses_cand = sorted(new_hypotheses_cand, key=lambda x: x[0].score, reverse=True)[:beam_size]
                 # break if all sentences have ended
-                if all(h.value[-1] == '</s>' for h in hypotheses_cand):
+                if all(c[0].value[-1] == '</s>' for c in hypotheses_cand):
                     break
-            return hypotheses_cand
-        
+            return [h for h, _, _ in hypotheses_cand]
+
     def evaluate_ppl(self, dev_data: List[Any], batch_size: int=32):
         """
         Evaluate perplexity on dev sentences
@@ -531,7 +528,7 @@ def train(args: Dict[str, str]):
                     patience = 0
                     print('save currently the best model to [%s]' % model_save_path)
                     model.save(model_save_path)
-                    torch.save(optimizer_save_path)
+                    # torch.save(optimizer_save_path)
 
                 elif patience < int(args['--patience']):
                     patience += 1
