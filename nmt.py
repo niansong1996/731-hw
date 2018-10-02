@@ -85,16 +85,17 @@ class NMT(nn.Module):
         # could add drop-out and bidirectional arguments
         # could also change the units to GRU
         self.encoder_embed = nn.Embedding(src_vocab_size, embed_size, padding_idx=0)
-        self.encoder_lstm = nn.LSTM(embed_size, hidden_size, bidirectional=True)
+        self.encoder_lstm = nn.LSTM(embed_size, hidden_size, dropout=self.dropout_rate, bidirectional=True)
 
         self.decoder_embed = nn.Embedding(self.tgt_vocab_size, embed_size)
-        self.decoder_lstm = nn.LSTM(2 * hidden_size + embed_size, 2 * hidden_size)
+        self.decoder_lstm = nn.LSTM(2 * hidden_size + embed_size, 2 * hidden_size, dropout=self.dropout_rate)
         self.decoder_out = nn.Linear(hidden_size, self.tgt_vocab_size)
         # W_a for attention
         self.decoder_W_a = nn.Linear(hidden_size * 2, hidden_size * 2, bias=False)
         # W_c for attention
         self.decoder_W_c = nn.Linear(hidden_size * 4, hidden_size * 2, bias=False)
         self.decoder_softmax = nn.LogSoftmax(dim=2)
+        self.dropout = nn.Dropout(p=self.dropout_rate)
         self.tanh = nn.Tanh()
         self.criterion = nn.NLLLoss()
         self.decoder_W_s = nn.Linear(hidden_size * 2, self.tgt_vocab_size, bias=False)
@@ -215,7 +216,7 @@ class NMT(nn.Module):
         # dim = (batch_size, 1, 2 * hidden_size)
         attn_h_t = self.global_attention(src_encodings, h_t)
         # dim = (1, batch_size, 2 * hidden_size)
-        attn_h_t_ = attn_h_t.transpose(0, 1)
+        attn_h_t_ = self.dropout(attn_h_t.transpose(0, 1))
         # dim = (1, batch_size, vocab_size)
         vocab_size_output = self.decoder_W_s(attn_h_t_)
         # dim = (batch_size, vocab_size)
