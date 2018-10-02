@@ -159,7 +159,7 @@ class NMT(nn.Module):
 
         # unpack the source encodings
         src_encodings = pad_packed_sequence(output)[0]
-        return src_encodings.data, (h_n, c_n)
+        return src_encodings, (h_n, c_n)
 
     def decode(self, src_encodings: Tensor, decoder_init_state: Tensor, tgt_sents: List[List[str]]) -> Tensor:
         """
