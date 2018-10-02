@@ -79,6 +79,7 @@ class NMT(nn.Module):
         self.vocab = vocab
         src_vocab_size = len(vocab.src)
         self.tgt_vocab_size = len(vocab.tgt)
+        self.DECODER_PAD_IDX = self.vocab.tgt.word2id['<pad>']
 
         # initialize neural network layers...
         # could add drop-out and bidirectional arguments
@@ -158,7 +159,7 @@ class NMT(nn.Module):
 
         # unpack the source encodings
         src_encodings = pad_packed_sequence(output)[0]
-        return src_encodings.data, (h_n, c_n)
+        return src_encodings, (h_n, c_n)
 
     def decode(self, src_encodings: Tensor, decoder_init_state: Tensor, tgt_sents: List[List[str]]) -> Tensor:
         """
@@ -178,7 +179,6 @@ class NMT(nn.Module):
                 for beam search
         """
         batch_size = len(tgt_sents)
-        loss_mask = torch.ones(batch_size, device=device)  # the mask for calculating loss
         input = corpus_to_indices(self.vocab.tgt, [["<s>"] for _ in range(batch_size)]).to(device)
         # dim = (batch_size, 1 (sent_len), embed_size)
         embedded = self.decoder_embed(input)
@@ -197,11 +197,11 @@ class NMT(nn.Module):
             # dim = (batch_size)
             target_word_indices = target_output[:, i].reshape(batch_size)
             score_delta = self.criterion(softmax_output, target_word_indices)
+            # mask '<pad>' with 0
+            pad_mask = torch.where((target_word_indices == self.DECODER_PAD_IDX), zero_mask, one_mask)
+            masked_score_delta = score_delta * pad_mask
             # update scores
-            scores = scores + score_delta * loss_mask
-            # mask 0 if eos is reached
-            eos_mask = torch.where((target_word_indices == self.vocab.tgt.word2id['</s>']), zero_mask, one_mask)
-            loss_mask = loss_mask * eos_mask
+            scores = scores + masked_score_delta
             # get the input for the next layer from the embed of the target words
             embedded = self.decoder_embed(target_word_indices.view(-1, 1))
             decoder_input = embedded.transpose(0, 1)
@@ -220,7 +220,7 @@ class NMT(nn.Module):
         attn_h_t = self.global_attention(src_encodings, h_t)
         # dim = (1, batch_size, 2 * hidden_size)
         attn_h_t_ = attn_h_t.transpose(0, 1)
-        # dim = (1, batch_size, 2 * hidden_size)
+        # dim = (1, batch_size, vocab_size)
         vocab_size_output = self.decoder_W_s(attn_h_t_)
         # dim = (batch_size, vocab_size)
         softmax_output = self.decoder_softmax(vocab_size_output).squeeze()
@@ -316,45 +316,42 @@ class NMT(nn.Module):
                 score: float: the log-likelihood of the target sentence
         """
         with torch.no_grad():
-            # candidates for best hypotheses
-            hypotheses_cand = [Hypothesis(['<s>'], 0)] + [Hypothesis(['</s>'], float('-Inf')) for _ in range(beam_size - 1)]
             # dim = (1, 1, embed_size)
-            src_encodings, decoder_init_state = self.encode([src_sent])
-            # dim = (1, beam_size, embed_size)
-            src_encodings = torch.cat((src_encodings,) * beam_size, dim=1)
-            # dim = (1, beam_size, embed_size)
-            h_t = torch.cat((decoder_init_state,) * beam_size, dim=1)
-            c_t = torch.zeros(h_t.shape, device=device)
+            src_encodings, (h_n, c_n) = self.encode([src_sent])
+            # dim = (1, 1, embed_size)
+            h_t_0 = h_n
+            c_t_0 = c_n
+            # candidates for best hypotheses
+            hypotheses_cand = [(Hypothesis(['<s>'], 0), h_t_0, c_t_0)]
             for i in range(max_decoding_time_step):
-                # get the new input words from the last word of every candidate
-                input_words = [[hyp.value[-1]] for hyp in hypotheses_cand]
-                input = corpus_to_indices(self.vocab.tgt, input_words).to(device)
-                # dim = (beam_size, 1 (single_word), embed_size)
-                embeded = self.decoder_embed(input)
-                # dim = (1 (single_word), beam_size, embed_size)
-                decoder_input = embeded.transpose(0, 1)
-                # softmax_output.shape = [beam_size, vocab_size]
-                h_t, c_t, softmax_output = self.decoder_step(src_encodings, decoder_input, h_t, c_t)
-                # dim = (beam_size, beam_size)
-                top_v, top_i = torch.topk(softmax_output, beam_size, dim=1)
                 new_hypotheses_cand = []
-                for candidate_idx in range(len(hypotheses_cand)):
-                    sent, log_likelihood = hypotheses_cand[candidate_idx]
-                    # skip ended sentences
-                    if sent[-1] == '</s>':
+                for (sent, log_likelihood), h_t, c_t in hypotheses_cand:
+                    input_word = [sent[-1]]
+                    # skip ended sentence
+                    if input_word == '</s>':
+                        # directly add ended sentence to new candidates
+                        new_hypotheses_cand.append((Hypothesis(sent, log_likelihood), h_t, c_t))
                         continue
-                    for word_idx_tensor in top_i[candidate_idx]:
+                    # dim = (1, 1 (single_word), embed_size)
+                    embeded = self.decoder_embed(corpus_to_indices(self.vocab.tgt, [input_word]).to(device))
+                    # dim = (1 (single_word), 1, embed_size)
+                    decoder_input = embeded.transpose(0, 1)
+                    # softmax_output.shape = [vocab_size]
+                    h_t, c_t, softmax_output = self.decoder_step(src_encodings, decoder_input, h_t, c_t)
+                    # dim = (1, beam_size)
+                    top_v, top_i = torch.topk(softmax_output.unsqueeze(0), beam_size, dim=1)
+                    for word_idx_tensor in top_i[0]:
                         word_idx = word_idx_tensor.item()
-                        new_hypotheses_cand.append(Hypothesis(sent + [self.vocab.tgt.id2word[word_idx]],
-                                                              log_likelihood + softmax_output[candidate_idx][word_idx]))
+                        new_hyp = Hypothesis(sent + [self.vocab.tgt.id2word[word_idx]],
+                                             log_likelihood + softmax_output[word_idx])
+                        new_hypotheses_cand.append((new_hyp, h_t, c_t))
                 # combine ended sentences with new candidates to form new hypotheses
-                hypotheses_cand = [h for h in hypotheses_cand if h.value[-1] == '</s>'] + new_hypotheses_cand
-                hypotheses_cand = sorted(hypotheses_cand, key=lambda hyp: hyp.score, reverse=True)[:beam_size]
+                hypotheses_cand = sorted(new_hypotheses_cand, key=lambda x: x[0].score, reverse=True)[:beam_size]
                 # break if all sentences have ended
-                if all(h.value[-1] == '</s>' for h in hypotheses_cand):
+                if all(c[0].value[-1] == '</s>' for c in hypotheses_cand):
                     break
-            return hypotheses_cand
-        
+            return [h for h, _, _ in hypotheses_cand]
+
     def evaluate_ppl(self, dev_data: List[Any], batch_size: int=32):
         """
         Evaluate perplexity on dev sentences
