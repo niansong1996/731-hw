@@ -88,10 +88,6 @@ class NMT(nn.Module):
         self.encoder_lstm = nn.LSTM(embed_size, hidden_size, bidirectional=True)
 
         self.decoder_embed = nn.Embedding(self.tgt_vocab_size, embed_size, padding_idx=0)
-
-        self.decoder_lstm = nn.LSTM(embed_size, 2 * hidden_size)
-        self.decoder_embed = nn.Embedding(self.tgt_vocab_size, embed_size)
-        self.decoder_state_transform = nn.Linear(hidden_size * 2, hidden_size * 2)
         self.decoder_lstm = nn.LSTM(2 * hidden_size + embed_size, 2 * hidden_size) 
         self.decoder_out = nn.Linear(hidden_size, self.tgt_vocab_size)
         # W_a for attention
@@ -101,7 +97,10 @@ class NMT(nn.Module):
         self.decoder_softmax = nn.LogSoftmax(dim=2)
         # self.dropout = nn.Dropout(p=self.dropout_rate)
         self.tanh = nn.Tanh()
-        self.criterion = nn.NLLLoss()
+
+        weights = torch.ones(self.tgt_vocab_size)
+        weights[0] = 0
+        self.criterion = nn.NLLLoss(weight=weights)
         self.decoder_W_s = nn.Linear(hidden_size * 2, self.tgt_vocab_size, bias=False)
 
         # initialize the parameters using uniform distribution
@@ -181,8 +180,8 @@ class NMT(nn.Module):
         # dim = (1 (single_word), batch_size, embed_size)
         decoder_input = embedded.transpose(0, 1)
         scores = torch.zeros(batch_size, device=device)
-        c_t = self.decoder_state_transform(decoder_init_state[1])
-        h_t = F.tanh(c_t)
+        c_t = decoder_init_state[1]
+        h_t = decoder_init_state[0]
         zero_mask = torch.zeros(batch_size, device=device)
         one_mask = torch.ones(batch_size, device=device)
         # convert the target sentences to indices, dim = (batch_size, max_tgt_len)
