@@ -83,7 +83,7 @@ class NMT(nn.Module):
         # initialize neural network layers...
         # could add drop-out and bidirectional arguments
         # could also change the units to GRU
-        self.encoder_embed = nn.Embedding(src_vocab_size, embed_size)
+        self.encoder_embed = nn.Embedding(src_vocab_size, embed_size, padding_idx=0)
         self.encoder_lstm = nn.LSTM(embed_size, hidden_size, bidirectional=True)
 
         self.decoder_embed = nn.Embedding(self.tgt_vocab_size, embed_size)
