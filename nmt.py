@@ -220,7 +220,7 @@ class NMT(nn.Module):
         attn_h_t = self.global_attention(src_encodings, h_t)
         # dim = (1, batch_size, 2 * hidden_size)
         attn_h_t_ = attn_h_t.transpose(0, 1)
-        # dim = (1, batch_size, 2 * hidden_size)
+        # dim = (1, batch_size, vocab_size)
         vocab_size_output = self.decoder_W_s(attn_h_t_)
         # dim = (batch_size, vocab_size)
         softmax_output = self.decoder_softmax(vocab_size_output).squeeze()
@@ -317,10 +317,10 @@ class NMT(nn.Module):
         """
         with torch.no_grad():
             # dim = (1, 1, embed_size)
-            src_encodings, decoder_init_state = self.encode([src_sent])
+            src_encodings, (h_n, c_n) = self.encode([src_sent])
             # dim = (1, 1, embed_size)
-            h_t_0 = decoder_init_state
-            c_t_0 = torch.zeros(h_t_0.shape, device=device)
+            h_t_0 = h_n
+            c_t_0 = c_n
             # candidates for best hypotheses
             hypotheses_cand = [(Hypothesis(['<s>'], 0), h_t_0, c_t_0)]
             for i in range(max_decoding_time_step):
