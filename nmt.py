@@ -94,7 +94,8 @@ class NMT(nn.Module):
         self.decoder_W_a = nn.Linear(hidden_size * 2, hidden_size * 2, bias=False)
         # W_c for attention
         self.decoder_W_c = nn.Linear(hidden_size * 4, hidden_size * 2, bias=False)
-        self.decoder_softmax = nn.LogSoftmax(dim=2)
+        self.decoder_log_softmax = nn.LogSoftmax(dim=2)
+        self.decoder_softmax = nn.Softmax(dim=2)
         self.dropout = nn.Dropout(p=self.dropout_rate)
         self.tanh = nn.Tanh()
         self.criterion = nn.NLLLoss()
@@ -220,7 +221,7 @@ class NMT(nn.Module):
         # dim = (1, batch_size, vocab_size)
         vocab_size_output = self.decoder_W_s(attn_h_t_)
         # dim = (batch_size, vocab_size)
-        softmax_output = self.decoder_softmax(vocab_size_output).squeeze()
+        softmax_output = self.decoder_log_softmax(vocab_size_output).squeeze()
         return h_t, c_t, softmax_output, attn_h_t_
 
 
@@ -543,12 +544,12 @@ def train(args: Dict[str, str]):
                     exit(0)
 
 
-def beam_search(model: NMT, test_data_src: List[List[str]], beam_size: int, max_decoding_time_step: int) -> List[List[Hypothesis]]:
-    was_training = model.training
-
+def beam_search(model: NMT, test_data_src: List[List[str]], beam_size: int, max_decoding_time_step: int) \
+        -> List[List[Hypothesis]]:
     hypotheses = []
     for src_sent in tqdm(test_data_src, desc='Decoding', file=sys.stdout):
-        example_hyps = model.beam_search(src_sent, beam_size=beam_size, max_decoding_time_step=max_decoding_time_step)
+        example_hyps = model.beam_search(src_sent, beam_size=beam_size,
+                                         max_decoding_time_step=max_decoding_time_step)
 
         hypotheses.append(example_hyps)
 
