@@ -200,7 +200,7 @@ class NMT(nn.Module):
         attn = torch.zeros(torch.Size([1])+h_t.shape[1:], device=device)
         # skip the '<s>' in the tgt_sents since the output starts from the word after '<s>'
         for i in range(1, target_output.shape[1]):
-            decoder_input = self.dropout(decoder_input)
+            # decoder_input = self.dropout(decoder_input)
             h_t, c_t, softmax_output, attn = self.decoder_step(src_encodings, decoder_input, h_t, c_t, attn)
             # dim = (batch_size)
             target_word_indices = target_output[:, i].reshape(batch_size)
@@ -236,6 +236,7 @@ class NMT(nn.Module):
         attn_h_t_ = attn_h_t.transpose(0, 1)
         # dim = (1, batch_size, vocab_size)
         vocab_size_output = self.decoder_W_s(attn_h_t_)
+        vocab_size_output = self.dropout(vocab_size_output)
         # dim = (batch_size, vocab_size)
         softmax_output = self.decoder_log_softmax(vocab_size_output).squeeze()
         return h_t, c_t, softmax_output, attn_h_t_
