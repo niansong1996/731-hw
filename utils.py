@@ -3,7 +3,6 @@ from typing import List
 
 import numpy as np
 
-
 def input_transpose(sents, pad_token):
     """
     This function transforms a list of sentences of shape (batch_size, token_num) into 
@@ -53,3 +52,30 @@ def batch_iter(data, batch_size, shuffle=True):
         tgt_sents = [e[1] for e in examples]
 
         yield src_sents, tgt_sents
+
+
+def load_glove(glove_path, vocabs, emb_dim):
+    words = []
+    word2idx = {}
+    glove = {}
+
+    with open(f'{glove_path}/glove.6B.%dd.txt' % emb_dim, 'rb') as f:
+        for l in f:
+            line = l.decode().split()
+            word = line[0]
+            word2idx[word] = len(words)
+            words.append(word)
+            vect = np.array(line[1:]).astype(np.float)
+            glove[word] = vect
+
+    matrix_len = len(vocabs)
+    weights_matrix = np.zeros((matrix_len, emb_dim))
+    words_found = 0
+
+    for i, word in enumerate(vocabs):
+        try:
+            weights_matrix[i] = glove[word]
+            words_found += 1
+        except KeyError:
+            weights_matrix[i] = np.random.random(size=(emb_dim,))
+    return weights_matrix
