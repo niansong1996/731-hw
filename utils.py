@@ -2,6 +2,7 @@ import math
 from typing import List
 
 import numpy as np
+import io
 
 def input_transpose(sents, pad_token):
     """
@@ -53,20 +54,20 @@ def batch_iter(data, batch_size, shuffle=True):
 
         yield src_sents, tgt_sents
 
-
-def load_glove(glove_path, vocabs, emb_dim):
+def load_matrix(fname, vocabs, emb_dim):
     words = []
     word2idx = {}
-    glove = {}
+    word2vec = {}
 
-    with open(f'{glove_path}/glove.6B.%dd.txt' % emb_dim, 'rb') as f:
-        for l in f:
-            line = l.decode().split()
-            word = line[0]
-            word2idx[word] = len(words)
-            words.append(word)
-            vect = np.array(line[1:]).astype(np.float)
-            glove[word] = vect
+    fin = io.open(fname, 'r', encoding='utf-8', newline='\n', errors='ignore')
+    n, d = map(int, fin.readline().split())
+    data = {}
+    for line in fin:
+        tokens = line.rstrip().split(' ')
+        word = tokens[0]
+        word2idx[word] = len(words)
+        words.append(word)
+        word2vec[word] = np.array(tokens[1:]).astype(np.float)
 
     matrix_len = len(vocabs)
     weights_matrix = np.zeros((matrix_len, emb_dim))
@@ -74,7 +75,7 @@ def load_glove(glove_path, vocabs, emb_dim):
 
     for i, word in enumerate(vocabs):
         try:
-            weights_matrix[i] = glove[word]
+            weights_matrix[i] = word2vec[word]
             words_found += 1
         except KeyError:
             weights_matrix[i] = np.random.random(size=(emb_dim,))
