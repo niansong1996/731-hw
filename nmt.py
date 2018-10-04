@@ -59,6 +59,7 @@ import torch.nn.functional as F
 from torch.nn.utils.rnn import pad_sequence
 from torch.nn.utils.rnn import pack_padded_sequence
 from torch.nn.utils.rnn import pad_packed_sequence
+from PyDictionary import PyDictionary
 
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -66,6 +67,7 @@ if torch.cuda.is_available():
     print(torch.cuda.get_device_name(torch.cuda.current_device()))
 
 Hypothesis = namedtuple('Hypothesis', ['value', 'score'])
+decoder_dict = PyDictionary()
 
 
 class NMT(nn.Module):
@@ -80,6 +82,7 @@ class NMT(nn.Module):
         src_vocab_size = len(vocab.src)
         self.tgt_vocab_size = len(vocab.tgt)
         self.DECODER_PAD_IDX = self.vocab.tgt.word2id['<pad>']
+        self.DECODER_UNK_IDX = self.vocab.tgt.word2id['<unk>']
 
         # initialize neural network layers...
         # could add drop-out and bidirectional arguments
@@ -190,7 +193,7 @@ class NMT(nn.Module):
         attn = torch.zeros(h_t.shape, device=device)
         # skip the '<s>' in the tgt_sents since the output starts from the word after '<s>'
         for i in range(1, target_output.shape[1]):
-            h_t, c_t, softmax_output, attn = self.decoder_step(src_encodings, decoder_input, h_t, c_t, attn)
+            h_t, c_t, softmax_output, attn, _ = self.decoder_step(src_encodings, decoder_input, h_t, c_t, attn)
             # dim = (batch_size)
             target_word_indices = target_output[:, i].reshape(batch_size)
             score_delta = self.criterion(softmax_output, target_word_indices)
@@ -218,14 +221,14 @@ class NMT(nn.Module):
         cat_input = torch.cat((attn, decoder_input), 2)
         _, (h_t, c_t) = self.decoder_lstm(cat_input, (h_t, c_t))
         # dim = (batch_size, 1, 2 * hidden_size)
-        attn_h_t = self.global_attention(src_encodings, h_t)
+        attn_h_t, a_t = self.global_attention(src_encodings, h_t)
         # dim = (1, batch_size, 2 * hidden_size)
         attn_h_t_ = attn_h_t.transpose(0, 1)
         # dim = (1, batch_size, vocab_size)
         vocab_size_output = self.decoder_W_s(attn_h_t_)
         # dim = (batch_size, vocab_size)
         softmax_output = self.decoder_log_softmax(vocab_size_output).squeeze()
-        return h_t, c_t, softmax_output, attn_h_t_
+        return h_t, c_t, softmax_output, attn_h_t_, a_t
 
 
     def global_attention(self, h_s: Tensor, h_t: Tensor):
@@ -246,7 +249,7 @@ class NMT(nn.Module):
         h_t_ = h_t.transpose(0, 1)
         # dim = (batch_size, 1, 4 * hidden_size)
         cat_c_h = torch.cat((c_t, h_t_), 2)
-        return self.tanh(self.decoder_W_c(cat_c_h))
+        return self.tanh(self.decoder_W_c(cat_c_h)), a_t
 
     def align_global(self, h_s: Tensor, h_t: Tensor):
         """
@@ -304,7 +307,7 @@ class NMT(nn.Module):
             hypotheses_cand = [(Hypothesis(['<s>'], 0), h_t_0, c_t_0, attn)]
             for i in range(max_decoding_time_step):
                 new_hypotheses_cand = []
-                for (sent, log_likelihood), h_t, c_t, attn in hypotheses_cand:
+                for (sent, log_likelihood), h_t, c_t, attn, a_t in hypotheses_cand:
                     input_word = sent[-1]
                     # skip ended sentence
                     if input_word == '</s>':
@@ -316,12 +319,20 @@ class NMT(nn.Module):
                     # dim = (1 (single_word), 1, embed_size)
                     decoder_input = embeded.transpose(0, 1)
                     # softmax_output.shape = [vocab_size]
-                    h_t, c_t, softmax_output, attn = self.decoder_step(src_encodings, decoder_input, h_t, c_t, attn)
+                    h_t, c_t, softmax_output, attn, a_t = self.dcoder_step(src_encodings, decoder_input, h_t, c_t, attn)
                     # dim = (1, beam_size)
                     top_v, top_i = torch.topk(softmax_output.unsqueeze(0), beam_size, dim=1)
                     for word_idx_tensor in top_i[0]:
                         word_idx = word_idx_tensor.item()
-                        new_hyp = Hypothesis(sent + [self.vocab.tgt.id2word[word_idx]],
+                        tgt_word = self.vocab.tgt.id2word[word_idx]
+                        
+                        # refer to dictionary according to attention if outputing <unk>
+                        if word_idx == self.DECODER_UNK_IDX:
+                            src_word_pos = torch.topk(a_t.squeeze(), 1)
+                            src_word = src_sent[src_word_pos]
+                            tgt_word = decoder_dict.translate(src_word, "de")
+                            
+                        new_hyp = Hypothesis(sent + [tgt_word],
                                              log_likelihood + softmax_output[word_idx])
                         new_hypotheses_cand.append((new_hyp, h_t, c_t, attn))
                 # combine ended sentences with new candidates to form new hypotheses
