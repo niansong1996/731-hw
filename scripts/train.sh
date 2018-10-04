@@ -25,7 +25,7 @@ python nmt.py \
     --valid-niter 2400 \
     --batch-size 64 \
     --hidden-size 256 \
-    --embed-size 256 \
+    --embed-size 300 \
     --uniform-init 0.1 \
     --dropout 0.2 \
     --clip-grad 5.0 \

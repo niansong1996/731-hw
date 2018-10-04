@@ -48,7 +48,7 @@ from docopt import docopt
 from tqdm import tqdm
 from nltk.translate.bleu_score import corpus_bleu, sentence_bleu, SmoothingFunction
 
-from utils import read_corpus, batch_iter
+from utils import read_corpus, batch_iter, load_matrix
 from vocab import Vocab, VocabEntry
 from embed import corpus_to_indices, indices_to_corpus
 
@@ -84,12 +84,15 @@ class NMT(nn.Module):
         # initialize neural network layers...
         # could add drop-out and bidirectional arguments
         # could also change the units to GRU
-        self.encoder_embed = nn.Embedding(src_vocab_size, embed_size, padding_idx=0)
+        src_weights_matrix = load_matrix("data/cc.de.300.vec", self.vocab.src.word2id.keys(), self.embed_size)
+        self.encoder_embed = self.create_emb_layer(self.src_vocab_size, src_weights_matrix)
         self.NUM_LAYER = 2
         self.NUM_DIR = 2
         self.BIDIR = self.NUM_DIR == 2
+
         self.encoder_lstm = nn.LSTM(embed_size, hidden_size, num_layers=self.NUM_LAYER, bidirectional=self.BIDIR)
-        self.decoder_embed = nn.Embedding(self.tgt_vocab_size, embed_size, padding_idx=0)
+        tgt_weights_matrix = load_matrix("data/cc.en.300.vec", self.vocab.tgt.word2id.keys(), self.embed_size)
+        self.decoder_embed = self.create_emb_layer(self.tgt_vocab_size, tgt_weights_matrix)
         decoder_hidden_size = self.NUM_DIR * hidden_size
         self.decoder_lstm = nn.LSTM(decoder_hidden_size + embed_size, decoder_hidden_size, num_layers=self.NUM_LAYER)
         # W_a for attention
@@ -110,6 +113,13 @@ class NMT(nn.Module):
         # initialize the parameters using uniform distribution
         for param in self.parameters():
             nn.init.uniform_(param.data, a=-0.1, b=0.1)
+
+    def create_emb_layer(self, vocab_size, weights_matrix, non_trainable=False):
+        emb_layer = nn.Embedding(vocab_size, self.embed_size)
+        emb_layer.weight = nn.Parameter(torch.from_numpy(weights_matrix).float())
+        if non_trainable:
+            emb_layer.weight.requires_grad = False
+        return emb_layer
 
     def forward(self, src_sents: List[List[str]], tgt_sents: List[List[str]]) -> Tensor:
         """

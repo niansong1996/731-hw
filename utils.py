@@ -2,7 +2,7 @@ import math
 from typing import List
 
 import numpy as np
-
+import io
 
 def input_transpose(sents, pad_token):
     """
@@ -53,3 +53,30 @@ def batch_iter(data, batch_size, shuffle=True):
         tgt_sents = [e[1] for e in examples]
 
         yield src_sents, tgt_sents
+
+def load_matrix(fname, vocabs, emb_dim):
+    words = []
+    word2idx = {}
+    word2vec = {}
+
+    fin = io.open(fname, 'r', encoding='utf-8', newline='\n', errors='ignore')
+    n, d = map(int, fin.readline().split())
+    data = {}
+    for line in fin:
+        tokens = line.rstrip().split(' ')
+        word = tokens[0]
+        word2idx[word] = len(words)
+        words.append(word)
+        word2vec[word] = np.array(tokens[1:]).astype(np.float)
+
+    matrix_len = len(vocabs)
+    weights_matrix = np.zeros((matrix_len, emb_dim))
+    words_found = 0
+
+    for i, word in enumerate(vocabs):
+        try:
+            weights_matrix[i] = word2vec[word]
+            words_found += 1
+        except KeyError:
+            weights_matrix[i] = np.random.random(size=(emb_dim,))
+    return weights_matrix
