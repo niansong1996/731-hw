@@ -91,8 +91,25 @@ class Vocab(object):
         print('initialize target vocabulary ..')
         self.tgt = VocabEntry.from_corpus(tgt_sents, vocab_size, freq_cutoff)
 
+        print('initializing ger-eng dictionary ..')
+        self.decoder_dict = dict()
+        with open('raw_dict.txt', encoding='utf-8') as f:
+            raw_content = f.readlines()
+            for line in raw_content:
+                try:
+                    if line[0] in '\'()#\n&-.0123456789,':
+                        continue
+                    parts = line.strip().split('\t')
+                    ger = parts[0].split(' ')[0]
+                    eng = parts[1].split(' ')[0]
+                    if ger not in self.decoder_dict:
+                        self.decoder_dict[ger] = eng
+                except:
+                    continue
+
     def __repr__(self):
-        return 'Vocab(source %d words, target %d words)' % (len(self.src), len(self.tgt))
+        return 'Vocab(source %d words, target %d words, %d decoder_dict items)' \
+        % (len(self.src), len(self.tgt), len(self.decoder_dict))
 
 
 if __name__ == '__main__':
@@ -105,7 +122,8 @@ if __name__ == '__main__':
     tgt_sents = read_corpus(args['--train-tgt'], source='tgt')
 
     vocab = Vocab(src_sents, tgt_sents, int(args['--size']), int(args['--freq-cutoff']))
-    print('generated vocabulary, source %d words, target %d words' % (len(vocab.src), len(vocab.tgt)))
+    print('generated vocabulary, source %d words, target %d words, decoder_dict %d items' \
+        % (len(vocab.src), len(vocab.tgt), len(vocab.decoder_dict)))
 
     pickle.dump(vocab, open(args['VOCAB_FILE'], 'wb'))
     print('vocabulary saved to %s' % args['VOCAB_FILE'])

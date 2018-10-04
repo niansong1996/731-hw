@@ -202,7 +202,7 @@ class NMT(nn.Module):
         attn = torch.zeros(torch.Size([1])+h_t.shape[1:], device=device)
         # skip the '<s>' in the tgt_sents since the output starts from the word after '<s>'
         for i in range(1, target_output.shape[1]):
-            h_t, c_t, softmax_output, attn = self.decoder_step(src_encodings, decoder_input, h_t, c_t, attn)
+            h_t, c_t, softmax_output, attn, _ = self.decoder_step(src_encodings, decoder_input, h_t, c_t, attn)
             # dim = (batch_size)
             target_word_indices = target_output[:, i].reshape(batch_size)
             score_delta = self.criterion(softmax_output, target_word_indices)
@@ -232,14 +232,14 @@ class NMT(nn.Module):
         cat_input = torch.cat((attn, decoder_input), 2)
         _, (h_t, c_t) = self.decoder_lstm(cat_input, (h_t, c_t))
         # dim = (batch_size, 1, decoder_hidden_size)
-        attn_h_t = self.global_attention(src_encodings, h_t)
+        attn_h_t, a_t = self.global_attention(src_encodings, h_t)
         # dim = (1, batch_size, num_directions * hidden_size + decoder_hidden_size)
         attn_h_t_ = attn_h_t.transpose(0, 1)
         # dim = (1, batch_size, vocab_size)
         vocab_size_output = self.decoder_W_s(attn_h_t_)
         # dim = (batch_size, vocab_size)
         softmax_output = self.decoder_log_softmax(vocab_size_output).squeeze()
-        return h_t, c_t, softmax_output, attn_h_t_
+        return h_t, c_t, softmax_output, attn_h_t_, a_t
 
     def global_attention(self, h_s: Tensor, h_t: Tensor):
         """
@@ -262,7 +262,7 @@ class NMT(nn.Module):
         c_t = torch.bmm(a_t, h_s_)
         # dim = (batch_size, 1, num_directions * hidden_size + decoder_hidden_size)
         cat_c_h = torch.cat((c_t, h_t_top), 2)
-        return self.tanh(self.decoder_W_c(cat_c_h))
+        return self.tanh(self.decoder_W_c(cat_c_h)), a_t
 
     def general_score(self, h_s_: Tensor, h_t_top: Tensor):
         """
@@ -315,12 +315,21 @@ class NMT(nn.Module):
                     # dim = (1 (single_word), 1, embed_size)
                     decoder_input = embeded.transpose(0, 1)
                     # softmax_output.shape = [vocab_size]
-                    h_t, c_t, softmax_output, attn = self.decoder_step(src_encodings, decoder_input, h_t, c_t, attn)
+                    h_t, c_t, softmax_output, attn, a_t = self.decoder_step(src_encodings, decoder_input, h_t, c_t, attn)
                     # dim = (1, beam_size)
                     top_v, top_i = torch.topk(softmax_output.unsqueeze(0), beam_size, dim=1)
                     for word_idx_tensor in top_i[0]:
                         word_idx = word_idx_tensor.item()
-                        new_hyp = Hypothesis(sent + [self.vocab.tgt.id2word[word_idx]],
+                        hyp_word = self.vocab.tgt.id2word[word_idx]
+
+                        # deal with unknown word
+                        if hyp_word == '<unk>':
+                            _, src_word_pos = torch.topk(a_t.squeeze(), 1)
+                            src_word = src_sent[src_word_pos]
+                            # use dictionary if possible, else use src_word
+                            hyp_word = self.vocab.decoder_dict.get(src_word, src_word)
+
+                        new_hyp = Hypothesis(sent + [hyp_word],
                                              log_likelihood + softmax_output[word_idx])
                         new_hypotheses_cand.append((new_hyp, h_t, c_t, attn))
                 # combine ended sentences with new candidates to form new hypotheses
