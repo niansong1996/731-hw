@@ -88,12 +88,10 @@ class NMT(nn.Module):
         self.NUM_LAYER = 2
         self.NUM_DIR = 2
         self.BIDIR = self.NUM_DIR == 2
-        self.encoder_lstm = nn.LSTM(embed_size, hidden_size, num_layers=self.NUM_LAYER, bidirectional=self.BIDIR,
-                                    dropout=self.dropout_rate)
+        self.encoder_lstm = nn.LSTM(embed_size, hidden_size, num_layers=self.NUM_LAYER, bidirectional=self.BIDIR)
         self.decoder_embed = nn.Embedding(self.tgt_vocab_size, embed_size, padding_idx=0)
         decoder_hidden_size = self.NUM_DIR * hidden_size
-        self.decoder_lstm = nn.LSTM(decoder_hidden_size + embed_size, decoder_hidden_size, num_layers=self.NUM_LAYER,
-                                    dropout=self.dropout_rate)
+        self.decoder_lstm = nn.LSTM(decoder_hidden_size + embed_size, decoder_hidden_size, num_layers=self.NUM_LAYER)
         # W_a for attention
         self.decoder_W_a = nn.Linear(self.NUM_DIR * hidden_size, decoder_hidden_size, bias=False)
         # W_c for attention
@@ -150,7 +148,7 @@ class NMT(nn.Module):
         sent_indices = self.vocab.src.words2indices(src_sents)
         sent_indices_padded = pad_sequence([torch.tensor(sent) for sent in sent_indices]).to(device)
         # embed padded seq
-        padded_embedding = self.encoder_embed(sent_indices_padded)
+        padded_embedding = self.dropout(self.encoder_embed(sent_indices_padded))
         packed_seqs = pack_padded_sequence(padded_embedding, sent_length)
 
         # h_n_.shape = c_n_.shape =  [num_layers * num_directions, batch_size, hidden_size]
@@ -202,6 +200,7 @@ class NMT(nn.Module):
         attn = torch.zeros(torch.Size([1])+h_t.shape[1:], device=device)
         # skip the '<s>' in the tgt_sents since the output starts from the word after '<s>'
         for i in range(1, target_output.shape[1]):
+            decoder_input = self.dropout(decoder_input)
             h_t, c_t, softmax_output, attn = self.decoder_step(src_encodings, decoder_input, h_t, c_t, attn)
             # dim = (batch_size)
             target_word_indices = target_output[:, i].reshape(batch_size)
@@ -257,7 +256,7 @@ class NMT(nn.Module):
         score = self.general_score(h_s_, h_t_top)
         # dim = (batch_size, 1, max_src_len)
         a_t = self.decoder_softmax(score)
-        a_t = self.dropout(a_t)
+        # a_t = self.dropout(a_t)
         # dim = (batch_size, 1, num_directions * hidden_size)
         c_t = torch.bmm(a_t, h_s_)
         # dim = (batch_size, 1, num_directions * hidden_size + decoder_hidden_size)
