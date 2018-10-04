@@ -88,17 +88,19 @@ class NMT(nn.Module):
         self.NUM_LAYER = 2
         self.NUM_DIR = 2
         self.BIDIR = self.NUM_DIR == 2
-        self.encoder_lstm = nn.LSTM(embed_size, hidden_size, num_layers=self.NUM_LAYER, bidirectional=self.BIDIR)
+        self.encoder_lstm = nn.LSTM(embed_size, hidden_size, num_layers=self.NUM_LAYER, bidirectional=self.BIDIR,
+                                    dropout=self.dropout_rate)
         self.decoder_embed = nn.Embedding(self.tgt_vocab_size, embed_size, padding_idx=0)
         decoder_hidden_size = self.NUM_DIR * hidden_size
-        self.decoder_lstm = nn.LSTM(decoder_hidden_size + embed_size, decoder_hidden_size, num_layers=self.NUM_LAYER)
+        self.decoder_lstm = nn.LSTM(decoder_hidden_size + embed_size, decoder_hidden_size, num_layers=self.NUM_LAYER,
+                                    dropout=self.dropout_rate)
         # W_a for attention
         self.decoder_W_a = nn.Linear(self.NUM_DIR * hidden_size, decoder_hidden_size, bias=False)
         # W_c for attention
         self.decoder_W_c = nn.Linear(self.NUM_DIR * hidden_size + decoder_hidden_size, decoder_hidden_size, bias=False)
         self.decoder_log_softmax = nn.LogSoftmax(dim=2)
         self.decoder_softmax = nn.Softmax(dim=2)
-        # self.dropout = nn.Dropout(p=self.dropout_rate)
+        self.dropout = nn.Dropout(p=self.dropout_rate)
         self.tanh = nn.Tanh()
 
         weights = torch.ones(self.tgt_vocab_size)
@@ -255,6 +257,7 @@ class NMT(nn.Module):
         score = self.general_score(h_s_, h_t_top)
         # dim = (batch_size, 1, max_src_len)
         a_t = self.decoder_softmax(score)
+        a_t = self.dropout(a_t)
         # dim = (batch_size, 1, num_directions * hidden_size)
         c_t = torch.bmm(a_t, h_s_)
         # dim = (batch_size, 1, num_directions * hidden_size + decoder_hidden_size)
@@ -490,8 +493,12 @@ def train(args: Dict[str, str]):
 
                 print('begin validation ... size %d %d' % (len(dev_data), len(dev_data_src)))
 
+                # set model to evaluate mode
+                model.eval()
                 # compute dev. ppl and bleu
                 dev_ppl = model.evaluate_ppl(dev_data, batch_size=128)   # dev batch size can be a bit larger
+                # set model back to training mode
+                model.train()
                 '''
                 print("dev. ppl %f" % dev_ppl)
                 dev_hyps = []
@@ -567,6 +574,8 @@ def decode(args: Dict[str, str]):
 
     print(f"load model from {args['MODEL_PATH']}")
     model = NMT.load(args['MODEL_PATH'])
+    # set model to evaluate mode
+    model.eval()
 
     hypotheses = beam_search(model, test_data_src,
                              beam_size=int(args['--beam-size']),
