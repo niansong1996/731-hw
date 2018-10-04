@@ -84,8 +84,7 @@ class NMT(nn.Module):
         # initialize neural network layers...
         # could add drop-out and bidirectional arguments
         # could also change the units to GRU
-        src_weights_matrix = load_glove("data", self.vocab.src.word2id.keys(), self.embed_size)
-        self.encoder_embed = self.create_emb_layer(src_vocab_size, src_weights_matrix)
+        self.encoder_embed = nn.Embedding(src_vocab_size, embed_size, padding_idx=0)
         self.NUM_LAYER = 2
         self.NUM_DIR = 2
         self.BIDIR = self.NUM_DIR == 2
