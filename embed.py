@@ -47,12 +47,12 @@ def indices_to_corpus(vocab: vocab.VocabEntry, indices: Tensor) -> List[List[str
 
 if __name__ == '__main__':
     sp = spm.SentencePieceProcessor()
-    sp.Load("en.wiki.bpe.op10000.model")
+    sp.Load("de.wiki.bpe.op10000.model")
 
-    with open("data/train.de-en.en", encoding='utf-8') as f:
+    with open("data/test.de-en.de", encoding='utf-8') as f:
         content = f.readlines()
     
-    with open("data/train_sub.de-en.en", 'w+', encoding='utf-8') as f:
+    with open("data/test_sub.de-en.de", 'w+', encoding='utf-8') as f:
         for line in content:
             subwords = sp.EncodeAsPieces(line)
             subword_sent = ' '.join(subwords)
