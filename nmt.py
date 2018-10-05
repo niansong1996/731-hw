@@ -583,6 +583,9 @@ def decode(args: Dict[str, str]):
 
     print(f"load model from {args['MODEL_PATH']}")
     model = NMT.load(args['MODEL_PATH'])
+
+    vocab = pickle.load(open('data/vocab.bin', 'rb'))
+    model.vocab = vocab
     # set model to evaluate mode
     model.eval()
 
