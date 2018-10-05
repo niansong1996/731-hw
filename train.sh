@@ -9,7 +9,8 @@ test_src="data/test.de-en.de"
 test_tgt="data/test.de-en.en"
 
 work_dir="work_dir"
-
+model_name="model-drop-embed-dict-hidden.bin"
+decode="drop-embed-dict-hidden.txt"
 mkdir -p ${work_dir}
 echo save results to ${work_dir}
 
@@ -21,13 +22,13 @@ python nmt.py \
     --train-tgt ${train_tgt} \
     --dev-src ${dev_src} \
     --dev-tgt ${dev_tgt} \
-    --save-to ${work_dir}/model.bin \
+    --save-to ${work_dir}/${model_name} \
     --save-opt ${work_dir}/optimizer.bin \
     --valid-niter 1200 \
     --lr 0.001 \
     --log-every 50 \
     --batch-size 128 \
-    --hidden-size 256 \
+    --hidden-size 512 \
     --max-epoch 100 \
     --embed-size 300 \
     --uniform-init 0.1 \
@@ -41,8 +42,8 @@ python nmt.py \
     --cuda \
     --beam-size 5 \
     --max-decoding-time-step 100 \
-    ${work_dir}/model.bin \
+    ${work_dir}/${model_name} \
     ${test_src} \
-    ${work_dir}/decode.txt
+    ${work_dir}/${decode}
 
-perl multi-bleu.perl ${test_tgt} < ${work_dir}/decode.txt
+perl multi-bleu.perl ${test_tgt} < ${work_dir}/${decode}
