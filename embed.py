@@ -10,6 +10,7 @@ from torch import Tensor
 import torch
 import numpy as np
 import vocab
+import sentencepiece as spm
 
 # look_up the dict to convert to indices and do the padding
 def corpus_to_indices(vocab: vocab.VocabEntry, corpus: List[List[str]]) -> Tensor:
@@ -43,3 +44,17 @@ def indices_to_corpus(vocab: vocab.VocabEntry, indices: Tensor) -> List[List[str
             sent.append(vocab.id2word[idx])
         corpus.append(sent)
     return corpus
+
+if __name__ == '__main__':
+    sp = spm.SentencePieceProcessor()
+    sp.Load("en.wiki.bpe.op10000.model")
+
+    with open("data/train.de-en.en", encoding='utf-8') as f:
+        content = f.readlines()
+    
+    with open("data/train_sub.de-en.en", 'w+', encoding='utf-8') as f:
+        for line in content:
+            subwords = sp.EncodeAsPieces(line)
+            subword_sent = ' '.join(subwords)
+            f.write(subword_sent)
+

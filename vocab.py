@@ -19,6 +19,7 @@ from collections import Counter
 from itertools import chain
 from docopt import docopt
 import pickle
+import re
 
 from utils import read_corpus, input_transpose
 
@@ -113,6 +114,27 @@ class Vocab(object):
 
 
 if __name__ == '__main__':
+    decoder_dict = dict()
+    with open('raw_dict.txt', encoding='utf-8') as f:
+            raw_content = f.readlines()
+            for line in raw_content:
+                try:
+                    if line[0] in '\'()#\n&-.0123456789,':
+                        continue
+                    parts = line.strip().split('\t')
+                    ger = parts[0].split(' ')[0]
+                    eng = parts[1]
+                    eng = re.sub('\{.+\}|\[.+\]', '', eng)
+                    eng_words = eng.strip().split(' ')
+                    if eng_words[0] == 'to':
+                        eng_words = eng_words[1:]
+                    eng_words = [x.strip() for x in eng_words]
+                    eng = ' '.join(eng_words)
+                    if ger not in decoder_dict:
+                        decoder_dict[ger] = eng
+                except:
+                    continue
+
     args = docopt(__doc__)
 
     print('read in source sentences: %s' % args['--train-src'])
