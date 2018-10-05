@@ -108,7 +108,7 @@ class Vocab(object):
                     if eng_words[0] == 'to':
                         eng_words = eng_words[1:]
                     eng_words = [x.strip() for x in eng_words]
-                    eng = ' '.join(eng_words)
+                    eng = eng_words[0]
                     if ger not in self.decoder_dict:
                         self.decoder_dict[ger] = eng
                 except:
