@@ -67,104 +67,35 @@ if torch.cuda.is_available():
 
 Hypothesis = namedtuple('Hypothesis', ['value', 'score'])
 
+class Encoder(nn.Module):
+    def __init__(self, src_vocab_size, embed_size, hidden_size, num_layer=2, bidirectional=2):
+        super(Encoder, self).__init__()
 
-class NMT(nn.Module):
-
-    def __init__(self, embed_size, hidden_size, vocab, dropout_rate=0.2):
-        super(NMT, self).__init__()
-
+        # init hyper params
+        self.vocab_size = src_vocab_size
         self.embed_size = embed_size
         self.hidden_size = hidden_size
-        self.dropout_rate = dropout_rate
-        self.vocab = vocab
-        src_vocab_size = len(vocab.src)
-        self.tgt_vocab_size = len(vocab.tgt)
-        self.DECODER_PAD_IDX = self.vocab.tgt.word2id['<pad>']
+        self.num_layer = num_layer
+        self.bidirectional = bidirectional
 
-        # initialize neural network layers...
-        # could add drop-out and bidirectional arguments
-        # could also change the units to GRU
-        src_weights_matrix = load_matrix("data/cc.400k.de.300.vec", self.vocab.src.word2id.keys(), self.embed_size)
-        self.encoder_embed = self.create_emb_layer(src_vocab_size, src_weights_matrix)
-        self.NUM_LAYER = 2
-        self.NUM_DIR = 2
-        self.BIDIR = self.NUM_DIR == 2
-
-        self.encoder_lstm = nn.LSTM(embed_size, hidden_size, num_layers=self.NUM_LAYER, bidirectional=self.BIDIR)
-        tgt_weights_matrix = load_matrix("data/cc.400k.en.300.vec", self.vocab.tgt.word2id.keys(), self.embed_size)
-        self.decoder_embed = self.create_emb_layer(self.tgt_vocab_size, tgt_weights_matrix)
-        decoder_hidden_size = self.NUM_DIR * hidden_size
-        self.decoder_lstm = nn.LSTM(decoder_hidden_size + embed_size, decoder_hidden_size, num_layers=self.NUM_LAYER)
-        # W_a for attention
-        self.decoder_W_a = nn.Linear(self.NUM_DIR * hidden_size, decoder_hidden_size, bias=False)
-        # W_c for attention
-        self.decoder_W_c = nn.Linear(self.NUM_DIR * hidden_size + decoder_hidden_size, decoder_hidden_size, bias=False)
-        self.decoder_log_softmax = nn.LogSoftmax(dim=2)
-        self.decoder_softmax = nn.Softmax(dim=2)
-        self.dropout = nn.Dropout(p=self.dropout_rate)
-        self.tanh = nn.Tanh()
-
-        weights = torch.ones(self.tgt_vocab_size)
-        weights[0] = 0
-        self.criterion = nn.NLLLoss(weight=weights)
-        # W_s for attention
-        self.decoder_W_s = nn.Linear(decoder_hidden_size, self.tgt_vocab_size, bias=False)
+        # init different layers
+        self.embed = nn.Embedding(vocab_size, self.embed_size)
+        self.encoder_lstm = nn.LSTM(embed_size, hidden_size, num_layers, bidirectional)
 
         # initialize the parameters using uniform distribution
         for param in self.parameters():
             nn.init.uniform_(param.data, a=-0.1, b=0.1)
 
-    def create_emb_layer(self, vocab_size, weights_matrix, non_trainable=False):
-        emb_layer = nn.Embedding(vocab_size, self.embed_size)
-        emb_layer.weight = nn.Parameter(torch.from_numpy(weights_matrix).float())
-        if non_trainable:
-            emb_layer.weight.requires_grad = False
-        return emb_layer
-
-    def forward(self, src_sents: List[List[str]], tgt_sents: List[List[str]]) -> Tensor:
-        """
-        take a mini-batch of source and target sentences, compute the log-likelihood of
-        target sentences.
-
-        Args:
-            src_sents: list of source sentence tokens
-            tgt_sents: list of target sentence tokens, wrapped by `<s>` and `</s>`
-
-        Returns:
-            scores: a variable/tensor of shape (batch_size, ) representing the
-                log-likelihood of generating the gold-standard target sentence for
-                each example in the input batch
-        """
-        src_encodings, decoder_init_state = self.encode(src_sents)
-        scores = self.decode(src_encodings, decoder_init_state, tgt_sents)
-
-        return scores
-
-    def encode(self, src_sents: List[List[str]]) -> Tuple[Tensor, Any]:
-        """
-        Use a GRU/LSTM to encode source sentences into hidden states
-
-        Args:
-            src_sents: list of source sentence tokens
-
-        Returns:
-            src_encodings: hidden states of tokens in source sentences, this could be a variable
-                with shape (source_sentence_length, batch_size, encoding_dim), or in other formats
-            decoder_init_state: decoder GRU/LSTM's initial state, computed from source encodings,
-                with dim (1, batch_size, encoding_dim)
-        """
-        # first the the vecotrized representation of the batch; dim = (batch_size, max_src_len)
-        sent_length = torch.tensor([len(sent) for sent in src_sents]).to(device)
-        sent_indices = self.vocab.src.words2indices(src_sents)
-        sent_indices_padded = pad_sequence([torch.tensor(sent) for sent in sent_indices]).to(device)
-        # embed padded seq
-        padded_embedding = self.dropout(self.encoder_embed(sent_indices_padded))
+    
+    def forward(self, src_encoding):
+        # pack the padded src sent to sent embedding
+        embedding = self.encoder_embed(src_encoding)
         packed_seqs = pack_padded_sequence(padded_embedding, sent_length)
 
         # h_n_.shape = c_n_.shape =  [num_layers * num_directions, batch_size, hidden_size]
-        output, (h_n_, c_n_) = self.encoder_lstm(packed_seqs)
-        h_n_ = h_n_.view(self.NUM_LAYER, 2, -1, self.hidden_size)
-        c_n_ = c_n_.view(self.NUM_LAYER, 2, -1, self.hidden_size)
+        output, (h_n_, c_n_) = self.lstm(packed_seqs)
+        h_n_ = h_n_.view(self.num_layer, 2, -1, self.hidden_size)
+        c_n_ = c_n_.view(self.num_layer, 2, -1, self.hidden_size)
 
         # h_n.shape = c_n.shape =  [num_layers, batch_size, num_directions * hidden_size]
         h_n = torch.cat((h_n_[:][0], h_n_[:][1]), dim=-1)
@@ -172,30 +103,44 @@ class NMT(nn.Module):
 
         # unpack the source encodings, src_encodings.shape = [max_src_len, batch_size, num_directions * hidden_size]
         src_encodings = pad_packed_sequence(output)[0]
+
         return src_encodings, (h_n, c_n)
 
-    def decode(self, src_encodings: Tensor, decoder_init_state: Tensor, tgt_sents: List[List[str]]) -> Tensor:
-        """
-        Given source encodings, compute the log-likelihood of predicting the gold-standard target
-        sentence tokens
+    
+class Decoder(nn.Module):
+    def __init__(self, tgt_vocab_size, embed_size, hidden_size, num_layer=2):
+        super(Decoder, self).__init__()
 
-        Args:
-            src_encodings: hidden states of tokens in source sentences of shape
-            [max_src_len, batch_size, num_directions * hidden_size]
-            decoder_init_state: decoder GRU/LSTM's initial state
-            tgt_sents: list of gold-standard target sentences, wrapped by `<s>` and `</s>`
+        # init hyper-params
+        self.vocab_size = tgt_vocab_size
+        self.embed_size = embed_size
+        self.hidden_size = hidden_size
+        self.num_layer = num_layer
 
-        Returns:
-            scores: could be a variable of shape (batch_size, ) representing the
-                log-likelihood of generating the gold-standard target sentence for
-                each example in the input batch
-                (extra note) we need this to be in the shape of (batch_size, output_vocab_size)
-                for beam search
-        """
-        batch_size = len(tgt_sents)
-        input = corpus_to_indices(self.vocab.tgt, [["<s>"] for _ in range(batch_size)]).to(device)
+        # init different layers
+        self.lstm = nn.LSTM(decoder_hidden_size + embed_size, decoder_hidden_size, num_layers=self.NUM_LAYER)
+        # W_a for attention
+        self.W_a = nn.Linear(self.NUM_DIR * hidden_size, decoder_hidden_size, bias=False)
+        # W_c for attention
+        self.W_c = nn.Linear(self.NUM_DIR * hidden_size + decoder_hidden_size, decoder_hidden_size, bias=False)
+        # W_s for attention
+        self.decoder_W_s = nn.Linear(decoder_hidden_size, self.tgt_vocab_size, bias=False)
+        self.log_softmax = nn.LogSoftmax(dim=2)
+        self.softmax = nn.Softmax(dim=2)
+        self.dropout = nn.Dropout(p=self.dropout_rate)
+        self.tanh = nn.Tanh()
+
+        # initialize the parameters using uniform distribution
+        for param in self.parameters():
+            nn.init.uniform_(param.data, a=-0.1, b=0.1)
+
+
+    def forward(self, src_encoding, init_state)
+        # dummy input
+        dmy_input = corpus_to_indices(self.vocab.tgt, [["<s>"] for _ in range(batch_size)]).to(device)
+
         # dim = (batch_size, 1 (sent_len), embed_size)
-        embedded = self.decoder_embed(input)
+        embedded = self.decoder_embed(dmy_input)
         # dim = (1 (single_word), batch_size, embed_size)
         decoder_input = embedded.transpose(0, 1)
         scores = torch.zeros(batch_size, device=device)
@@ -224,19 +169,9 @@ class NMT(nn.Module):
             embedded = self.decoder_embed(target_word_indices.view(-1, 1))
             decoder_input = embedded.transpose(0, 1)
         return scores
-
+        
+        
     def decoder_step(self, src_encodings: Tensor, decoder_input: Tensor, h_t: Tensor, c_t: Tensor, attn: Tensor):
-        """
-        Perform one decoder step
-
-        :param src_encodings:  the output features (h_t) from the last layer in source sentences of shape
-            [max_src_len, batch_size, num_directions * hidden_size]
-        :param decoder_input: (1, batch_size, embed_size)
-        :param h_t: [num_layers, batch_size, num_directions * hidden_size]
-        :param c_t: [num_layers, batch_size, num_directions * hidden_size]
-        :param attn: [1, batch_size, num_directions * hidden_size]
-        :return: new h_t, c_t, softmax_output with dim (batch_size, vocab_size), attn (1, batch_size, 2 * hidden_size)
-        """
         # dim = (1, batch_size,  num_directions * hidden_size + embed_size)
         cat_input = torch.cat((attn, decoder_input), 2)
         _, (h_t, c_t) = self.decoder_lstm(cat_input, (h_t, c_t))
@@ -273,6 +208,7 @@ class NMT(nn.Module):
         cat_c_h = torch.cat((c_t, h_t_top), 2)
         return self.tanh(self.decoder_W_c(cat_c_h)), a_t
 
+
     def general_score(self, h_s_: Tensor, h_t_top: Tensor):
         """
         Calculate general attention score
@@ -286,6 +222,40 @@ class NMT(nn.Module):
         # dim = (batch_size, num_directions * hidden_size, max_src_len)
         W_a_h_s = W_a_h_s.transpose(1, 2)
         return torch.bmm(h_t_top, W_a_h_s)
+
+class NMT(nn.Module):
+
+    def __init__(self, embed_size, hidden_size, vocab):
+        super(NMT, self).__init__()
+
+        self.vocab = vocab
+        src_vocab_size = len(vocab.src)
+        tgt_vocab_size = len(vocab.tgt)
+        self.DECODER_PAD_IDX = self.vocab.tgt.word2id['<pad>']
+
+        # initialize neural network layers...
+        # could add drop-out and bidirectional arguments
+        # could also change the units to GRU
+        self.NUM_LAYER = 2
+        self.NUM_DIR = 2
+        self.BIDIR = self.NUM_DIR == 2
+
+        decoder_hidden_size = self.NUM_DIR * hidden_size
+
+
+    def forward(self, src_sents: List[List[str]], tgt_sents: List[List[str]]) -> Tensor:
+        src_encodings, decoder_init_state = self.encode(src_sents)
+        scores = self.decode(src_encodings, decoder_init_state, tgt_sents)
+
+        return scores
+
+    def encode(self, src_sents: List[List[str]]) -> Tuple[Tensor, Any]:
+        # first the the vecotrized representation of the batch; dim = (batch_size, max_src_len)
+        sent_length = torch.tensor([len(sent) for sent in src_sents]).to(device)
+        sent_indices = self.vocab.src.words2indices(src_sents)
+        sent_indices_padded = pad_sequence([torch.tensor(sent) for sent in sent_indices]).to(device)
+        # embed padded seq
+
 
     def beam_search(self, src_sent: List[str], beam_size: int=5, max_decoding_time_step: int=70) -> List[Hypothesis]:
         """
