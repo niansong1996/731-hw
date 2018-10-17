@@ -1,0 +1,39 @@
+{
+    "version": "0.2.0",
+    "configurations": 
+    [
+
+        {
+            "name": "Python: Current File (Integrated Terminal)",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Run NMT Training",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/nmt.py",
+            "console": "integratedTerminal",
+            "args": [
+                "train",
+                "--cuda",
+                "--vocab=data/vocab.bin",
+                "--train-src=data/train.de-en.de.wmixerprep",
+                "--train-tgt=data/train.de-en.en.wmixerprep",
+                "--dev-src=data/valid.de-en.de",
+                "--dev-tgt=data/valid.de-en.en",
+                "--save-to=work_dir/model.bin",
+                "--valid-niter=2400",
+                "--batch-size=64",
+                "--hidden-size=256",
+                "--embed-size=128",
+                "--uniform-init=0.1",
+                "--dropout=0.2",
+                "--clip-grad=5.0",
+                "--lr-decay=0.5"
+            ]
+        }
+    ]
+}
