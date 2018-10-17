@@ -114,3 +114,6 @@ venv.bak/
 
 # model
 work_dir/
+
+# multi-lingual data
+multilingual/data
