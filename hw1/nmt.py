@@ -196,6 +196,7 @@ class NMT(nn.Module):
         input = corpus_to_indices(self.vocab.tgt, [["<s>"] for _ in range(batch_size)]).to(device)
         # dim = (batch_size, 1 (sent_len), embed_size)
         embedded = self.decoder_embed(input)
+        embedded = F.relu(embedded)
         # dim = (1 (single_word), batch_size, embed_size)
         decoder_input = embedded.transpose(0, 1)
         scores = torch.zeros(batch_size, device=device)
