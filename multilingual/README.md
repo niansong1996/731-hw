@@ -1,31 +1,27 @@
-In this project, you are going to implement a neural machine translation model, trained and tested on the IWSLT 2014 data set. To help you start, we have prepared some template (pseudo-) code in this repo. Note that you are not required to use this template code, and it may not be the best implementation, however you may find this a good reference.
+You will have access to TED talk parallel data for 3 low-resource languages: Galician (gl), Azerbaijani (az), and Belarusian (be), derived from ted_talks.tar.gz from the following repository:
+> https://github.com/neulab/word-embeddings-for-nmt
+Using, and improving upon, your implementation from the first assignment, please attempt to get the best accuracy possible on the low-resource language pairs. This can be done both through architectural improvements, and through semi-supervised learning or cross-lingual transfer from the data sources listed below.
 
-## File Structure
+The first data source is TED data in other languages. The TED talks corpus contains data for a bunch of other languages (~60). We have prepared this data in high-resource languages, Portuguese (pt), Turkish (tr), and Russian (ru), that pair with each of the low resource languages (gl with pt, az eith tr, and ge with ru). These languages are helper languages that can improve the results on the low-resource ones as they are highly related. You can use this data for training, or use any of the other training data in ted_talks.tar.gz.
 
-* `nmt.py`: contains the neural machine translation model and training/testing code.
-* `vocab.py`: a script that extracts vocabulary from training data
-* `util.py`: contains utility/helper functions
+In addition, we provide monolingual data (tokenized Wikipedia) that you can use in semi-supervised learning methods.
 
-## Dataset
+Out baseline model gives the following BLEU scores when trained on either the TED data in the target language, or the TED data in the target+related language, which you should aim to signficantly improve upon:
 
-The IWSLT 2014 dataset has 150K German-English training sentences. The `data/` folder contains a copy of the public release of the dataset. Files with suffix `*.wmixerprep` are pre-processed versions of the dataset from Ranzato et al., 2015, with long sentences chopped and rared words replaced by a special `<unk>` token. You could use the pre-processed training files for training/developing (or come up with your own pre-processing strategy), but for testing you have to use the **original** version of testing files, ie., `test.de-en.(de|en)`.
+az-en: 3.0
+az-en (with tr): 7.1
 
-## Environment
+be-en: 5.4
+be-en (with ru): 11.6
 
-The (pseudo-) template code is written in Python 3.6 using some supporting third-party libraries. We provided a conda environment to install Python 3.6 with required libraries. Simply run
+gl-en: 16.5
+gl-en (with pt): 22.0
 
-```[bash]
-conda env create -f environment.yml
-```
+Note that we have provided a script, get_wikipedia.sh, that can be used to download wikipedia and process more languages which might be useful. To use, just clone the following repos in your working directory:
 
-## Usage
+> https://github.com/moses-smt/mosesdecoder
+> https://github.com/attardi/wikiextractor
 
-First, we extract a vocabulary file from the training data using the command:
+And use the following command: sh get_wikipedia.sh <language> where <language> is a two-letter language code. For example: sh get_wikipedia.sh gl will download and process the Galician wikipedia.
 
-```[bash]
-python vocab.py --train-src=data/train.de-en.de.wmixerprep --train-tgt=data/train.de-en.en.wmixerprep data/vocab.bin
-```
-
-This generates a vocabulary file `data/vocab.bin`. The script also has options to control the cutoff frequency and the size of generated vocabulary, which you may play with.
-
-For training and decoding/testing, you may refer to `data/train.sh`. Note that in the training script we set the values of some hyper parameters. They are not guaranteed to be the best hyper-parameters, and you are free to play with them. After training and decoding, we call the official evaluation script `multi-bleu.perl` to compute the corpus-level BLEU score of the decoding results against the gold-standard.
+We also provide the script we used to extract the parallel data from the files in ted_talks.tar.gz, extract_ted_talks.py, which could be useful in extracting data for other languages.
