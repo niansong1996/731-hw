@@ -68,7 +68,7 @@ if torch.cuda.is_available():
 Hypothesis = namedtuple('Hypothesis', ['value', 'score'])
 
 class Encoder(nn.Module):
-    def __init__(self, src_vocab_size, embed_size, hidden_size, num_layer=2, bidirectional=2):
+    def __init__(self, src_vocab_size, embed_size, hidden_size, num_layer=2, bidirectional=True):
         super(Encoder, self).__init__()
 
         # init hyper params
@@ -79,8 +79,8 @@ class Encoder(nn.Module):
         self.bidirectional = bidirectional
 
         # init different layers
-        self.embed = nn.Embedding(vocab_size, self.embed_size)
-        self.encoder_lstm = nn.LSTM(embed_size, hidden_size, num_layers, bidirectional)
+        self.embed = nn.Embedding(self.vocab_size, self.embed_size)
+        self.encoder_lstm = nn.LSTM(self.embed_size, self.hidden_size, self.num_layers, self.bidirectional)
 
         # initialize the parameters using uniform distribution
         for param in self.parameters():
@@ -108,7 +108,7 @@ class Encoder(nn.Module):
 
     
 class Decoder(nn.Module):
-    def __init__(self, tgt_vocab_size, embed_size, hidden_size, num_layer=2):
+    def __init__(self, tgt_vocab_size, embed_size, hidden_size, encoder_bi=True, num_layer=2, dropout_rate=0.2):
         super(Decoder, self).__init__()
 
         # init hyper-params
@@ -116,15 +116,17 @@ class Decoder(nn.Module):
         self.embed_size = embed_size
         self.hidden_size = hidden_size
         self.num_layer = num_layer
+        self.dropout_rate = dropout_rate
 
         # init different layers
-        self.lstm = nn.LSTM(decoder_hidden_size + embed_size, decoder_hidden_size, num_layers=self.NUM_LAYER)
+        self.embed = nn.Embedding(self.vocab_size, self.embed_size)
+        self.lstm = nn.LSTM(decoder_hidden_size + embed_size, decoder_hidden_size, num_layers=self.num_layer)
         # W_a for attention
         self.W_a = nn.Linear(self.NUM_DIR * hidden_size, decoder_hidden_size, bias=False)
         # W_c for attention
         self.W_c = nn.Linear(self.NUM_DIR * hidden_size + decoder_hidden_size, decoder_hidden_size, bias=False)
         # W_s for attention
-        self.decoder_W_s = nn.Linear(decoder_hidden_size, self.tgt_vocab_size, bias=False)
+        self.W_s = nn.Linear(decoder_hidden_size, self.tgt_vocab_size, bias=False)
         self.log_softmax = nn.LogSoftmax(dim=2)
         self.softmax = nn.Softmax(dim=2)
         self.dropout = nn.Dropout(p=self.dropout_rate)
