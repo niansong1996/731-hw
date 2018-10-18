@@ -23,15 +23,35 @@ def unpack_weight(self, weight, input_size, hidden_size):
 
     return W_x, W_h, b_x, b_h 
 
-class FLSTMCell(nn.Module):
-    def __init__(self, input_size, hidden_size):
-        super(FLSTM, self).__init__()
+class Stack_FLSTMCell():
+    def __init__(self, input_size, hidden_size, num_layers=1):
+        # init the size constants
+        self.input_size = input_size
+        self.hidden_size = hidden_size
+        self.num_layers = num_layers
 
+        # init the cell
+        self.cell = FLSTMCell(self.input_size, self.hidden_size)
+
+
+    def forward(self, X, h_0, c_0, weights):
+        pass
+
+class FLSTMCell():
+    def __init__(self, input_size, hidden_size, weights):
+        # init the size constants
         self.input_size = input_size
         self.hidden_size = hidden_size
 
-    
-    def forward(self, X, h_0, c_0, weights):
+        # init the weights BY REFRENCE
+        W_x, W_h, b_x, b_h = weights
+        self.W_x = W_x
+        self.W_h = W_h
+        self.b_x = b_x
+        self.b_h = b_h
+
+
+    def __call__(self, X, h_0, c_0):
         """
         perform a step in LSTM
 
@@ -46,13 +66,12 @@ class FLSTMCell(nn.Module):
         input_size = X.shape[1]
         hidden_size = h_0.shape[1]
 
-        W_x, W_h, b_x, b_h = weights
 
         # (4*hidden_size, batch_size)  =  (4*hidden_size, input_size) * (batch_size, input_size)^{T}
-        W_x_X = torch.mm(W_x, X.transpose(0 ,1))
-        W_h_H = torch.mm(W_h, h_0.transpose(0,1))
+        W_x_X = torch.mm(self.W_x, X.transpose(0 ,1))
+        W_h_H = torch.mm(self.W_h, h_0.transpose(0,1))
         W_x_h = W_x_X + W_h_H
-        W_x_h_b = W_x_h + b_x + b_h
+        W_x_h_b = W_x_h + self.b_x +self.b_h
 
         # (batch_size, hidden_size)
         i = torch.sigmoid(W_x_h_b[0:hidden_size]).transpose(0,1)
@@ -76,7 +95,6 @@ h_0 = torch.randn((batch_size, hidden_size))
 X = torch.randn((batch_size, input_size))
 
 lstm = nn.LSTMCell(input_size, hidden_size)
-flstm = FLSTM(input_size, hidden_size)
 
 weights = []
 for param in lstm.parameters():
@@ -84,8 +102,10 @@ for param in lstm.parameters():
 weights[2] = weights[2].unsqueeze(1)
 weights[3] = weights[3].unsqueeze(1)
 
+flstm = FLSTMCell(input_size, hidden_size, weights)
+
 lstm_output = lstm(X, (h_0, c_0))
-flstm_output = flstm(X, h_0, c_0, weights)
+flstm_output = flstm(X, h_0, c_0)
 
 print(lstm_output)
 print(flstm_output)
