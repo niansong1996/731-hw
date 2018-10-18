@@ -45,6 +45,7 @@ class Stack_FLSTMCell:
     def __call__(self, X: Tensor, h_0: List[Tensor], c_0: List[Tensor]) \
             -> (List[Tensor], List[Tensor]):
         """
+        Performs a step of stacked LSTM
 
         :param X: input
         :param h_0: a list of hidden layers of size num of layers, with the first layer at 0
@@ -71,7 +72,7 @@ class Stack_FLSTMCell:
 
         assert(len(h_1) == self.num_layers)
         assert(len(c_1) == self.num_layers) 
-        
+
         return h_1, c_1
 
 
@@ -90,14 +91,14 @@ class FLSTMCell:
 
     def __call__(self, X: Tensor, h_0: Tensor, c_0: Tensor) -> (Tensor, Tensor):
         """
-        perform a step in LSTM
+        Performs a step of LSTM
 
         :param X: input embedding dim = (batch_size, embed_size) 
         :param c_0: cell state (batch_size, hidden_size)
         :param h_0: hidden state (batch_size, hidden_size)
         :param weights: W_x, W_h, b_x, b_h
 
-        :return: (h_1, c_1) next cell state and hidden state
+        :return: (h_1, c_1) next cell state and hidden state dim = (batch_size, hidden_size)
         """
         batch_size = X.shape[0]
         hidden_size = h_0.shape[1]
