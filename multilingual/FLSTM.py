@@ -39,7 +39,7 @@ class Stack_FLSTMCell():
             self.cells.append(cell)
 
 
-    def forward(self, X, h_0, c_0):
+    def __call__(self, X, h_0, c_0):
         assert(len(h_0) == self.num_layers)
         assert(len(c_0) == self.num_layers)
 
@@ -60,7 +60,7 @@ class Stack_FLSTMCell():
 
         assert(len(h_1) == self.num_layers)
         assert(len(c_1) == self.num_layers) 
-        
+
         return h_1, c_1
 
             
@@ -88,7 +88,7 @@ class FLSTMCell():
         :param h_0: hidden state (batch_size, hidden_size)
         :param weights: W_x, W_h, b_x, b_h
 
-        :return: (h_1, c_1) next cell state and hidden state
+        :return: (h_1, c_1) next cell state and hidden state dim = (batch_size, hidden_size)
         """
         batch_size = X.shape[0]
         input_size = X.shape[1]
