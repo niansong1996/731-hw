@@ -4,8 +4,8 @@ import torch.tensor as Tensor
 import torch.nn.functional as F
 
 LANG_INDICES = { 'en' : 0, 
-                 'gl' : 1, 'pt' : 4
-                 'az' : 2, 'tr' : 5
+                 'gl' : 1, 'pt' : 4,
+                 'az' : 2, 'tr' : 5,
                  'be' : 3, 'ru' : 6 }
 
 
@@ -56,7 +56,7 @@ class CPG(nn.Module):
         return theta
 
 
-    def get_embedding(self, lang: int)
+    def get_embedding(self, lang: int):
         # get the word embedding for the language
         word_embedding =  self.word_embeddings[lang]
 
