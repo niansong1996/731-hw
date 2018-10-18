@@ -24,18 +24,46 @@ def unpack_weight(self, weight, input_size, hidden_size):
     return W_x, W_h, b_x, b_h 
 
 class Stack_FLSTMCell():
-    def __init__(self, input_size, hidden_size, num_layers=1):
+    def __init__(self, input_size, hidden_size, weights, num_layers=1):
+        assert(len(weights) == num_layers)
+
         # init the size constants
         self.input_size = input_size
         self.hidden_size = hidden_size
         self.num_layers = num_layers
 
-        # init the cell
-        self.cell = FLSTMCell(self.input_size, self.hidden_size)
+        # init the cells for each layer with weight references
+        self.cells = []
+        for i in range(num_layers):
+            cell = FLSTMCell(self.input_size, self.hidden_size, weights[i])
+            self.cells.append(cell)
 
 
-    def forward(self, X, h_0, c_0, weights):
-        pass
+    def forward(self, X, h_0, c_0):
+        assert(len(h_0) == self.num_layers)
+        assert(len(c_0) == self.num_layers)
+
+        # input and output for each layer
+        input_x = X
+        h_1 = []
+        c_1 = []
+
+        # do a forward pass sequentially with each layer
+        for i in range(self.num_layers):
+            cell = self.cells[i]
+            h, c = cell(input_x, h_0[i], c_0[i])
+
+            # get the results
+            input_x = h
+            h_1.append(h)
+            c_1.append(c)
+
+        assert(len(h_1) == self.num_layers)
+        assert(len(c_1) == self.num_layers) 
+        
+        return h_1, c_1
+
+            
 
 class FLSTMCell():
     def __init__(self, input_size, hidden_size, weights):
