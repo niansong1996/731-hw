@@ -48,6 +48,8 @@ from docopt import docopt
 from tqdm import tqdm
 from nltk.translate.bleu_score import corpus_bleu, sentence_bleu, SmoothingFunction
 
+from CPG import CPG
+from Decoder import Decoder
 from utils import read_corpus, batch_iter, load_matrix
 from vocab import Vocab, VocabEntry
 from embed import corpus_to_indices, indices_to_corpus
@@ -86,6 +88,7 @@ class NMT(nn.Module):
         self.BIDIR = self.NUM_DIR == 2
 
         decoder_hidden_size = self.NUM_DIR * hidden_size
+        self.cpg = CPG()
 
     def forward(self, src_sents: List[List[str]], tgt_sents: List[List[str]]) -> Tensor:
         src_encodings, decoder_init_state = self.encode(src_sents)
@@ -118,11 +121,9 @@ class NMT(nn.Module):
             # dim = (1, 1, embed_size)
             src_encodings, (h_n, c_n) = self.encode([src_sent])
             # dim = (1, 1, embed_size)
-            h_t_0 = h_n
-            c_t_0 = c_n
-            attn = torch.zeros(torch.Size([1]) + h_t_0.shape[1:], device=device)
+            h_t_0, c_t_0, attn_0 = Decoder.init_decoder_step_input(device, src_encodings)
             # candidates for best hypotheses
-            hypotheses_cand = [(Hypothesis(['<s>'], 0), h_t_0, c_t_0, attn)]
+            hypotheses_cand = [(Hypothesis(['<s>'], 0), h_t_0, c_t_0, attn_0)]
             for i in range(max_decoding_time_step):
                 new_hypotheses_cand = []
                 for (sent, log_likelihood), h_t, c_t, attn in hypotheses_cand:

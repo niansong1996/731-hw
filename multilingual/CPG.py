@@ -22,8 +22,7 @@ class CPG(nn.Module):
         super(CPG, self).__init__()
 
         # init size constants
-        self.shapes = shapes
-        self.group_num = len(shapes)
+
         self.lang_embed_size = size_dict['lang_embed_size']
         self.word_embed_size = size_dict['word_embed_size']
         self.num_lang = size_dict['num_lang']
@@ -31,21 +30,10 @@ class CPG(nn.Module):
         self.low_rank = size_dict['low_rank']
         self.lang_encode = torch.eyes(self.num_lang)
 
-        # calculate the parameters groups sizes and numbers
-
-        # a list of param number in each group [[1024, 1024], [5120, 2560, 2560] ...]umber for each group
-        self.group_param_num = [] 
-        # a list of TOTAL param number in each group [2048, 10240, ...]
-        self.group_param_sizes = []
-
-        for group in self.shapes:
-            self.group_param_num.append(len(group))
-            group_param_size = 0
-            for shape in group:
-                group_param_size += reduce(lambda product, dim: product * dim, shape, 1)
-
-            self.group_param_sizes.append(group_param_size)
-
+        self.shapes = shapes
+        self.group_num, self.group_param_num, self.group_param_sizes = \
+            self.get_param_meta(self.lang_embed_size, self.low_rank, shapes)
+        
         # init every layer of CPG for different groups
         self.L = nn.Linear(self.num_lang, self.lang_embed_size, bias=False)
         self.Ps = nn.ModuleList([nn.Linear(self.lang_embed_size, self.low_rank) for _ in range(self.group_num)])
@@ -59,7 +47,26 @@ class CPG(nn.Module):
         for param in self.parameters():
             nn.init.uniform_(param.data, a=-0.1, b=0.1)
 
-    def get_params(self, lang: int) -> List[List[Tensor]]:
+    @staticmethod
+    def get_param_meta(lang_embed_size, low_rank, shapes: List[List[tuple]]):
+        # calculate the parameters groups sizes and numbers
+        group_num = len(shapes)
+        # a list of param number in each group [[1024, 1024], [5120, 2560, 2560] ...]umber for each group
+        group_param_num = []
+        # a list of TOTAL param number in each group [2048, 10240, ...]
+        group_param_sizes = []
+
+        for group in shapes:
+            group_param_num.append(len(group))
+            group_param_size = 0
+            for shape in group:
+                group_param_size += reduce(lambda product, dim: product * dim, shape, 1)
+
+            group_param_sizes.append(group_param_size)
+
+        return group_num, group_param_num, group_param_sizes
+
+    def get_params(self, lang: List[int]) -> List[List[Tensor]]:
         """
         get the grouped parameters required by the model
 
@@ -69,17 +76,17 @@ class CPG(nn.Module):
         Return:
             grouped_params: a list of groups of parameters in tensor form
         """
-        # get language embedding for a specific language
-        ell = self.L(self.lang_encode[lang])
+        assert(len(lang) == self.group_num)
 
         # generate parameters for this language by group
         params = []
         for j in range(self.group_num):
+            ell_j = self.L(self.lang_encode[lang[j]])
             P_j = self.Ps[j]
             W_j = self.Ws[j]
-            P_j_ell = P_j(ell)
-            W_j_P_j_ell = W_j(P_j_ell)
-            params.append(W_j_P_j_ell)
+            P_j_ell_j = P_j(ell_j)
+            W_j_P_j_ell_j = W_j(P_j_ell_j)
+            params.append(W_j_P_j_ell_j)
 
         # separate the params inside the group and reshape to desired shape
         grouped_params = []
@@ -95,7 +102,7 @@ class CPG(nn.Module):
 
     def get_embedding(self, lang: int):
         # get the word embedding for the language
-        word_embedding =  self.word_embeddings[lang]
+        word_embedding = self.word_embeddings[lang]
 
         return word_embedding
 
