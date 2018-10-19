@@ -4,7 +4,6 @@ import torch.nn as nn
 import torch.tensor as Tensor
 import torch.nn.functional as F
 
-
 from utils import assert_tensor_size
 from FLSTM import Stack_FLSTMCell
 
@@ -12,26 +11,23 @@ from config import device
 
 
 class Decoder:
-    def __init__(self, dropout_rate, embedding: nn.Embedding, decoder_pad_idx,
-                 Ws: Tensor, Wc: Tensor, Wa: Tensor, batch_size, embed_size, hidden_size, num_layers,
-                 LSTM_cell_weights):
-        self.DECODER_PAD_IDX = decoder_pad_idx
-        self.log_softmax = nn.LogSoftmax(dim=1)
-        self.softmax = nn.Softmax(dim=2)
-        self.criterion = nn.NLLLoss()
-        self.dropout_rate = dropout_rate
-        self.dropout = nn.Dropout(p=self.dropout_rate)
+    def __init__(self, batch_size, embed_size, hidden_size, num_layers,
+                 embedding: nn.Embedding, lstm_weights, attn_weights, dropout_rate=0, decoder_pad_idx=0):
         self.embedding = embedding
-        self.Ws = Ws
-        self.Wc = Wc
-        self.Wa = Wa
-        self.tanh = nn.Tanh()
         self.dec_embed_size = embed_size
         self.dec_hidden_size = hidden_size
         self.num_layers = num_layers
         self.batch_size = batch_size
-        self.lstm_cell = Stack_FLSTMCell(input_size=embed_size, hidden_size=hidden_size, weights=LSTM_cell_weights,
+        self.lstm_cell = Stack_FLSTMCell(input_size=embed_size, hidden_size=hidden_size, weights=lstm_weights,
                                          num_layers=num_layers)
+        self.Wa, self.Wc, self.Ws = attn_weights
+        self.log_softmax = nn.LogSoftmax(dim=1)
+        self.softmax = nn.Softmax(dim=2)
+        self.criterion = nn.NLLLoss()
+        self.tanh = nn.Tanh()
+        self.dropout_rate = dropout_rate
+        self.dropout = nn.Dropout(p=self.dropout_rate)
+        self.DECODER_PAD_IDX = decoder_pad_idx
 
     @staticmethod
     def init_decoder_step_input(d: torch.device, decoder_init_state: Tensor) -> (Tensor, Tensor, Tensor):
@@ -58,7 +54,7 @@ class Decoder:
 
         Args:
             src_encodings: hidden states of tokens in source sentences of shape
-            [src_len, batch_size, 2 * enc_hidden_size]
+            [src_len, batch_size, num_direction * enc_hidden_size]
             decoder_init_state: decoder GRU/LSTM's initial state
             tgt_sent_idx: indices of gold-standard target sentences with dim [batch_size, sent_len]
             init_input: initial input with dim [batch_size, embed_size]

@@ -65,22 +65,22 @@ class CPG(nn.Module):
 
         return group_num, group_param_num, group_param_sizes
 
-    def get_params(self, lang: List[int]) -> List[List[Tensor]]:
+    def get_params(self, langs: List[int]) -> List[List[Tensor]]:
         """
-        get the grouped parameters required by the model
+        Gets the grouped parameters required by the model
 
         Args:
-            lang: an integer representing the language using CPG.LANG_INDICES
+            langs: a list of language indices representing the language using CPG.LANG_INDICES
 
         Return:
             grouped_params: a list of groups of parameters in tensor form
         """
-        assert(len(lang) == self.group_num)
+        assert(len(langs) == self.group_num)
 
         # generate parameters for this language by group
         params = []
         for j in range(self.group_num):
-            ell_j = self.L(self.lang_encode[lang[j]])
+            ell_j = self.L(self.lang_encode[langs[j]])
             P_j = self.Ps[j]
             W_j = self.Ws[j]
             P_j_ell_j = P_j(ell_j)
