@@ -61,9 +61,9 @@ class NMT(nn.Module):
         # decode
         dec_lstm_weights = grouped_params[self.enc_shapes_len:self.enc_shapes_len + self.dec_lstm_shapes_len]
         attn_weights = grouped_params[self.enc_shapes_len + self.dec_lstm_shapes_len:]
-        decoder = Decoder(self.batch_size, self.embed_size, self.hidden_size, self.cpg.get_embedding(tgt_lang),
-                          dec_lstm_weights, attn_weights)
-        return decoder(src_encodings, decoder_init_state, tgt_sent_idx, init_input)
+        decoder = Decoder(self.batch_size, self.embed_size, self.decoder_hidden_size, self.num_layers,
+                          self.cpg.get_embedding(tgt_lang), dec_lstm_weights, attn_weights)
+        return decoder(src_encodings, decoder_init_state, tgt_sent_idx)
 
     def infer(self, src_sent: Tensor, src_lang: int, tgt_lang: int) -> Tensor:
         """

@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 
 import torch
 from utils import assert_tensor_size
@@ -11,7 +11,7 @@ class Encoder:
     """
     The encoder is a bidiretional encoder, one can NOT be used as a single direction one
     """
-    def __init__(self, batch_size, embed_size, hidden_size, embedding: torch.nn.Embedding, weights: Tensor,
+    def __init__(self, batch_size, embed_size, hidden_size, embedding: torch.nn.Embedding, weights: List[List[Tensor]],
                  num_layer=2):
         self.num_direction = 2
         # num of cell weights must match the setting
@@ -32,7 +32,7 @@ class Encoder:
         self.h_0 = torch.zeros((self.num_direction * self.num_layer, self.batch_size, self.hidden_size), device=device)
         self.c_0 = torch.zeros((self.num_direction * self.num_layer, self.batch_size, self.hidden_size), device=device)
 
-    def __call__(self, src_sent_idx: Tensor) ->(Tensor, (Tensor, Tensor)):
+    def __call__(self, src_sent_idx: Tensor) -> Tuple[Tensor, Tuple[Tensor, Tensor]]:
         """
         encode the sequence in bidirection
 
@@ -81,7 +81,7 @@ class Encoder:
         return torch.cat((in_t, rev_t), 2)
 
     def encoder_step(self, in_x: Tensor, rev_x: Tensor, h_t: List[Tensor], c_t: List[Tensor]) \
-            -> (Tensor, List[Tensor], List[Tensor]):
+            -> Tuple[Tensor, List[Tensor], List[Tensor]]:
         """
         encode only one step by two direction for stacked flstm
         Args:

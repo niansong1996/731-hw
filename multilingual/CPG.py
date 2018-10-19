@@ -13,7 +13,7 @@ LANG_INDICES = { 'en' : 0,
 
 
 class CPG(nn.Module):
-    def __init__(self, shapes: List[List[tuple]], size_dict: Dict[str, int]):
+    def __init__(self, shapes: List[List[Tuple[int]]], size_dict: Dict[str, int]):
         """
         Args:
             shapes: List[List[tuples]] a list of groups, where each tuple the
@@ -47,7 +47,7 @@ class CPG(nn.Module):
             nn.init.uniform_(param.data, a=-0.1, b=0.1)
 
     @staticmethod
-    def get_param_meta(shapes: List[List[tuple]]):
+    def get_param_meta(shapes: List[List[Tuple[int]]]):
         # calculate the parameters groups sizes and numbers
         group_num = len(shapes)
         # a list of param number in each group [[1024, 1024], [5120, 2560, 2560] ...]umber for each group

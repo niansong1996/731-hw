@@ -8,11 +8,13 @@ from utils import assert_tensor_size
 from FLSTM import Stack_FLSTMCell
 
 from config import device
+from vocab import VocabEntry
 
 
 class Decoder:
     def __init__(self, batch_size, embed_size, hidden_size, num_layers,
-                 embedding: nn.Embedding, lstm_weights, attn_weights, dropout_rate=0, decoder_pad_idx=0):
+                 embedding: nn.Embedding, lstm_weights: List[List[Tensor]], attn_weights: List[List[Tensor]],
+                 dropout_rate=0, decoder_pad_idx=0):
         self.embedding = embedding
         self.dec_embed_size = embed_size
         self.dec_hidden_size = hidden_size
@@ -28,9 +30,13 @@ class Decoder:
         self.dropout_rate = dropout_rate
         self.dropout = nn.Dropout(p=self.dropout_rate)
         self.DECODER_PAD_IDX = decoder_pad_idx
+        sos_batch = torch.tensor([VocabEntry.SOS_ID for _ in range(batch_size)], dtype=torch.long).to(device)
+        self.init_input = embedding(sos_batch)
+        assert_tensor_size(self.init_input, [self.batch_size, self.dec_embed_size])
 
     @staticmethod
-    def init_decoder_step_input(d: torch.device, decoder_init_state: Tensor) -> (Tensor, Tensor, Tensor):
+    def init_decoder_step_input(d: torch.device, decoder_init_state: Tuple[Tensor, Tensor]) \
+            -> Tuple[Tensor, Tensor, Tensor]:
         """
         Initial input to decoder step
 
@@ -46,8 +52,7 @@ class Decoder:
         attn = torch.zeros(h_0.shape[1:], device=d)
         return h_0, c_0, attn
 
-    def decode(self, src_encodings: Tensor, decoder_init_state: Tensor, tgt_sent_idx: Tensor,
-               init_input: Tensor) -> Tensor:
+    def __call__(self, src_encodings: Tensor, decoder_init_state: Tensor, tgt_sent_idx: Tensor) -> Tensor:
         """
         Given source encodings, compute the log-likelihood of predicting the gold-standard target
         sentence tokens
@@ -57,7 +62,6 @@ class Decoder:
             [src_len, batch_size, num_direction * enc_hidden_size]
             decoder_init_state: decoder GRU/LSTM's initial state
             tgt_sent_idx: indices of gold-standard target sentences with dim [batch_size, sent_len]
-            init_input: initial input with dim [batch_size, embed_size]
 
         Returns:
             scores: could be a variable of shape (batch_size, ) representing the
@@ -67,14 +71,13 @@ class Decoder:
                 for beam search
         """
         # dim = (batch_size, embed_size)
-        decoder_input = init_input
-        assert_tensor_size(decoder_input, [self.batch_size, self.dec_embed_size])
+        decoder_input = self.init_input
         scores = torch.zeros(self.batch_size, device=device)
         zero_mask = torch.zeros(self.batch_size, device=device)
         one_mask = torch.ones(self.batch_size, device=device)
         h_t, c_t, attn = self.init_decoder_step_input(device, decoder_init_state)
         # dim = (batch_size, sent_len, embed_size)
-        tgt_sent_embd = self.embedding(tgt_sent_idx)
+        tgt_sent_embed = self.embedding(tgt_sent_idx)
         # skip the '<s>' in the tgt_sents since the output starts from the word after '<s>'
         for i in range(1, tgt_sent_idx.shape[1]):
             decoder_input = self.dropout(decoder_input)
@@ -88,7 +91,7 @@ class Decoder:
             # update scores
             scores = scores + masked_score_delta
             # dim = (batch_size, embed_size)
-            decoder_input = tgt_sent_embd[, i, :]
+            decoder_input = tgt_sent_embed[, i, :]
             assert_tensor_size(decoder_input, [self.batch_size, self.dec_embed_size])
         return scores
 
