@@ -1,8 +1,11 @@
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
+from typing import List
 
-def unpack_weight(self, weight, input_size, hidden_size):
+import torch
+import torch.tensor as Tensor
+import torch.nn as nn
+
+
+def unpack_weight(weight, input_size, hidden_size):
     assert(weight.shape == (4*hidden_size*(input_size+hidden_size+1+1), 1))
 
     W_x_shape = (4*hidden_size, input_size)
@@ -21,9 +24,10 @@ def unpack_weight(self, weight, input_size, hidden_size):
     b_x = weight[W_h_1:b_x_1].reshape(b_x_shape)
     b_h = weight[b_x_1:b_h_1].reshape(b_h_shape)
 
-    return W_x, W_h, b_x, b_h 
+    return W_x, W_h, b_x, b_h
 
-class Stack_FLSTMCell():
+
+class Stack_FLSTMCell:
     def __init__(self, input_size, hidden_size, weights, num_layers=1):
         assert(len(weights) == num_layers)
 
@@ -38,8 +42,16 @@ class Stack_FLSTMCell():
             cell = FLSTMCell(self.input_size, self.hidden_size, weights[i])
             self.cells.append(cell)
 
+    def __call__(self, X: Tensor, h_0: List[Tensor], c_0: List[Tensor]) \
+            -> (List[Tensor], List[Tensor]):
+        """
+        Performs a step of stacked LSTM
 
-    def __call__(self, X, h_0, c_0):
+        :param X: input
+        :param h_0: a list of hidden layers of size num of layers, with the first layer at 0
+        :param c_0: a list of memory cells of size num of layers, with the first cell at 0
+        :return:
+        """
         assert(len(h_0) == self.num_layers)
         assert(len(c_0) == self.num_layers)
 
@@ -63,9 +75,8 @@ class Stack_FLSTMCell():
 
         return h_1, c_1
 
-            
 
-class FLSTMCell():
+class FLSTMCell:
     def __init__(self, input_size, hidden_size, weights):
         # init the size constants
         self.input_size = input_size
@@ -78,10 +89,9 @@ class FLSTMCell():
         self.b_x = b_x
         self.b_h = b_h
 
-
-    def __call__(self, X, h_0, c_0):
+    def __call__(self, X: Tensor, h_0: Tensor, c_0: Tensor) -> (Tensor, Tensor):
         """
-        perform a step in LSTM
+        Performs a step of LSTM
 
         :param X: input embedding dim = (batch_size, embed_size) 
         :param c_0: cell state (batch_size, hidden_size)
@@ -91,13 +101,11 @@ class FLSTMCell():
         :return: (h_1, c_1) next cell state and hidden state dim = (batch_size, hidden_size)
         """
         batch_size = X.shape[0]
-        input_size = X.shape[1]
         hidden_size = h_0.shape[1]
 
-
         # (4*hidden_size, batch_size)  =  (4*hidden_size, input_size) * (batch_size, input_size)^{T}
-        W_x_X = torch.mm(self.W_x, X.transpose(0 ,1))
-        W_h_H = torch.mm(self.W_h, h_0.transpose(0,1))
+        W_x_X = torch.mm(self.W_x, X.transpose(0, 1))
+        W_h_H = torch.mm(self.W_h, h_0.transpose(0, 1))
         W_x_h = W_x_X + W_h_H
         W_x_h_b = W_x_h + self.b_x +self.b_h
 
@@ -113,16 +121,16 @@ class FLSTMCell():
 
         return h_1, c_1
 
-    
-input_size = 256
-hidden_size = 512
-batch_size = 32
 
-c_0 = torch.randn((batch_size, hidden_size))
-h_0 = torch.randn((batch_size, hidden_size))
-X = torch.randn((batch_size, input_size))
+input_size_ = 256
+hidden_size_ = 512
+batch_size_ = 32
 
-lstm = nn.LSTMCell(input_size, hidden_size)
+c_0_ = torch.randn((batch_size_, hidden_size_))
+h_0_ = torch.randn((batch_size_, hidden_size_))
+X_ = torch.randn((batch_size_, input_size_))
+
+lstm = nn.LSTMCell(input_size_, hidden_size_)
 
 weights = []
 for param in lstm.parameters():
@@ -130,10 +138,10 @@ for param in lstm.parameters():
 weights[2] = weights[2].unsqueeze(1)
 weights[3] = weights[3].unsqueeze(1)
 
-flstm = FLSTMCell(input_size, hidden_size, weights)
+flstm = FLSTMCell(input_size_, hidden_size_, weights)
 
-lstm_output = lstm(X, (h_0, c_0))
-flstm_output = flstm(X, h_0, c_0)
+lstm_output = lstm(X_, (h_0_, c_0_))
+flstm_output = flstm(X_, h_0_, c_0_)
 
 print(lstm_output)
 print(flstm_output)

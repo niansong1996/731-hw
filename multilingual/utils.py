@@ -3,6 +3,7 @@ from typing import List
 
 import numpy as np
 import io
+import torch.tensor as Tensor
 
 def input_transpose(sents, pad_token):
     """
@@ -30,6 +31,14 @@ def read_corpus(file_path, source):
         data.append(sent)
 
     return data
+
+
+def assert_tensor_size(tensor: Tensor, expected_size: List[int]):
+    try:
+        assert list(tensor.shape) == expected_size
+    except AssertionError:
+        print("tensor shape %s doesn't match expected size %s" % (tensor.shape, expected_size))
+        raise
 
 
 def batch_iter(data, batch_size, shuffle=True):
