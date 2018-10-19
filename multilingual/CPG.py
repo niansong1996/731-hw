@@ -6,11 +6,6 @@ import torch.tensor as Tensor
 import torch.nn.functional as F
 from functools import reduce
 
-LANG_INDICES = { 'en' : 0, 
-                 'gl' : 1, 'pt' : 4,
-                 'az' : 2, 'tr' : 5,
-                 'be' : 3, 'ru' : 6 }
-
 
 class CPG(nn.Module):
     def __init__(self, shapes: List[List[tuple]], size_dict: Dict[str, int]):
