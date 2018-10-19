@@ -430,10 +430,10 @@ def decode(args: Dict[str, str]):
 def main():
     args = docopt(__doc__)
 
-    # seed the random number generator (RNG), you may
-    # also want to seed the RNG of tensorflow, pytorch, dynet, etc.
+    # seed the random number generator (RNG) for numpy and pytorch
     seed = int(args['--seed'])
     np.random.seed(seed * 13 // 7)
+    torch.manual_seed(seed * 13 // 7)
 
     if args['train']:
         train(args)
