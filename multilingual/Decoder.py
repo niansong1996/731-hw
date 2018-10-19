@@ -50,7 +50,7 @@ class Decoder:
         attn = torch.zeros(h_0.shape[1:], device=d)
         return h_0, c_0, attn
 
-    def decode(self, src_encodings: Tensor, decoder_init_state: Tensor, target_output: Tensor,
+    def decode(self, src_encodings: Tensor, decoder_init_state: Tensor, tgt_sent_idx: Tensor,
                init_input: Tensor) -> Tensor:
         """
         Given source encodings, compute the log-likelihood of predicting the gold-standard target
@@ -60,7 +60,7 @@ class Decoder:
             src_encodings: hidden states of tokens in source sentences of shape
             [src_len, batch_size, 2 * enc_hidden_size]
             decoder_init_state: decoder GRU/LSTM's initial state
-            target_output: indices of gold-standard target sentences with dim [batch_size, sent_len]
+            tgt_sent_idx: indices of gold-standard target sentences with dim [batch_size, sent_len]
             init_input: initial input with dim [batch_size, embed_size]
 
         Returns:
@@ -77,20 +77,22 @@ class Decoder:
         zero_mask = torch.zeros(self.batch_size, device=device)
         one_mask = torch.ones(self.batch_size, device=device)
         h_t, c_t, attn = self.init_decoder_step_input(device, decoder_init_state)
+        # dim = (batch_size, sent_len, embed_size)
+        tgt_sent_embd = self.embedding(tgt_sent_idx)
         # skip the '<s>' in the tgt_sents since the output starts from the word after '<s>'
-        for i in range(1, target_output.shape[1]):
+        for i in range(1, tgt_sent_idx.shape[1]):
             decoder_input = self.dropout(decoder_input)
             h_t, c_t, softmax_output, attn = self.decoder_step(src_encodings, decoder_input, h_t, c_t, attn)
             # dim = (batch_size)
-            target_word_indices = target_output[:, i].reshape(self.batch_size)
+            target_word_indices = tgt_sent_idx[:, i].reshape(self.batch_size)
             score_delta = self.criterion(softmax_output, target_word_indices)
             # mask '<pad>' with 0
             pad_mask = torch.where((target_word_indices == self.DECODER_PAD_IDX), zero_mask, one_mask)
             masked_score_delta = score_delta * pad_mask
             # update scores
             scores = scores + masked_score_delta
-            # get the input for the next layer from the embed of the target words
-            decoder_input = self.embedding(target_word_indices)
+            # dim = (batch_size, embed_size)
+            decoder_input = tgt_sent_embd[, i, :]
             assert_tensor_size(decoder_input, [self.batch_size, self.dec_embed_size])
         return scores
 
