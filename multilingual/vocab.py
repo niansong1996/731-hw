@@ -25,6 +25,10 @@ from utils import read_corpus, input_transpose
 
 
 class VocabEntry(object):
+    PAD = '<pad>'
+    SOS = '<s>'
+    EOS = '</s>'
+    UNK = '<unk>'
     PAD_ID = 0
     SOS_ID = 1
     EOS_ID = 2
@@ -33,10 +37,10 @@ class VocabEntry(object):
     def __init__(self):
         self.word2id = dict()
         self.unk_id = VocabEntry.UNK_ID
-        self.word2id['<pad>'] = VocabEntry.PAD_ID
-        self.word2id['<s>'] = VocabEntry.SOS_ID
-        self.word2id['</s>'] = VocabEntry.EOS_ID
-        self.word2id['<unk>'] = VocabEntry.UNK_ID
+        self.word2id[VocabEntry.PAD] = VocabEntry.PAD_ID
+        self.word2id[VocabEntry.SOS] = VocabEntry.SOS_ID
+        self.word2id[VocabEntry.EOS] = VocabEntry.EOS_ID
+        self.word2id[VocabEntry.UNK] = VocabEntry.UNK_ID
 
         self.id2word = {v: k for k, v in self.word2id.items()}
 

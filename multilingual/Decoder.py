@@ -35,7 +35,7 @@ class Decoder:
         assert_tensor_size(self.init_input, [self.batch_size, self.dec_embed_size])
 
     @staticmethod
-    def init_decoder_step_input(d: torch.device, decoder_init_state: Tuple[Tensor, Tensor]) \
+    def init_decoder_step_input(decoder_init_state: Tuple[Tensor, Tensor]) \
             -> Tuple[Tensor, Tensor, Tensor]:
         """
         Initial input to decoder step
@@ -49,7 +49,7 @@ class Decoder:
         h_0 = decoder_init_state[0]
         c_0 = decoder_init_state[1]
         # [batch_size, num_direction * enc_hidden_size]
-        attn = torch.zeros(h_0.shape[1:], device=d)
+        attn = torch.zeros(h_0.shape[1:], device=device)
         return h_0, c_0, attn
 
     def __call__(self, src_encodings: Tensor, decoder_init_state: Tensor, tgt_sent_idx: Tensor) -> Tensor:
@@ -64,7 +64,7 @@ class Decoder:
             tgt_sent_idx: indices of gold-standard target sentences with dim [batch_size, sent_len]
 
         Returns:
-            scores: could be a variable of shape (batch_size, ) representing the
+            scores: could be a variable of shape [batch_size, ] representing the
                 log-likelihood of generating the gold-standard target sentence for
                 each example in the input batch
                 (extra note) we need this to be in the shape of (batch_size, output_vocab_size)
