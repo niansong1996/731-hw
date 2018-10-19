@@ -15,7 +15,7 @@ class Encoder:
     def __init__(self, batch_size, input_size, hidden_size, embedding_weights: Tensor, weights: Tensor, num_layer=2):
         self.num_direction = 2
         # num of cell weights must match the setting
-        assert(len(weights) == num_layer * self.num_direction)
+        assert(len(weights) == self.num_direction * num_layer)
         # init size constant
         self.batch_size = batch_size
         self.input_size = input_size

@@ -31,8 +31,7 @@ class CPG(nn.Module):
         self.lang_encode = torch.eyes(self.num_lang)
 
         self.shapes = shapes
-        self.group_num, self.group_param_num, self.group_param_sizes = \
-            self.get_param_meta(self.lang_embed_size, self.low_rank, shapes)
+        self.group_num, self.group_param_num, self.group_param_sizes = self.get_param_meta(shapes)
         
         # init every layer of CPG for different groups
         self.L = nn.Linear(self.num_lang, self.lang_embed_size, bias=False)
@@ -48,7 +47,7 @@ class CPG(nn.Module):
             nn.init.uniform_(param.data, a=-0.1, b=0.1)
 
     @staticmethod
-    def get_param_meta(lang_embed_size, low_rank, shapes: List[List[tuple]]):
+    def get_param_meta(shapes: List[List[tuple]]):
         # calculate the parameters groups sizes and numbers
         group_num = len(shapes)
         # a list of param number in each group [[1024, 1024], [5120, 2560, 2560] ...]umber for each group
