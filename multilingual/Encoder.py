@@ -1,10 +1,9 @@
-from typing import List
+from typing import List, Tuple
 
 import torch
 from utils import assert_tensor_size
 from FLSTM import Stack_FLSTMCell
 from torch import Tensor
-import torch.nn.functional as F
 from config import device
 
 
@@ -12,19 +11,20 @@ class Encoder:
     """
     The encoder is a bidiretional encoder, one can NOT be used as a single direction one
     """
-    def __init__(self, batch_size, input_size, hidden_size, embedding_weights: Tensor, weights: Tensor, num_layer=2):
+    def __init__(self, batch_size, embed_size, hidden_size, embedding: torch.nn.Embedding, weights: List[List[Tensor]],
+                 num_layer=2):
         self.num_direction = 2
         # num of cell weights must match the setting
         assert(len(weights) == self.num_direction * num_layer)
         # init size constant
         self.batch_size = batch_size
-        self.input_size = input_size
+        self.input_size = embed_size
         self.hidden_size = hidden_size
         self.num_layer = num_layer
 
         # set different layers
-        self.embedding_weights = embedding_weights
-        self.embed_size = embedding_weights.shape[1]
+        self.embedding = embedding
+        self.embed_size = embedding.shape[1]
         self.in_order_cells = Stack_FLSTMCell(self.input_size, self.hidden_size, weights[:self.num_layer])
         self.rev_order_cells = Stack_FLSTMCell(self.input_size, self.hidden_size, weights[self.num_layer:])
 
@@ -32,15 +32,16 @@ class Encoder:
         self.h_0 = torch.zeros((self.num_direction * self.num_layer, self.batch_size, self.hidden_size), device=device)
         self.c_0 = torch.zeros((self.num_direction * self.num_layer, self.batch_size, self.hidden_size), device=device)
 
-    def __call__(self, src_idx: Tensor) -> Tensor:
+    def __call__(self, src_sent_idx: Tensor) -> Tuple[Tensor, Tuple[Tensor, Tensor]]:
         """
         encode the sequence in bidirection
 
         Args:
-            src_idx: source input indices dim = (batch_size, sent_len)
+            src_sent_idx: source sentence word indices dim = (batch_size, sent_len)
 
         Return:
             outputs: dim = (sent_length, batch_size, num_direction * hidden_size)
+            h_t, c_t: dim = (num_layers, batch_size, num_direction * hidden_size)
         """
         # set the variables that iteratively used in encoding steps
         h_t = self.h_0
@@ -48,10 +49,10 @@ class Encoder:
         outputs = []
 
         # get the sentence length for this batch
-        sent_len = src_idx.shape[1]
+        sent_len = src_sent_idx.shape[1]
 
         # dim = (batch_size, sent_length, embed_size)
-        embedding = F.embedding(src_idx, self.embedding_weights)
+        embedding = self.embedding(src_sent_idx)
         # dim = (batch_size, sent_length, embed_size)
         assert_tensor_size(embedding, [self.batch_size, sent_len, self.embed_size])
 
@@ -64,10 +65,23 @@ class Encoder:
         outputs = torch.stack(outputs, dim=0)
         assert_tensor_size(outputs, [sent_len, self.batch_size, self.num_direction * self.hidden_size])
 
-        return outputs
+        return outputs, (self.to_tensor(h_t), self.to_tensor(c_t))
+
+    def to_tensor(self, t: List[Tensor]) -> Tensor:
+        """
+        Concatenates a list of tensors with two directions and stack by layers
+        :param t:
+        :return: dim = (num_layers, batch_size, num_direction * hidden_size)
+        """
+        # dim = (num_layers, batch_size, hidden_size)
+        in_t = torch.stack(t[:self.num_layer], dim=0)
+        # dim = (num_layers, batch_size, hidden_size)
+        rev_t = torch.stack(t[self.num_layer:], dim=0)
+        # dim = (num_layers, batch_size, num_direction * hidden_size)
+        return torch.cat((in_t, rev_t), 2)
 
     def encoder_step(self, in_x: Tensor, rev_x: Tensor, h_t: List[Tensor], c_t: List[Tensor]) \
-            -> (Tensor, List[Tensor], List[Tensor]):
+            -> Tuple[Tensor, List[Tensor], List[Tensor]]:
         """
         encode only one step by two direction for stacked flstm
         Args:
