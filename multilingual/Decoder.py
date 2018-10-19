@@ -10,8 +10,9 @@ from FLSTM import Stack_FLSTMCell
 
 from config import device
 
+
 class Decoder:
-    def __init__(self, dropout_rate, embedding_weights: Tensor, decoder_pad_idx,
+    def __init__(self, dropout_rate, embedding: nn.Embedding, decoder_pad_idx,
                  Ws: Tensor, Wc: Tensor, Wa: Tensor, batch_size, embed_size, hidden_size, num_layers,
                  LSTM_cell_weights):
         self.DECODER_PAD_IDX = decoder_pad_idx
@@ -20,7 +21,7 @@ class Decoder:
         self.criterion = nn.NLLLoss()
         self.dropout_rate = dropout_rate
         self.dropout = nn.Dropout(p=self.dropout_rate)
-        self.embedding_weights = embedding_weights
+        self.embedding = embedding
         self.Ws = Ws
         self.Wc = Wc
         self.Wa = Wa
@@ -31,6 +32,23 @@ class Decoder:
         self.batch_size = batch_size
         self.lstm_cell = Stack_FLSTMCell(input_size=embed_size, hidden_size=hidden_size, weights=LSTM_cell_weights,
                                          num_layers=num_layers)
+
+    @staticmethod
+    def init_decoder_step_input(d: torch.device, decoder_init_state: Tensor) -> (Tensor, Tensor, Tensor):
+        """
+        Initial input to decoder step
+
+        :param d: device type
+        :param decoder_init_state: decoder GRU/LSTM's initial state
+        :return: h_0, c_0 of shape [num_layers, self.batch_size, dec_hidden_size],
+        attn of shape [batch_size, num_direction * enc_hidden_size]
+        """
+        # [num_layers, self.batch_size, dec_hidden_size]
+        h_0 = decoder_init_state[0]
+        c_0 = decoder_init_state[1]
+        # [batch_size, num_direction * enc_hidden_size]
+        attn = torch.zeros(h_0.shape[1:], device=d)
+        return h_0, c_0, attn
 
     def decode(self, src_encodings: Tensor, decoder_init_state: Tensor, target_output: Tensor,
                init_input: Tensor) -> Tensor:
@@ -56,13 +74,9 @@ class Decoder:
         decoder_input = init_input
         assert_tensor_size(decoder_input, [self.batch_size, self.dec_embed_size])
         scores = torch.zeros(self.batch_size, device=device)
-        # [num_layers, self.batch_size, dec_hidden_size]
-        h_t = decoder_init_state[0]
-        c_t = decoder_init_state[1]
         zero_mask = torch.zeros(self.batch_size, device=device)
         one_mask = torch.ones(self.batch_size, device=device)
-        # [batch_size, num_direction * enc_hidden_size]
-        attn = torch.zeros(h_t.shape[1:], device=device)
+        h_t, c_t, attn = self.init_decoder_step_input(device, decoder_init_state)
         # skip the '<s>' in the tgt_sents since the output starts from the word after '<s>'
         for i in range(1, target_output.shape[1]):
             decoder_input = self.dropout(decoder_input)
@@ -76,7 +90,7 @@ class Decoder:
             # update scores
             scores = scores + masked_score_delta
             # get the input for the next layer from the embed of the target words
-            decoder_input = F.embedding(target_word_indices, self.embedding_weights)
+            decoder_input = self.embedding(target_word_indices)
             assert_tensor_size(decoder_input, [self.batch_size, self.dec_embed_size])
         return scores
 

@@ -67,163 +67,6 @@ if torch.cuda.is_available():
 
 Hypothesis = namedtuple('Hypothesis', ['value', 'score'])
 
-class Encoder(nn.Module):
-    def __init__(self, src_vocab_size, embed_size, hidden_size, num_layer=2, bidirectional=True):
-        super(Encoder, self).__init__()
-
-        # init hyper params
-        self.vocab_size = src_vocab_size
-        self.embed_size = embed_size
-        self.hidden_size = hidden_size
-        self.num_layer = num_layer
-        self.bidirectional = bidirectional
-
-        # init different layers
-        self.embed = nn.Embedding(self.vocab_size, self.embed_size)
-        self.encoder_lstm = nn.LSTM(self.embed_size, self.hidden_size, self.num_layers, self.bidirectional)
-
-        # initialize the parameters using uniform distribution
-        for param in self.parameters():
-            nn.init.uniform_(param.data, a=-0.1, b=0.1)
-
-    
-    def forward(self, src_encoding):
-        # pack the padded src sent to sent embedding
-        embedding = self.encoder_embed(src_encoding)
-        packed_seqs = pack_padded_sequence(padded_embedding, sent_length)
-
-        # h_n_.shape = c_n_.shape =  [num_layers * num_directions, batch_size, hidden_size]
-        output, (h_n_, c_n_) = self.lstm(packed_seqs)
-        h_n_ = h_n_.view(self.num_layer, 2, -1, self.hidden_size)
-        c_n_ = c_n_.view(self.num_layer, 2, -1, self.hidden_size)
-
-        # h_n.shape = c_n.shape =  [num_layers, batch_size, num_directions * hidden_size]
-        h_n = torch.cat((h_n_[:][0], h_n_[:][1]), dim=-1)
-        c_n = torch.cat((c_n_[:][0], c_n_[:][1]), dim=-1)
-
-        # unpack the source encodings, src_encodings.shape = [max_src_len, batch_size, num_directions * hidden_size]
-        src_encodings = pad_packed_sequence(output)[0]
-
-        return src_encodings, (h_n, c_n)
-
-    
-class Decoder(nn.Module):
-    def __init__(self, tgt_vocab_size, embed_size, hidden_size, encoder_bi=True, num_layer=2, dropout_rate=0.2):
-        super(Decoder, self).__init__()
-
-        # init hyper-params
-        self.vocab_size = tgt_vocab_size
-        self.embed_size = embed_size
-        self.hidden_size = hidden_size
-        self.num_layer = num_layer
-        self.dropout_rate = dropout_rate
-
-        # init different layers
-        self.embed = nn.Embedding(self.vocab_size, self.embed_size)
-        self.lstm = nn.LSTM(decoder_hidden_size + embed_size, decoder_hidden_size, num_layers=self.num_layer)
-        # W_a for attention
-        self.W_a = nn.Linear(self.NUM_DIR * hidden_size, decoder_hidden_size, bias=False)
-        # W_c for attention
-        self.W_c = nn.Linear(self.NUM_DIR * hidden_size + decoder_hidden_size, decoder_hidden_size, bias=False)
-        # W_s for attention
-        self.W_s = nn.Linear(decoder_hidden_size, self.tgt_vocab_size, bias=False)
-        self.log_softmax = nn.LogSoftmax(dim=2)
-        self.softmax = nn.Softmax(dim=2)
-        self.dropout = nn.Dropout(p=self.dropout_rate)
-        self.tanh = nn.Tanh()
-
-        # initialize the parameters using uniform distribution
-        for param in self.parameters():
-            nn.init.uniform_(param.data, a=-0.1, b=0.1)
-
-
-    def forward(self, src_encoding, init_state)
-        # dummy input
-        dmy_input = corpus_to_indices(self.vocab.tgt, [["<s>"] for _ in range(batch_size)]).to(device)
-
-        # dim = (batch_size, 1 (sent_len), embed_size)
-        embedded = self.decoder_embed(dmy_input)
-        # dim = (1 (single_word), batch_size, embed_size)
-        decoder_input = embedded.transpose(0, 1)
-        scores = torch.zeros(batch_size, device=device)
-        # [num_layers, batch_size, num_directions * hidden_size]
-        h_t = decoder_init_state[0]
-        c_t = decoder_init_state[1]
-        zero_mask = torch.zeros(batch_size, device=device)
-        one_mask = torch.ones(batch_size, device=device)
-        # convert the target sentences to indices, dim = (batch_size, max_tgt_len)
-        target_output = corpus_to_indices(self.vocab.tgt, tgt_sents).to(device)
-        # [1, batch_size, num_directions * hidden_size]
-        attn = torch.zeros(torch.Size([1])+h_t.shape[1:], device=device)
-        # skip the '<s>' in the tgt_sents since the output starts from the word after '<s>'
-        for i in range(1, target_output.shape[1]):
-            decoder_input = self.dropout(decoder_input)
-            h_t, c_t, softmax_output, attn, _ = self.decoder_step(src_encodings, decoder_input, h_t, c_t, attn)
-            # dim = (batch_size)
-            target_word_indices = target_output[:, i].reshape(batch_size)
-            score_delta = self.criterion(softmax_output, target_word_indices)
-            # mask '<pad>' with 0
-            pad_mask = torch.where((target_word_indices == self.DECODER_PAD_IDX), zero_mask, one_mask)
-            masked_score_delta = score_delta * pad_mask
-            # update scores
-            scores = scores + masked_score_delta
-            # get the input for the next layer from the embed of the target words
-            embedded = self.decoder_embed(target_word_indices.view(-1, 1))
-            decoder_input = embedded.transpose(0, 1)
-        return scores
-        
-        
-    def decoder_step(self, src_encodings: Tensor, decoder_input: Tensor, h_t: Tensor, c_t: Tensor, attn: Tensor):
-        # dim = (1, batch_size,  num_directions * hidden_size + embed_size)
-        cat_input = torch.cat((attn, decoder_input), 2)
-        _, (h_t, c_t) = self.decoder_lstm(cat_input, (h_t, c_t))
-        # dim = (batch_size, 1, decoder_hidden_size)
-        attn_h_t, a_t = self.global_attention(src_encodings, h_t)
-        # dim = (1, batch_size, num_directions * hidden_size + decoder_hidden_size)
-        attn_h_t_ = attn_h_t.transpose(0, 1)
-        # dim = (1, batch_size, vocab_size)
-        vocab_size_output = self.decoder_W_s(attn_h_t_)
-        # dim = (batch_size, vocab_size)
-        softmax_output = self.decoder_log_softmax(vocab_size_output).squeeze()
-        return h_t, c_t, softmax_output, attn_h_t_, a_t
-
-    def global_attention(self, h_s: Tensor, h_t: Tensor):
-        """
-        Calculate global attention
-
-        :param h_s: source top hidden state of size [max_src_len, batch_size, num_directions * hidden_size]
-        :param h_t: decoder hidden state of shape [num_layers, batch_size, decoder_hidden_size]
-        :return: an attention vector (batch_size, 1, decoder_hidden_size)
-        """
-        # top hidden layer with dim = (batch_size, 1, decoder_hidden_size)
-        h_t_top = h_t[-1].unsqueeze(0).transpose(0, 1)
-        # dim = (batch_size, max_src_len, num_directions * hidden_size)
-        h_s_ = h_s.transpose(0, 1)
-        # dim = (batch_size, 1, max_src_len)
-        score = self.general_score(h_s_, h_t_top)
-        # dim = (batch_size, 1, max_src_len)
-        a_t = self.decoder_softmax(score)
-        # a_t = self.dropout(a_t)
-        # dim = (batch_size, 1, num_directions * hidden_size)
-        c_t = torch.bmm(a_t, h_s_)
-        # dim = (batch_size, 1, num_directions * hidden_size + decoder_hidden_size)
-        cat_c_h = torch.cat((c_t, h_t_top), 2)
-        return self.tanh(self.decoder_W_c(cat_c_h)), a_t
-
-
-    def general_score(self, h_s_: Tensor, h_t_top: Tensor):
-        """
-        Calculate general attention score
-
-        :param h_s_: transposed source top hidden state of size [batch_size, max_src_len, num_directions * hidden_size]
-        :param h_t_top: decoder hidden state of size [batch_size, 1, decoder_hidden_size]
-        :return: a score of size (batch_size, 1, max_src_len)
-        """
-        # dim = (batch_size, max_src_len, num_directions * hidden_size)
-        W_a_h_s = self.decoder_W_a(h_s_)
-        # dim = (batch_size, num_directions * hidden_size, max_src_len)
-        W_a_h_s = W_a_h_s.transpose(1, 2)
-        return torch.bmm(h_t_top, W_a_h_s)
 
 class NMT(nn.Module):
 
@@ -244,7 +87,6 @@ class NMT(nn.Module):
 
         decoder_hidden_size = self.NUM_DIR * hidden_size
 
-
     def forward(self, src_sents: List[List[str]], tgt_sents: List[List[str]]) -> Tensor:
         src_encodings, decoder_init_state = self.encode(src_sents)
         scores = self.decode(src_encodings, decoder_init_state, tgt_sents)
@@ -257,7 +99,6 @@ class NMT(nn.Module):
         sent_indices = self.vocab.src.words2indices(src_sents)
         sent_indices_padded = pad_sequence([torch.tensor(sent) for sent in sent_indices]).to(device)
         # embed padded seq
-
 
     def beam_search(self, src_sent: List[str], beam_size: int=5, max_decoding_time_step: int=70) -> List[Hypothesis]:
         """
@@ -366,7 +207,6 @@ class NMT(nn.Module):
         Save current model to file
         """
         torch.save(self, path)
-
 
 
 def compute_corpus_level_bleu_score(references: List[List[str]], hypotheses: List[Hypothesis]) -> float:
