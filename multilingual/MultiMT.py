@@ -1,39 +1,41 @@
 from collections import namedtuple
 from typing import *
 
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.tensor as Tensor
 
 from CPG import CPG
-from Encoder import Encoder
 from Decoder import Decoder
-
+from Encoder import Encoder
 from config import device
+from utils import batch_iter
 from vocab import VocabEntry
 
 Hypothesis = namedtuple('Hypothesis', ['value', 'score'])
 
 
-class NMT(nn.Module):
-    def __init__(self, size_dict: Dict[str, int]):
-        super(NMT, self).__init__()
+class MultiNMT(nn.Module):
+    def __init__(self, embed_size, hidden_size, vocab_size, num_layers, batch_size, dropout_rate):
+        super(MultiNMT, self).__init__()
 
         # init size constants
-        self.embed_size = size_dict['embed_size']
-        self.hidden_size = size_dict['hidden_size']
-        self.vocab_size = size_dict['vocab_size']
-        self.num_layers = size_dict['num_layers']
-        self.batch_size = size_dict['batch_size']
+        self.embed_size = embed_size
+        self.hidden_size = hidden_size
+        self.vocab_size = vocab_size
+        self.num_layers = num_layers
+        self.batch_size = batch_size
+        self.dropout_rate = dropout_rate
         self.NUM_DIR = 2
         # init encoder param shapes
-        self.enc_in_lstm_shapes = NMT.get_shapes_flstm(self.embed_size, self.hidden_size, self.num_layers)
-        self.enc_rev_lstm_shapes = NMT.get_shapes_flstm(self.embed_size, self.hidden_size, self.num_layers)
+        self.enc_in_lstm_shapes = MultiNMT.get_shapes_flstm(self.embed_size, self.hidden_size, self.num_layers)
+        self.enc_rev_lstm_shapes = MultiNMT.get_shapes_flstm(self.embed_size, self.hidden_size, self.num_layers)
         self.enc_shapes = self.enc_in_lstm_shapes + self.enc_rev_lstm_shapes
         self.enc_shapes_len = len(self.enc_shapes)
         # init decoder param shapes
         self.decoder_hidden_size = self.NUM_DIR * self.hidden_size
-        self.dec_lstm_shapes = NMT.get_shapes_flstm(self.embed_size, self.decoder_hidden_size, self.num_layers)
+        self.dec_lstm_shapes = MultiNMT.get_shapes_flstm(self.embed_size, self.decoder_hidden_size, self.num_layers)
         self.dec_lstm_shapes_len = len(self.dec_lstm_shapes)
         decoder_W_a_shape = (self.NUM_DIR * self.hidden_size, self.decoder_hidden_size)
         decoder_W_c_shape = (self.NUM_DIR * self.hidden_size + self.decoder_hidden_size, self.decoder_hidden_size)
@@ -46,14 +48,14 @@ class NMT(nn.Module):
         # init CPG
         self.cpg = CPG(self.param_shapes, size_dict)
 
-    def forward(self, src_sent_idx: Tensor, tgt_sent_idx: Tensor, src_lang: int, tgt_lang: int) -> Tensor:
+    def forward(self, src_lang: int, tgt_lang: int, src_sent_idx: Tensor, tgt_sent_idx: Tensor) -> Tensor:
         """
         Takes in a batch of paired src and tgt sentences with lang tags, return the loss
 
-        :param src_sent_idx: [batch_size, sent_length]
-        :param tgt_sent_idx: [batch_size, sent_length]
         :param src_lang: source language index
         :param tgt_lang: target language index
+        :param src_sent_idx: [batch_size, sent_length]
+        :param tgt_sent_idx: [batch_size, sent_length]
         :return: scores with shape = [batch_size]
         """
         grouped_params = self.get_grouped_params(src_lang, tgt_lang)
@@ -158,3 +160,29 @@ class NMT(nn.Module):
             params_in_lstm.append(params_in_group)
 
         return params_in_lstm
+
+    def evaluate_ppl(self, src_lang: int, tgt_lang: int, dev_data: List[Any], batch_size: int=32):
+        """
+        Evaluate perplexity on dev sentences
+
+        Args:
+            src_lang: source language index
+            tgt_lang: target language index
+            dev_data: a list of dev sentences
+            batch_size: batch size
+
+        Returns:
+            ppl: the perplexity on dev sentences
+        """
+        cum_loss = 0.
+        cum_tgt_words = 0.
+        with torch.no_grad():
+            for src_sents, tgt_sents in batch_iter(dev_data, batch_size):
+                loss = self(src_lang, tgt_lang, src_sents, tgt_sents).sum()
+                cum_loss += loss
+                tgt_word_num_to_predict = sum(len(s[1:]) for s in tgt_sents)  # omitting the leading `<s>`
+                cum_tgt_words += tgt_word_num_to_predict
+
+            ppl = np.exp(cum_loss / cum_tgt_words)
+
+            return ppl

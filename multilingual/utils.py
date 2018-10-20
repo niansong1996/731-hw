@@ -1,10 +1,14 @@
 import math
-from typing import List
+from typing import List, Tuple
 from config import LANG_INDICES
+from collections import namedtuple
 
 import numpy as np
 import io
 import torch.tensor as Tensor
+
+LangPair = namedtuple('LangPair', ['src', 'tgt'])
+PairedData = namedtuple('PairedData', ['data', 'langs'])
 
 def input_transpose(sents, pad_token):
     """
@@ -68,27 +72,45 @@ def assert_tensor_size(tensor: Tensor, expected_size: List[int]):
         raise
 
 
-def batch_iter(data, batch_size, shuffle=True):
+def batch_iter(data: List[PairedData], batch_size, shuffle=True):
     """
     Given a list of examples, shuffle and slice them into mini-batches
     """
-    batch_num = math.ceil(len(data) / batch_size)
-    index_array = list(range(len(data)))
-
-    # sort the pairs w.r.t. the length of the src sent
-    data = sorted(data, key=lambda e: len(e[0]), reverse=True)
-
-    batch_idx = list(range(batch_num))
+    pairs = [PairedDataBatch(i, pd, batch_size, shuffle) for i, pd in enumerate(data)]
+    batch_indices = [batch_idx for p in pairs for batch_idx in p.batch_indices]
     if shuffle:
-        np.random.shuffle(batch_idx)
-    for i in batch_idx:
-        indices = index_array[i * batch_size: (i + 1) * batch_size]
-        examples = [data[idx] for idx in indices]
+        np.random.shuffle(batch_indices)
+    for pair_idx, batch_idx in batch_indices:
+        pair = pairs[pair_idx]
+        src_sents, tgt_sents = pair.get_batch(batch_idx)
+        yield pair.src_lang, pair.tgt_lang, src_sents, tgt_sents
+
+
+class PairedDataBatch:
+    def __init__(self, pair_idx: int, paried_data: PairedData, batch_size, shuffle=True):
+        self.data = paried_data.data
+        self.src_lang = paried_data.langs.src
+        self.tgt_lang = paried_data.langs.tgt
+        self.batch_size = batch_size
+        batch_count = math.ceil(len(self.data) / batch_size)
+        self.index_array = list(range(len(self.data)))
+
+        # sort the pairs w.r.t. the length of the src sent
+        self.data = sorted(self.data, key=lambda e: len(e[0]), reverse=True)
+
+        self.batch_indices = [(pair_idx, i) for i in range(batch_count)]
+        if shuffle:
+            np.random.shuffle(self.batch_indices)
+        self.i = 0
+
+    def get_batch(self, batch_idx):
+        indices = self.index_array[batch_idx * self.batch_size: (batch_idx + 1) * self.batch_size]
+        examples = [self.data[idx] for idx in indices]
 
         src_sents = [e[0] for e in examples]
         tgt_sents = [e[1] for e in examples]
-
         yield src_sents, tgt_sents
+
 
 def load_matrix(fname, vocabs, emb_dim):
     words = []
