@@ -1,6 +1,6 @@
 import math
 from typing import List, Tuple
-from config import LANG_INDICES
+from config import LANG_NAMES
 from collections import namedtuple
 
 import numpy as np
@@ -9,6 +9,7 @@ import torch.tensor as Tensor
 
 LangPair = namedtuple('LangPair', ['src', 'tgt'])
 PairedData = namedtuple('PairedData', ['data', 'langs'])
+
 
 def input_transpose(sents, pad_token):
     """
@@ -25,6 +26,7 @@ def input_transpose(sents, pad_token):
 
     return sents_t
 
+
 def read_corpus(file_path, source):
     data = []
     for line in open(file_path, encoding="utf-8"):
@@ -35,7 +37,6 @@ def read_corpus(file_path, source):
         data.append(sent)
 
     return data
-
 
 
 def assert_tensor_size(tensor: Tensor, expected_size: List[int]):

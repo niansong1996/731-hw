@@ -11,21 +11,25 @@ Options:
     --lang=<lang-abbr>         Two letter representation of language
     --vocab-size=<file>        The vocabulary size for subword model
 """
+from typing import List, Tuple
 
 import sentencepiece as spm
 from docopt import docopt
-from config import LANG_INDICES
+from config import LANG_NAMES
+
 
 def train(lang, vocab_size):
     spm.SentencePieceTrainer.\
     Train('--input=data/%s_mono.txt --model_prefix=subword_files/%s --vocab_size=%d' % (lang, lang, vocab_size))
 
-def get_corpus_pairs(src_lang_idx, tgt_lang_idx, source):
+
+def get_corpus_pairs(src_lang_idx: int, tgt_lang_idx: int, data_type: str) \
+        -> List[Tuple[List[int], List[int]]]:
     src_sents = []
     tgt_sents = []
 
-    src_lang = LANG_INDICES[src_lang_idx]
-    tgt_lang = LANG_INDICES[tgt_lang_idx]
+    src_lang = LANG_NAMES[src_lang_idx]
+    tgt_lang = LANG_NAMES[tgt_lang_idx]
 
     # load the subword models for encoding these sents to indices
     src_sp = spm.SentencePieceProcessor()
@@ -34,14 +38,14 @@ def get_corpus_pairs(src_lang_idx, tgt_lang_idx, source):
     tgt_sp.Load('subword_files/%s.model' % tgt_lang)
 
     # read corpus for src corpus
-    file_path = 'data/%s.%s-%s.%s.txt' % (source, tgt_lang, src_lang, src_lang)
+    file_path = 'data/%s.%s-%s.%s.txt' % (data_type, tgt_lang, src_lang, src_lang)
     for line in open(file_path, encoding="utf-8"):
         sent = line.strip()
         sent_encode = src_sp.EncodeAsIds(sent)
         src_sents.append(sent_encode)
 
     # read corpus for tgt corpus
-    file_path = 'data/%s.%s-%s.%s.txt' % (source, tgt_lang, src_lang, tgt_lang)
+    file_path = 'data/%s.%s-%s.%s.txt' % (data_type, tgt_lang, src_lang, tgt_lang)
     for line in open(file_path, encoding="utf-8"):
         sent = line.strip()
         # add <s> and </s> to the tgt sents
@@ -52,6 +56,17 @@ def get_corpus_pairs(src_lang_idx, tgt_lang_idx, source):
     src_tgt_sent_pairs = list(zip(src_sents, tgt_sents))
 
     return src_tgt_sent_pairs
+
+def decode_corpus_ids(lang: int, sents: List[List[int]]) -> List[List[str]]:
+    sp = spm.SentencePieceProcessor()
+    sp.Load('subword_files/%s.model' % lang)
+
+    decoded_sents = []
+    for line in sents:
+        sent = sp.DecodeIds(line)
+        decoded_sents.append(sent)
+
+    return decoded_sents
 
 
 if __name__ == '__main__':
@@ -64,7 +79,7 @@ if __name__ == '__main__':
 
     # train the subword model for the specified language
     if lang == 'all':
-        for lan in LANG_INDICES.values():
+        for lan in LANG_NAMES.values():
             train(lan, vocab_size)
             print('Done for %s : ' % lang)
     else:

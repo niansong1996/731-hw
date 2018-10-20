@@ -10,14 +10,14 @@ from CPG import CPG
 from Decoder import Decoder
 from Encoder import Encoder
 from config import device
-from utils import batch_iter
+from utils import batch_iter, PairedData
 from vocab import VocabEntry
 
 Hypothesis = namedtuple('Hypothesis', ['value', 'score'])
 
 
 class MultiNMT(nn.Module):
-    def __init__(self, embed_size, hidden_size, vocab_size, num_layers, batch_size, dropout_rate):
+    def __init__(self, embed_size, hidden_size, vocab_size, num_layers, batch_size, dropout_rate, ):
         super(MultiNMT, self).__init__()
 
         # init size constants
@@ -161,13 +161,11 @@ class MultiNMT(nn.Module):
 
         return params_in_lstm
 
-    def evaluate_ppl(self, src_lang: int, tgt_lang: int, dev_data: List[Any], batch_size: int=32):
+    def evaluate_ppl(self, dev_data: List[PairedData], batch_size: int=32):
         """
         Evaluate perplexity on dev sentences
 
         Args:
-            src_lang: source language index
-            tgt_lang: target language index
             dev_data: a list of dev sentences
             batch_size: batch size
 
@@ -177,7 +175,7 @@ class MultiNMT(nn.Module):
         cum_loss = 0.
         cum_tgt_words = 0.
         with torch.no_grad():
-            for src_sents, tgt_sents in batch_iter(dev_data, batch_size):
+            for src_lang, tgt_lang, src_sents, tgt_sents in batch_iter(dev_data, batch_size):
                 loss = self(src_lang, tgt_lang, src_sents, tgt_sents).sum()
                 cum_loss += loss
                 tgt_word_num_to_predict = sum(len(s[1:]) for s in tgt_sents)  # omitting the leading `<s>`

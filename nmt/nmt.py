@@ -48,9 +48,10 @@ from docopt import docopt
 from tqdm import tqdm
 from nltk.translate.bleu_score import corpus_bleu, sentence_bleu, SmoothingFunction
 
-from config import device
+from config import device, LANG_INDICES
 from MultiMT import Hypothesis, MultiNMT
-from utils import read_corpus, batch_iter, load_matrix
+from subword import get_corpus_pairs
+from utils import read_corpus, batch_iter, load_matrix, PairedData, LangPair
 from vocab import Vocab, VocabEntry
 from embed import corpus_to_indices, indices_to_corpus
 
@@ -83,15 +84,21 @@ def compute_corpus_level_bleu_score(references: List[List[str]], hypotheses: Lis
     return bleu_score
 
 
+def get_data_pairs(langs: List[List[str]], data_type: str):
+    data = []
+    for src_name, tgt_name in langs:
+        src = LANG_INDICES[src_name]
+        tgt = LANG_INDICES[tgt_name]
+        data_pair = get_corpus_pairs(src, tgt, 'train')
+        data.append(PairedData(data_pair, LangPair(src, tgt)))
+    return data
+
+
 def train(args: Dict[str, str]):
-    train_data_src = read_corpus(args['--train-src'], source='src')
-    train_data_tgt = read_corpus(args['--train-tgt'], source='tgt')
-
-    dev_data_src = read_corpus(args['--dev-src'], source='src')
-    dev_data_tgt = read_corpus(args['--dev-tgt'], source='tgt')
-
-    train_data = list(zip(train_data_src, train_data_tgt))
-    dev_data = list(zip(dev_data_src, dev_data_tgt))
+    lang_pairs = args['--langs']
+    langs = [p.split('-') for p in lang_pairs.split(',')]
+    train_data = get_data_pairs(langs, 'train')
+    dev_data = get_data_pairs(langs, 'dev')
 
     train_batch_size = int(args['--batch-size'])
     clip_grad = float(args['--clip-grad'])
@@ -151,13 +158,13 @@ def train(args: Dict[str, str]):
             cumulative_examples += batch_size
 
             if train_iter % log_every == 0:
-                print('epoch %d, iter %d, avg. loss %.2f, avg. ppl %.2f ' \
-                      'cum. examples %d, speed %.2f words/sec, time elapsed %.2f sec' % (epoch, train_iter,
-                                                                                         report_loss / report_examples,
-                                                                                         math.exp(report_loss / report_tgt_words),
-                                                                                         cumulative_examples,
-                                                                                         report_tgt_words / (time.time() - train_time),
-                                                                                         time.time() - begin_time), flush=True)
+                print('epoch %d, iter %d, avg. loss %.2f, avg. ppl %.2f '
+                      'cum. examples %d, speed %.2f words/sec, '
+                      'time elapsed %.2f sec' % (epoch, train_iter, report_loss / report_examples,
+                                                 math.exp(report_loss / report_tgt_words), cumulative_examples,
+                                                 report_tgt_words / (time.time() - train_time),
+                                                 time.time() - begin_time),
+                      flush=True)
 
                 train_time = time.time()
                 report_loss = report_tgt_words = report_examples = 0.
@@ -170,19 +177,20 @@ def train(args: Dict[str, str]):
             # training. This repeats for up to `--max-num-trial` times.
             if train_iter % valid_niter == 0:
                 print('epoch %d, iter %d, cum. loss %.2f, cum. ppl %.2f cum. examples %d' % (epoch, train_iter,
-                                                                                         cum_loss / cumulative_examples,
-                                                                                         np.exp(cum_loss / cumulative_tgt_words),
-                                                                                         cumulative_examples))
+                                                                                             cum_loss / cumulative_examples,
+                                                                                             np.exp(
+                                                                                                 cum_loss / cumulative_tgt_words),
+                                                                                             cumulative_examples))
 
                 cum_loss = cumulative_examples = cumulative_tgt_words = 0.
                 valid_num += 1
 
-                print('begin validation ... size %d %d' % (len(dev_data), len(dev_data_src)))
+                print('begin validation ... size %d' % len(dev_data))
 
                 # set model to evaluate mode
                 model.eval()
                 # compute dev. ppl and bleu
-                dev_ppl = model.evaluate_ppl(dev_data, batch_size=128)   # dev batch size can be a bit larger
+                dev_ppl = model.evaluate_ppl(dev_data, batch_size=128)  # dev batch size can be a bit larger
                 # set model back to training mode
                 model.train()
                 '''

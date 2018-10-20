@@ -15,7 +15,7 @@ from Decoder import Decoder
 from utils import read_corpus, batch_iter, load_matrix
 from vocab import Vocab, VocabEntry
 from embed import corpus_to_indices, indices_to_corpus
-from config import device, Hypothesis, LANG_INDICES
+from config import device, Hypothesis, LANG_NAMES
 
 import torch
 import torch.nn as nn
@@ -24,8 +24,8 @@ import torch.nn.functional as F
 
 
 def train(args: Dict[str, str]):
-    train_corpus_pairs = [read_corpus(0, i, source='train') for i in range(1, len(LANG_INDICES))]
-    dev_corpus_pairs = [read_corpus(0, i, source='dev') for i in range(1, len(LANG_INDICES))]
+    train_corpus_pairs = [read_corpus(0, i, source='train') for i in range(1, len(LANG_NAMES))]
+    dev_corpus_pairs = [read_corpus(0, i, source='dev') for i in range(1, len(LANG_NAMES))]
 
     train_batch_size = int(args['--batch-size'])
     clip_grad = float(args['--clip-grad'])

@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # get raw data if it does not exist
-if [ ! -d "$data" ]; then
+if [ ! -d "./data" ]; then
     wget http://phontron.com/class/mtandseq2seq2018/assets/data/cs11731-assignment2-v1.zip
     unzip cs11731-assignment2-v1.zip
     unzip assignment-2/data.zip

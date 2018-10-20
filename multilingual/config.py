@@ -7,7 +7,9 @@ if torch.cuda.is_available():
 
 Hypothesis = namedtuple('Hypothesis', ['value', 'score'])
 
-LANG_INDICES = { 0 : 'en', 
-                 1 : 'az', 4 : 'tr',
-                 2 : 'be', 5 : 'ru', 
-                 3 : 'gl', 6 : 'pt' }
+LANG_NAMES = {0: 'en',
+              1: 'az', 4: 'tr',
+              2: 'be', 5: 'ru',
+              3: 'gl', 6: 'pt'}
+
+LANG_INDICES = {v: k for k, v in LANG_NAMES.items()}
