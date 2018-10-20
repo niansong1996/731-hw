@@ -51,7 +51,7 @@ from nltk.translate.bleu_score import corpus_bleu, sentence_bleu, SmoothingFunct
 from config import device, LANG_INDICES
 from MultiMT import Hypothesis, MultiNMT
 from subword import get_corpus_pairs
-from utils import read_corpus, batch_iter, load_matrix, PairedData, LangPair
+from utils import read_corpus, batch_iter, load_matrix, PairedData, LangPair, sents_to_tensor
 from vocab import Vocab, VocabEntry
 from embed import corpus_to_indices, indices_to_corpus
 
@@ -137,8 +137,7 @@ def train(args: Dict[str, str]):
 
             # start training routine
             optimizer.zero_grad()
-            loss_v = model(src_lang, tgt_lang,
-                           torch.tensor(src_sents, device=device), torch.tensor(tgt_sents, device=device))
+            loss_v = model(src_lang, tgt_lang, sents_to_tensor(src_sents, device), sents_to_tensor(tgt_sents, device))
             loss = torch.sum(loss_v)
             loss.backward()
             torch.nn.utils.clip_grad_norm(model.parameters(), clip_grad)

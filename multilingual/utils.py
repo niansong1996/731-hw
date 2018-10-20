@@ -1,11 +1,16 @@
 import math
 from typing import List, Tuple
+
+import torch
+
 from config import LANG_NAMES
 from collections import namedtuple
 
 import numpy as np
 import io
 import torch.tensor as Tensor
+
+from vocab import VocabEntry
 
 LangPair = namedtuple('LangPair', ['src', 'tgt'])
 PairedData = namedtuple('PairedData', ['data', 'langs'])
@@ -47,7 +52,7 @@ def assert_tensor_size(tensor: Tensor, expected_size: List[int]):
         raise
 
 
-def batch_iter(data: List[PairedData], batch_size, shuffle=True):
+def batch_iter(data: List[PairedData], batch_size, shuffle=True) -> Tuple[int, int, List[List[int]], List[List[int]]]:
     """
     Given a list of examples, shuffle and slice them into mini-batches
     """
@@ -78,13 +83,22 @@ class PairedDataBatch:
             np.random.shuffle(self.batch_indices)
         self.i = 0
 
-    def get_batch(self, batch_idx):
+    def get_batch(self, batch_idx: int) -> Tuple[List[List[int]], List[List[int]]]:
         indices = self.index_array[batch_idx * self.batch_size: (batch_idx + 1) * self.batch_size]
         examples = [self.data[idx] for idx in indices]
 
         src_sents = [e[0] for e in examples]
         tgt_sents = [e[1] for e in examples]
         yield src_sents, tgt_sents
+
+
+def sents_to_tensor(sents: List[List[int]], device: torch.device) -> Tensor:
+    max_sent_len = max(map((lambda x: len(x)), sents))
+    # indices are initialized with the index of '<pad>'
+    for sent in enumerate(sents):
+        while len(sent) < max_sent_len:
+            sent.append(VocabEntry.PAD_ID)
+    return torch.tensor(sents, dtype=torch.long, device=device)
 
 
 def load_matrix(fname, vocabs, emb_dim):
