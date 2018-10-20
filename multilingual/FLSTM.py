@@ -93,12 +93,12 @@ class FLSTMCell:
         """
         Performs a step of LSTM
 
-        :param X: input embedding dim = (batch_size, embed_size) 
-        :param c_0: cell state (batch_size, hidden_size)
-        :param h_0: hidden state (batch_size, hidden_size)
+        :param X: input embedding shape = [batch_size, embed_size]
+        :param c_0: cell state shape = [batch_size, hidden_size]
+        :param h_0: hidden state shape = [batch_size, hidden_size]
         :param weights: W_x, W_h, b_x, b_h
 
-        :return: (h_1, c_1) next cell state and hidden state dim = (batch_size, hidden_size)
+        :return: (h_1, c_1) next cell state and hidden state shape = [batch_size, hidden_size]
         """
         batch_size = X.shape[0]
         hidden_size = h_0.shape[1]
