@@ -22,8 +22,8 @@ class MultiNMT(nn.Module):
         # init size constants
         self.embed_size = int(args['--embed-size'])
         self.hidden_size = int(args['--hidden-size'])
-        self.vocab_size = int(args['--vocab_size'])
-        self.num_layers = int(args['--num_layers'])
+        self.vocab_size = int(args['--vocab-size'])
+        self.num_layers = int(args['--num-layers'])
         self.batch_size = int(args['--batch-size'])
         self.dropout_rate = float(args['--dropout'])
         self.NUM_DIR = 2
