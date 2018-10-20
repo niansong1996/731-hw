@@ -19,8 +19,8 @@ from config import LANG_NAMES
 
 
 def train(lang, vocab_size):
-    spm.SentencePieceTrainer.\
-    Train('--input=data/%s_mono.txt --model_prefix=subword_files/%s --vocab_size=%d' % (lang, lang, vocab_size))
+    spm.SentencePieceTrainer. \
+        Train('--input=data/%s_mono.txt --model_prefix=subword_files/%s --vocab_size=%d' % (lang, lang, vocab_size))
 
 
 def get_corpus_pairs(src_lang_idx: int, tgt_lang_idx: int, data_type: str) \
@@ -34,7 +34,9 @@ def get_corpus_pairs(src_lang_idx: int, tgt_lang_idx: int, data_type: str) \
 
     return src_tgt_sent_pairs
 
-def get_corpus_ids(src_lang_idx: int, tgt_lang_idx: int, data_type: str, is_tgt: bool):
+
+def get_corpus_ids(src_lang_idx: int, tgt_lang_idx: int, data_type: str, is_tgt: bool)\
+        -> List[List[int]]:
     sents = []
 
     src_lang = LANG_NAMES[src_lang_idx]
@@ -50,13 +52,14 @@ def get_corpus_ids(src_lang_idx: int, tgt_lang_idx: int, data_type: str, is_tgt:
     for line in open(file_path, encoding="utf-8"):
         sent = line.strip()
 
-        sent_encode = src_sp.EncodeAsIds(sent)
+        sent_encode = sp.EncodeAsIds(sent)
         if is_tgt:
             # add <s> and </s> to the tgt sents
-            sent_encode = [tgt_sp.bos_id()] + sent_encode + [tgt_sp.eos_id()]
+            sent_encode = [sp.bos_id()] + sent_encode + [sp.eos_id()]
         sents.append(sent_encode)
 
     return sents
+
 
 def decode_corpus_ids(lang: int, sents: List[List[int]]) -> List[List[str]]:
     sp = spm.SentencePieceProcessor()

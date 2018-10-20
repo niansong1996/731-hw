@@ -127,7 +127,7 @@ def train(args: Dict[str, str]):
 
             # start training routine
             optimizer.zero_grad()
-            loss_v = model(src_lang, tgt_lang, sents_to_tensor(src_sents, device), sents_to_tensor(tgt_sents, device))
+            loss_v = model(src_lang, tgt_lang, src_sents, tgt_sents)
             loss = torch.sum(loss_v)
             loss.backward()
             torch.nn.utils.clip_grad_norm(model.parameters(), clip_grad)
@@ -243,11 +243,11 @@ def decode(args: Dict[str, str]):
     model_path = args['MODEL_PATH']
     output_file = args['OUTPUT_FILE']
 
-    test_data_src = get_corpus_ids(src_lang_idx, tgt_lang_idx, data_type='test', False)
-    test_data_tgt = get_corpus_ids(src_lang_idx, tgt_lang_idx, data_type='test', True)
+    test_data_src = get_corpus_ids(src_lang_idx, tgt_lang_idx, data_type='test', is_tgt=False)
+    # test_data_tgt = get_corpus_ids(src_lang_idx, tgt_lang_idx, data_type='test', is_tgt=True)
 
-    print(f"load model from {args['MODEL_PATH']}")
-    model = NMT.load(args['MODEL_PATH'])
+    print(f"load model from {model_path}")
+    model = MultiNMT.load(model_path)
 
     # set model to evaluate mode
     model.eval()
@@ -256,13 +256,12 @@ def decode(args: Dict[str, str]):
                              beam_size=int(args['--beam-size']),
                              max_decoding_time_step=int(args['--max-decoding-time-step']))
 
-    top_hypotheses = [hyps[0] for hyps in hypotheses]
-    top_hypotheses = decode_corpus_ids(top_hypotheses)
+    top_hypotheses = [hyps[0].value for hyps in hypotheses]
+    translated_text = decode_corpus_ids(top_hypotheses)
 
-    with open(args['OUTPUT_FILE'], 'w') as f:
-        for src_sent, top_hyp in zip(test_data_src, top_hypotheses):
-            hyp_sent = top_hyp.value
-            f.write(hyp_sent + '\n')
+    with open(output_file, 'w') as f:
+        for sent in translated_text:
+            f.write(' '.join(sent) + '\n')
 
 
 def main():

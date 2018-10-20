@@ -47,22 +47,27 @@ class MultiNMT(nn.Module):
         # init CPG
         self.cpg = CPG(self.param_shapes, args)
 
-    def forward(self, src_lang: int, tgt_lang: int, src_sent_idx: Tensor, tgt_sent_idx: Tensor) -> Tensor:
+    def forward(self, src_lang: int, tgt_lang: int, src_sents: List[List[int]], tgt_sents: List[List[int]]) \
+            -> Tensor:
         """
         Takes in a batch of paired src and tgt sentences with lang tags, return the loss
 
         :param src_lang: source language index
         :param tgt_lang: target language index
-        :param src_sent_idx: [batch_size, sent_length]
-        :param tgt_sent_idx: [batch_size, sent_length]
+        :param src_sents: batch_size of sentences
+        :param tgt_sents: batch_size of sentences
         :return: scores with shape = [batch_size]
         """
+        # [batch_size, sent_len]
+        src_sents_tensor = sents_to_tensor(src_sents, device)
+        # [batch_size, sent_len]
+        tgt_sents_tensor = sents_to_tensor(tgt_sents, device)
         grouped_params = self.get_grouped_params(src_lang, tgt_lang)
         # encode
-        src_encodings, decoder_init_state = self.encode(src_sent_idx, src_lang, grouped_params)
+        src_encodings, decoder_init_state = self.encode(src_sents_tensor, src_lang, grouped_params)
         # decode
         decoder = self.get_decoder(tgt_lang, grouped_params)
-        return decoder(src_encodings, decoder_init_state, tgt_sent_idx)
+        return decoder(src_encodings, decoder_init_state, tgt_sents_tensor)
 
     def get_grouped_params(self, src_lang: int, tgt_lang: int) -> List[List[Tensor]]:
         # create a list of language indices corresponding each param group
@@ -90,11 +95,11 @@ class MultiNMT(nn.Module):
         return Decoder(self.batch_size, self.embed_size, self.decoder_hidden_size, self.num_layers,
                        self.cpg.get_embedding(tgt_lang), dec_lstm_weights, attn_weights)
 
-    def beam_search(self, src_sent_idx: Tensor, src_lang: int, tgt_lang: int, beam_size: int=5,
+    def beam_search(self, src_sents: List[List[int]], src_lang: int, tgt_lang: int, beam_size: int=5,
                     max_decoding_time_step: int=70) -> Tensor:
         """
         Takes in ONE src sentence with language tag, return the corresponding translation (word indices)
-        :param src_sent_idx: dim = (1, sent_length)
+        :param src_sents: batch_size of sentences
         :param src_lang: source language index
         :param tgt_lang: target language index
         :param beam_size: beam size
@@ -105,8 +110,10 @@ class MultiNMT(nn.Module):
         """
         with torch.no_grad():
             grouped_params = self.get_grouped_params(src_lang, tgt_lang)
+            # [batch_size, sent_len]
+            src_sents_tensor = sents_to_tensor(src_sents, device)
             # src_encodings.shape = [sent_length, 1, embed_size]
-            src_encodings, decoder_init_state = self.encode(src_sent_idx, src_lang, grouped_params)
+            src_encodings, decoder_init_state = self.encode(src_sents_tensor, src_lang, grouped_params)
             h_t_0, c_t_0, attn = Decoder.init_decoder_step_input(decoder_init_state)
             # candidates for best hypotheses
             hypotheses_cand = [(Hypothesis([VocabEntry.SOS_ID], 0), h_t_0, c_t_0, attn)]
@@ -175,8 +182,7 @@ class MultiNMT(nn.Module):
         cum_tgt_words = 0.
         with torch.no_grad():
             for src_lang, tgt_lang, src_sents, tgt_sents in batch_iter(dev_data, batch_size):
-                loss = self(src_lang, tgt_lang,
-                            sents_to_tensor(src_sents, device), sents_to_tensor(tgt_sents, device)).sum()
+                loss = self(src_lang, tgt_lang, src_sents, tgt_sents).sum()
                 cum_loss += loss
                 tgt_word_num_to_predict = sum(len(s[1:]) for s in tgt_sents)  # omitting the leading `<s>`
                 cum_tgt_words += tgt_word_num_to_predict
