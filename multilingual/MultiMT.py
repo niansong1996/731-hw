@@ -63,7 +63,7 @@ class MultiNMT(nn.Module):
         src_sents_tensor = sents_to_tensor(src_sents, device)
         # [batch_size, sent_len]
         tgt_sents_tensor = sents_to_tensor(tgt_sents, device)
-        assert (src_sents_tensor.shape[0] == tgt_sents_tensor[0])
+        assert (src_sents_tensor.shape[0] == tgt_sents_tensor.shape[0])
         batch_size = src_sents_tensor.shape[0]
         grouped_params = self.get_grouped_params(src_lang, tgt_lang)
         # encode

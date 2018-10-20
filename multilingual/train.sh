@@ -6,6 +6,7 @@ work_dir="work_dir"
 name_prefix="mult-lang"
 model_name=${work_dir}"-model.bin"
 decode=${work_dir}"-result.txt"
+test_tgt="data/test.en-az.en.txt"
 mkdir -p ${work_dir}
 echo save results to ${work_dir}
 

@@ -262,7 +262,7 @@ def decode(args: Dict[str, str]):
                              max_decoding_time_step=int(args['--max-decoding-time-step']))
 
     top_hypotheses = [hyps[0].value for hyps in hypotheses]
-    translated_text = decode_corpus_ids(top_hypotheses)
+    translated_text = decode_corpus_ids(lang_name=tgt_lang, sents=top_hypotheses)
 
     with open(output_file, 'w') as f:
         for sent in translated_text:
