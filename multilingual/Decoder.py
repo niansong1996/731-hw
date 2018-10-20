@@ -137,7 +137,7 @@ class Decoder:
         a_t = self.softmax(score)
         # a_t = self.dropout(a_t)
         # dim = (batch_size, num_direction * enc_hidden_size)
-        c_t = torch.bmm(a_t, h_s_).squeeze()
+        c_t = torch.bmm(a_t, h_s_)[:, 0, :]
         # dim = (batch_size, num_direction * enc_hidden_size + dec_hidden_size)
         cat_c_h = torch.cat((c_t, h_t_top), 1)
         return self.tanh(F.linear(cat_c_h, self.Wc))

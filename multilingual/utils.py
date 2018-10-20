@@ -3,7 +3,6 @@ from typing import List, Tuple
 
 import torch
 
-from config import LANG_NAMES
 from collections import namedtuple
 
 import numpy as np

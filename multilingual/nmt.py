@@ -5,7 +5,7 @@ A very basic implementation of neural machine translation
 
 Usage:
     nmt.py train --vocab_size=<int> [options]
-    nmt.py decode [options] MODEL_PATH SRC_LANG TGT_LANG OUTPUTFILE
+    nmt.py decode [options] MODEL_PATH SRC_LANG TGT_LANG OUTPUT_FILE
 
 Options:
     -h --help                               show this screen.
@@ -115,6 +115,11 @@ def train(args: Dict[str, str]):
         print(type(param.data), param.size())
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
+    # TODO: [remove this] temporaily save inited model for testing
+    model.save(model_save_path)
+    print('save currently the best model to [%s]' % model_save_path)
+
+
     while True:
         epoch += 1
 
@@ -122,7 +127,7 @@ def train(args: Dict[str, str]):
             train_iter += 1
             batch_size = len(src_sents)
 
-            if train_iter % 5 == 0:
+            if train_iter % 1 == 0:
                 print("#", end="", flush=True)
 
             # start training routine

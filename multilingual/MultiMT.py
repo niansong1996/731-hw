@@ -10,7 +10,7 @@ from CPG import CPG
 from Decoder import Decoder
 from Encoder import Encoder
 from config import device
-from utils import batch_iter, PairedData, sents_to_tensor
+from utils import batch_iter, PairedData, sents_to_tensor, assert_tensor_size
 from vocab import Vocab
 
 Hypothesis = namedtuple('Hypothesis', ['value', 'score'])
@@ -66,7 +66,7 @@ class MultiNMT(nn.Module):
         tgt_sents_tensor = sents_to_tensor(tgt_sents, device)
         grouped_params = self.get_grouped_params(src_lang, tgt_lang)
         # encode
-        src_encodings, decoder_init_state = self.encode(src_sents_tensor, src_lang, grouped_params)
+        src_encodings, decoder_init_state = self.encode(self.batch_size, src_sents_tensor, src_lang, grouped_params)
         # decode
         decoder = self.get_decoder(tgt_lang, grouped_params)
         return decoder(src_encodings, decoder_init_state, tgt_sents_tensor)
@@ -76,7 +76,7 @@ class MultiNMT(nn.Module):
         langs = [src_lang for _ in range(self.enc_shapes_len)] + [tgt_lang for _ in range(self.dec_shapes_len)]
         return self.cpg.get_params(langs)
 
-    def encode(self, src_sent_idx: Tensor, src_lang: int, grouped_params: List[List[Tensor]]) \
+    def encode(self, batch_size: int, src_sent_idx: Tensor, src_lang: int, grouped_params: List[List[Tensor]]) \
             -> Tuple[Tensor, Tuple[Tensor, Tensor]]:
         """
 
@@ -87,7 +87,7 @@ class MultiNMT(nn.Module):
             h_t, c_t: shape = [num_layers, batch_size, num_direction * hidden_size]
         """
         enc_weights = grouped_params[:self.enc_shapes_len]
-        encoder = Encoder(self.batch_size, self.embed_size, self.hidden_size, self.cpg.get_embedding(src_lang),
+        encoder = Encoder(batch_size, self.embed_size, self.hidden_size, self.cpg.get_embedding(src_lang),
                           enc_weights)
         return encoder(src_sent_idx)
 
@@ -97,11 +97,11 @@ class MultiNMT(nn.Module):
         return Decoder(self.batch_size, self.embed_size, self.decoder_hidden_size, self.num_layers,
                        self.cpg.get_embedding(tgt_lang), dec_lstm_weights, attn_weights)
 
-    def beam_search(self, src_sents: List[List[int]], src_lang: int, tgt_lang: int, beam_size: int=5,
+    def beam_search(self, src_sent: List[int], src_lang: int, tgt_lang: int, beam_size: int=5,
                     max_decoding_time_step: int=70) -> Tensor:
         """
         Takes in ONE src sentence with language tag, return the corresponding translation (word indices)
-        :param src_sents: batch_size of sentences
+        :param src_sent: batch_size of sentences
         :param src_lang: source language index
         :param tgt_lang: target language index
         :param beam_size: beam size
@@ -113,9 +113,9 @@ class MultiNMT(nn.Module):
         with torch.no_grad():
             grouped_params = self.get_grouped_params(src_lang, tgt_lang)
             # [batch_size, sent_len]
-            src_sents_tensor = sents_to_tensor(src_sents, device)
+            src_sents_tensor = sents_to_tensor([src_sent], device)
             # src_encodings.shape = [sent_length, 1, embed_size]
-            src_encodings, decoder_init_state = self.encode(src_sents_tensor, src_lang, grouped_params)
+            src_encodings, decoder_init_state = self.encode(1, src_sents_tensor, src_lang, grouped_params)
             h_t_0, c_t_0, attn = Decoder.init_decoder_step_input(decoder_init_state)
             # candidates for best hypotheses
             hypotheses_cand = [(Hypothesis([Vocab.SOS_ID], 0), h_t_0, c_t_0, attn)]
@@ -130,7 +130,8 @@ class MultiNMT(nn.Module):
                         new_hypotheses_cand.append((Hypothesis(sent, log_likelihood), h_t, c_t, attn))
                         continue
                     # dim = (1 (single_word), embed_size)
-                    decoder_input = self.decoder_embed(torch.tensor([input_word_idx]).to(device))
+                    decoder_input = decoder.embedding(torch.tensor([input_word_idx]).to(device))
+                    assert_tensor_size(decoder_input, [1, self.embed_size])
                     # softmax_output.shape = [vocab_size]
                     h_t, c_t, softmax_output, attn = decoder.decoder_step(src_encodings, decoder_input, h_t, c_t, attn)
                     # dim = (1, beam_size)

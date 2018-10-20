@@ -11,7 +11,7 @@ echo save results to ${work_dir}
 
 python nmt.py \
     train \
-    --langs 'az-en,be-en'\
+    --langs 'az-en,be-en,gl-en,tr-en,ru-en,pt-en'\
     --lang-embed-size 4\
     --cuda \
     --vocab_size 20000 \
@@ -20,15 +20,16 @@ python nmt.py \
     --valid-niter 1200 \
     --lr 0.001 \
     --log-every 50 \
-    --batch-size 128 \
-    --hidden-size 512 \
+    --batch-size 64 \
+    --hidden-size 256 \
     --num_layers 2\
     --max-epoch 100 \
-    --embed-size 300 \
+    --embed-size 256 \
     --uniform-init 0.1 \
     --dropout 0.2 \
     --clip-grad 5.0 \
-    --lr-decay 0.5
+    --lr-decay 0.5 \
+    --patience 3
 # 2>${work_dir}/err.log
 
 python nmt.py \
@@ -38,7 +39,7 @@ python nmt.py \
     --max-decoding-time-step 100 \
     ${work_dir}/${model_name} \
     az \
-    en
+    en \
     ${work_dir}/${decode}
 
 perl multi-bleu.perl ${test_tgt} < ${work_dir}/${decode}
