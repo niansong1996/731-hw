@@ -109,12 +109,7 @@ def train(args: Dict[str, str]):
 
     vocab = pickle.load(open(args['--vocab'], 'rb'))
 
-    model = MultiNMT(embed_size=int(args['--embed-size']),
-                     hidden_size=int(args['--hidden-size']),
-                     vocab_size=int(args['--vocab_size']),
-                     num_layers=int(args['--num_layers']),
-                     batch_size=train_batch_size,
-                     dropout_rate=float(args['--dropout'])).to(device)
+    model = MultiNMT().to(device)
 
     num_trial = 0
     train_iter = patience = cum_loss = report_loss = cumulative_tgt_words = report_tgt_words = 0

@@ -5,14 +5,11 @@ import torch.nn as nn
 import torch.tensor as Tensor
 from functools import reduce
 
-LANG_INDICES = {'en': 0,
-                'gl': 1, 'pt': 4,
-                'az': 2, 'tr': 5,
-                'be': 3, 'ru': 6}
+from config import LANG_NAMES
 
 
 class CPG(nn.Module):
-    def __init__(self, shapes: List[List[Tuple[int]]], size_dict: Dict[str, int]):
+    def __init__(self, shapes: List[List[Tuple[int]]], args: Dict[str, str]):
         """
         Args:
             shapes: List[List[tuples]] a list of groups, where each tuple the
@@ -22,24 +19,24 @@ class CPG(nn.Module):
 
         # init size constants
 
-        self.lang_embed_size = size_dict['lang_embed_size']
-        self.word_embed_size = size_dict['word_embed_size']
-        self.num_lang = size_dict['num_lang']
-        self.vocab_size = size_dict['vocab_size']
-        self.low_rank = size_dict['low_rank']
-        self.lang_encode = torch.eyes(self.num_lang)
+        self.lang_embed_size = int(args['--lang_embed_size'])
+        self.word_embed_size = int(args['--embed-size'])
+        self.vocab_size = int(args['--vocab_size'])
+        self.low_rank = int(args['--low_rank'])
+        num_lang = len(LANG_NAMES)
+        self.lang_encode = torch.eyes(num_lang)
 
         self.shapes = shapes
         self.group_num, self.group_param_num, self.group_param_sizes = self.get_param_meta(shapes)
-        
+
         # init every layer of CPG for different groups
-        self.L = nn.Linear(self.num_lang, self.lang_embed_size, bias=False)
+        self.L = nn.Linear(num_lang, self.lang_embed_size, bias=False)
         self.Ps = nn.ModuleList([nn.Linear(self.lang_embed_size, self.low_rank) for _ in range(self.group_num)])
         self.Ws = nn.ModuleList([nn.Linear(self.low_rank, self.group_param_sizes[i]) for i in range(self.group_num)])
 
         # init language embeddings
         self.word_embeddings = nn.ModuleList([nn.Embedding(self.vocab_size, self.word_embed_size)
-                                              for _ in range(self.num_lang)])
+                                              for _ in range(num_lang)])
 
         # initialize the parameters using uniform distribution
         for param in self.parameters():
@@ -69,12 +66,12 @@ class CPG(nn.Module):
         Gets the grouped parameters required by the model
 
         Args:
-            langs: a list of language indices representing the language using CPG.LANG_INDICES
+            langs: a list of language indices representing the language using utils.LANG_INDICES
 
         Return:
             grouped_params: a list of groups of parameters in tensor form
         """
-        assert(len(langs) == self.group_num)
+        assert (len(langs) == self.group_num)
 
         # generate parameters for this language by group
         params = []
@@ -106,4 +103,4 @@ class CPG(nn.Module):
 
     @DeprecationWarning
     def forward(self, L, X, y):
-        pass 
+        pass
