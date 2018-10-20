@@ -24,7 +24,7 @@ class CPG(nn.Module):
         self.vocab_size = int(args['--vocab_size'])
         self.low_rank = int(args['--low_rank'])
         num_lang = len(LANG_NAMES)
-        self.lang_encode = torch.eyes(num_lang)
+        self.lang_encode = torch.eye(num_lang)
 
         self.shapes = shapes
         self.group_num, self.group_param_num, self.group_param_sizes = self.get_param_meta(shapes)
@@ -52,11 +52,14 @@ class CPG(nn.Module):
         group_param_sizes = []
 
         for group in shapes:
-            group_param_num.append(len(group))
+            group_param = []
             group_param_size = 0
             for shape in group:
-                group_param_size += reduce(lambda product, dim: product * dim, shape, 1)
+                shape_size = reduce(lambda product, dim: product * dim, shape, 1)
+                group_param.append(shape_size)
+                group_param_size += shape_size
 
+            group_param_num.append(group_param)
             group_param_sizes.append(group_param_size)
 
         return group_num, group_param_num, group_param_sizes
@@ -104,3 +107,23 @@ class CPG(nn.Module):
     @DeprecationWarning
     def forward(self, L, X, y):
         pass
+
+
+args = dict()
+args['--lang_embed_size'] = 8
+args['--embed-size'] = 256
+args['--vocab_size'] = 20000
+args['--low_rank'] = 4
+
+shapes = [[(10, 20), (10,20,30), (10,20,30)], [(100, 200), (10,2,300)], [(1, 20, 45), (10,2)] ]
+
+print(CPG.get_param_meta(shapes))
+
+
+cpg = CPG(shapes, args)
+result = cpg.get_params([1, 1, 0])
+
+for tensor_list in result:
+    print('%d tensors in this group' % len(tensor_list))
+    for tsr in tensor_list:
+        print(tsr.shape)
