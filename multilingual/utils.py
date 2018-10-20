@@ -33,32 +33,6 @@ def read_corpus(file_path, source):
     return data
 
 
-def read_corpus_pairs(src_lang_idx, tgt_lang_idx, source):
-    src_sents = []
-    tgt_sents = []
-
-    src_lang = LANG_INDICES[src_lang_idx]
-    tgt_lang = LANG_INDICES[tgt_lang_idx]
-
-    # read corpus for src corpus
-    file_path = '%s.%s-%s.%s.txt' % (source, tgt_lang, src_lang, src_lang)
-    for line in open(file_path, encoding="utf-8"):
-        sent = line.strip().split(' ')
-        src_sents.append(sent)
-
-    # read corpus for tgt corpus
-    file_path = '%s.%s-%s.%s.txt' % (source, tgt_lang, src_lang, tgt_lang)
-    for line in open(file_path, encoding="utf-8"):
-        sent = line.strip().split(' ')
-        if source == 'tgt':
-            sent = ['<s>'] + sent + ['</s>']
-        tgt_sents.append(sent)
-
-    # pair those corresponding sents together
-    src_tgt_sent_pairs = list(zip(src_sents, tgt_sents))
-
-    return src_tgt_sent_pairs
-
 
 def assert_tensor_size(tensor: Tensor, expected_size: List[int]):
     try:
