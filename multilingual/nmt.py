@@ -108,12 +108,7 @@ def train(args: Dict[str, str]):
 
     vocab = pickle.load(open(args['--vocab'], 'rb'))
 
-    model = MultiNMT(embed_size=int(args['--embed-size']),
-                     hidden_size=int(args['--hidden-size']),
-                     vocab_size=int(args['--vocab_size']),
-                     num_layers=int(args['--num_layers']),
-                     batch_size=train_batch_size,
-                     dropout_rate=float(args['--dropout'])).to(device)
+    model = MultiNMT().to(device)
 
     num_trial = 0
     train_iter = patience = cum_loss = report_loss = cumulative_tgt_words = report_tgt_words = 0
@@ -141,7 +136,8 @@ def train(args: Dict[str, str]):
 
             # start training routine
             optimizer.zero_grad()
-            loss_v = model(src_sents, tgt_sents)
+            loss_v = model(src_lang, tgt_lang,
+                           torch.tensor(src_sents, device=device), torch.tensor(tgt_sents, device=device))
             loss = torch.sum(loss_v)
             loss.backward()
             torch.nn.utils.clip_grad_norm(model.parameters(), clip_grad)

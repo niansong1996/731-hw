@@ -17,16 +17,15 @@ Hypothesis = namedtuple('Hypothesis', ['value', 'score'])
 
 
 class MultiNMT(nn.Module):
-    def __init__(self, embed_size, hidden_size, vocab_size, num_layers, batch_size, dropout_rate, ):
+    def __init__(self, args: Dict[str, str]):
         super(MultiNMT, self).__init__()
-
         # init size constants
-        self.embed_size = embed_size
-        self.hidden_size = hidden_size
-        self.vocab_size = vocab_size
-        self.num_layers = num_layers
-        self.batch_size = batch_size
-        self.dropout_rate = dropout_rate
+        self.embed_size = int(args['--embed-size']),
+        self.hidden_size = int(args['--hidden-size']),
+        self.vocab_size = int(args['--vocab_size']),
+        self.num_layers = int(args['--num_layers']),
+        self.train_batch_size = int(args['--batch-size'])
+        self.dropout_rate = float(args['--dropout'])
         self.NUM_DIR = 2
         # init encoder param shapes
         self.enc_in_lstm_shapes = MultiNMT.get_shapes_flstm(self.embed_size, self.hidden_size, self.num_layers)
@@ -46,7 +45,7 @@ class MultiNMT(nn.Module):
         # combine enc and dec param shapes
         self.param_shapes = self.enc_shapes + self.dec_shapes
         # init CPG
-        self.cpg = CPG(self.param_shapes, size_dict)
+        self.cpg = CPG(self.param_shapes, args)
 
     def forward(self, src_lang: int, tgt_lang: int, src_sent_idx: Tensor, tgt_sent_idx: Tensor) -> Tensor:
         """
