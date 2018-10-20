@@ -39,28 +39,19 @@ import math
 import pickle
 import sys
 import time
-from collections import namedtuple
+from typing import *
 
 import numpy as np
-from typing import *
-from docopt import docopt
-from tqdm import tqdm
-from nltk.translate.bleu_score import corpus_bleu, sentence_bleu, SmoothingFunction
-
-from config import device, LANG_INDICES
-from MultiMT import Hypothesis, MultiNMT
-from subword import get_corpus_pairs, get_corpus_ids, decode_corpus_ids
-from utils import read_corpus, batch_iter, load_matrix, PairedData, LangPair
-from vocab import Vocab, VocabEntry
-from embed import corpus_to_indices, indices_to_corpus
-
 import torch
-import torch.nn as nn
-import torch.tensor as Tensor
-import torch.nn.functional as F
-from torch.nn.utils.rnn import pad_sequence
-from torch.nn.utils.rnn import pack_padded_sequence
-from torch.nn.utils.rnn import pad_packed_sequence
+from docopt import docopt
+from nltk.translate.bleu_score import corpus_bleu
+from tqdm import tqdm
+
+from MultiMT import Hypothesis, MultiNMT
+from config import device, LANG_INDICES
+from subword import get_corpus_pairs, get_corpus_ids, decode_corpus_ids
+from utils import batch_iter, PairedData, LangPair
+from utils import sents_to_tensor
 
 
 def compute_corpus_level_bleu_score(references: List[List[str]], hypotheses: List[Hypothesis]) -> float:
@@ -136,8 +127,7 @@ def train(args: Dict[str, str]):
 
             # start training routine
             optimizer.zero_grad()
-            loss_v = model(src_lang, tgt_lang,
-                           torch.tensor(src_sents, device=device), torch.tensor(tgt_sents, device=device))
+            loss_v = model(src_lang, tgt_lang, sents_to_tensor(src_sents, device), sents_to_tensor(tgt_sents, device))
             loss = torch.sum(loss_v)
             loss.backward()
             torch.nn.utils.clip_grad_norm(model.parameters(), clip_grad)

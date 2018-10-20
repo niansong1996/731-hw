@@ -10,7 +10,7 @@ from CPG import CPG
 from Decoder import Decoder
 from Encoder import Encoder
 from config import device
-from utils import batch_iter, PairedData
+from utils import batch_iter, PairedData, sents_to_tensor
 from vocab import VocabEntry
 
 Hypothesis = namedtuple('Hypothesis', ['value', 'score'])
@@ -175,7 +175,8 @@ class MultiNMT(nn.Module):
         cum_tgt_words = 0.
         with torch.no_grad():
             for src_lang, tgt_lang, src_sents, tgt_sents in batch_iter(dev_data, batch_size):
-                loss = self(src_lang, tgt_lang, src_sents, tgt_sents).sum()
+                loss = self(src_lang, tgt_lang,
+                            sents_to_tensor(src_sents, device), sents_to_tensor(tgt_sents, device)).sum()
                 cum_loss += loss
                 tgt_word_num_to_predict = sum(len(s[1:]) for s in tgt_sents)  # omitting the leading `<s>`
                 cum_tgt_words += tgt_word_num_to_predict
