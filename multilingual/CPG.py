@@ -19,7 +19,7 @@ class CPG(nn.Module):
 
         # init size constants
 
-        self.lang_embed_size = int(args['--lang_embed_size'])
+        self.lang_embed_size = int(args['--lang-embed-size'])
         self.word_embed_size = int(args['--embed-size'])
         self.vocab_size = int(args['--vocab_size'])
         self.low_rank = int(args['--low_rank'])
@@ -109,21 +109,21 @@ class CPG(nn.Module):
         pass
 
 
-args = dict()
-args['--lang_embed_size'] = 8
-args['--embed-size'] = 256
-args['--vocab_size'] = 20000
-args['--low_rank'] = 4
+if __name__ == '__main__':
+    args = dict()
+    args['--lang_embed_size'] = 8
+    args['--embed-size'] = 256
+    args['--vocab_size'] = 20000
+    args['--low_rank'] = 4
 
-shapes = [[(10, 20), (10,20,30), (10,20,30)], [(100, 200), (10,2,300)], [(1, 20, 45), (10,2)] ]
+    shapes = [[(10, 20), (10, 20, 30), (10, 20, 30)], [(100, 200), (10, 2, 300)], [(1, 20, 45), (10, 2)]]
 
-print(CPG.get_param_meta(shapes))
+    print(CPG.get_param_meta(shapes))
 
+    cpg = CPG(shapes, args)
+    result = cpg.get_params([1, 1, 0])
 
-cpg = CPG(shapes, args)
-result = cpg.get_params([1, 1, 0])
-
-for tensor_list in result:
-    print('%d tensors in this group' % len(tensor_list))
-    for tsr in tensor_list:
-        print(tsr.shape)
+    for tensor_list in result:
+        print('%d tensors in this group' % len(tensor_list))
+        for tsr in tensor_list:
+            print(tsr.shape)

@@ -4,8 +4,8 @@
 A very basic implementation of neural machine translation
 
 Usage:
-    nmt.py train --train-src=<file> --train-tgt=<file> --dev-src=<file> --dev-tgt=<file> --vocab=<file> [options]
-    nmt.py decode [options] MODEL_PATH LANG OUTPUTFILE
+    nmt.py train --vocab_size=<int> [options]
+    nmt.py decode [options] MODEL_PATH SRC_LANG TGT_LANG OUTPUTFILE
 
 Options:
     -h --help                               show this screen.
@@ -17,6 +17,7 @@ Options:
     --batch-size=<int>                      batch size [default: 32]
     --lang-embed-size=<int>                 language embedding size [default: 8]
     --embed-size=<int>                      word embedding size [default: 256]
+    --num_layers=<int>                      number of layers [default: 2]
     --hidden-size=<int>                     hidden size [default: 256]
     --clip-grad=<float>                     gradient clipping [default: 5.0]
     --log-every=<int>                       log every [default: 10]
@@ -78,6 +79,8 @@ def get_data_pairs(langs: List[List[str]], data_type: str):
         tgt = LANG_INDICES[tgt_name]
         data_pair = get_corpus_pairs(src, tgt, data_type)
         data.append(PairedData(data_pair, LangPair(src, tgt)))
+        print('Done loading %s data for %s-%s parallel translation' \
+              % (data_type, src_name, tgt_name))
     return data
 
 
@@ -94,7 +97,9 @@ def train(args: Dict[str, str]):
     model_save_path = args['--save-to']
     optimizer_save_path = args['--save-opt']
 
-    model = MultiNMT().to(device)
+    # initialize the model
+    print('Model initializing...')
+    model = MultiNMT(args).to(device)
 
     num_trial = 0
     train_iter = patience = cum_loss = report_loss = cumulative_tgt_words = report_tgt_words = 0

@@ -20,9 +20,9 @@ class Decoder:
         self.dec_hidden_size = hidden_size
         self.num_layers = num_layers
         self.batch_size = batch_size
-        self.lstm_cell = Stack_FLSTMCell(input_size=embed_size, hidden_size=hidden_size, weights=lstm_weights,
-                                         num_layers=num_layers)
-        self.Wa, self.Wc, self.Ws = attn_weights
+        self.lstm_cell = Stack_FLSTMCell(input_size=hidden_size + embed_size, hidden_size=hidden_size,
+                                         weights=lstm_weights, num_layers=num_layers)
+        self.Wa, self.Wc, self.Ws = attn_weights[0]
         self.log_softmax = nn.LogSoftmax(dim=1)
         self.softmax = nn.Softmax(dim=2)
         self.criterion = nn.NLLLoss()
@@ -75,7 +75,7 @@ class Decoder:
         scores = torch.zeros(self.batch_size, device=device)
         zero_mask = torch.zeros(self.batch_size, device=device)
         one_mask = torch.ones(self.batch_size, device=device)
-        h_t, c_t, attn = self.init_decoder_step_input(device, decoder_init_state)
+        h_t, c_t, attn = self.init_decoder_step_input(decoder_init_state)
         # dim = (batch_size, sent_len, embed_size)
         tgt_sent_embed = self.embedding(tgt_sent_idx)
         # skip the '<s>' in the tgt_sents since the output starts from the word after '<s>'
@@ -91,7 +91,7 @@ class Decoder:
             # update scores
             scores = scores + masked_score_delta
             # dim = (batch_size, embed_size)
-            decoder_input = tgt_sent_embed[, i, :]
+            decoder_input = tgt_sent_embed[:, i, :]
             assert_tensor_size(decoder_input, [self.batch_size, self.dec_embed_size])
         return scores
 
@@ -111,9 +111,9 @@ class Decoder:
         # dim = (batch_size,  num_direction * enc_hidden_size + dec_embed_size)
         cat_input = torch.cat((attn, decoder_input), 1)
         h_t, c_t = self.lstm_cell(cat_input, h_t, c_t)
-        # dim = (batch_size, dec_hidden_size)
+        # attn_h_t.shape = [batch_size, dec_hidden_size]
         attn_h_t = self.global_attention(src_encodings, h_t)
-        # dim = (batch_size, vocab_size)
+        # vocab_size_output.shape = [batch_size, vocab_size]
         vocab_size_output = F.linear(attn_h_t, self.Ws)
         # dim = (batch_size, vocab_size)
         softmax_output = self.log_softmax(vocab_size_output).squeeze()

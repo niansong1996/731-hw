@@ -20,11 +20,11 @@ class MultiNMT(nn.Module):
     def __init__(self, args: Dict[str, str]):
         super(MultiNMT, self).__init__()
         # init size constants
-        self.embed_size = int(args['--embed-size']),
-        self.hidden_size = int(args['--hidden-size']),
-        self.vocab_size = int(args['--vocab_size']),
-        self.num_layers = int(args['--num_layers']),
-        self.train_batch_size = int(args['--batch-size'])
+        self.embed_size = int(args['--embed-size'])
+        self.hidden_size = int(args['--hidden-size'])
+        self.vocab_size = int(args['--vocab_size'])
+        self.num_layers = int(args['--num_layers'])
+        self.batch_size = int(args['--batch-size'])
         self.dropout_rate = float(args['--dropout'])
         self.NUM_DIR = 2
         # init encoder param shapes
@@ -34,11 +34,13 @@ class MultiNMT(nn.Module):
         self.enc_shapes_len = len(self.enc_shapes)
         # init decoder param shapes
         self.decoder_hidden_size = self.NUM_DIR * self.hidden_size
-        self.dec_lstm_shapes = MultiNMT.get_shapes_flstm(self.embed_size, self.decoder_hidden_size, self.num_layers)
+        self.decoder_input_size = self.decoder_hidden_size + self.embed_size
+        self.dec_lstm_shapes = MultiNMT.get_shapes_flstm(self.decoder_input_size, self.decoder_hidden_size,
+                                                         self.num_layers)
         self.dec_lstm_shapes_len = len(self.dec_lstm_shapes)
-        decoder_W_a_shape = (self.NUM_DIR * self.hidden_size, self.decoder_hidden_size)
-        decoder_W_c_shape = (self.NUM_DIR * self.hidden_size + self.decoder_hidden_size, self.decoder_hidden_size)
-        decoder_W_s_shape = (self.decoder_hidden_size, self.vocab_size)
+        decoder_W_a_shape = (self.decoder_hidden_size, self.NUM_DIR * self.hidden_size)
+        decoder_W_c_shape = (self.decoder_hidden_size, self.NUM_DIR * self.hidden_size + self.decoder_hidden_size)
+        decoder_W_s_shape = (self.vocab_size, self.decoder_hidden_size)
         self.dec_attn_shapes = [[decoder_W_a_shape, decoder_W_c_shape, decoder_W_s_shape]]
         self.dec_shapes = self.dec_lstm_shapes + self.dec_attn_shapes
         self.dec_shapes_len = len(self.dec_shapes)
@@ -152,13 +154,13 @@ class MultiNMT(nn.Module):
         return torch.load(model_path)
 
     @staticmethod
-    def get_shapes_flstm(embed_size, hidden_size, num_layers):
+    def get_shapes_flstm(input_size, hidden_size, num_layers):
         params_in_lstm = []
 
-        for _ in range(num_layers):
+        for i in range(num_layers):
             params_in_group = []
-
-            params_in_group.append((4 * hidden_size, embed_size))
+            input_size = input_size if i == 0 else hidden_size
+            params_in_group.append((4 * hidden_size, input_size))
             params_in_group.append((4 * hidden_size, hidden_size))
             params_in_group.append((4 * hidden_size, 1))
             params_in_group.append((4 * hidden_size, 1))

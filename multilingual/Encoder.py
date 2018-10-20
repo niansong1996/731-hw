@@ -24,9 +24,11 @@ class Encoder:
 
         # set different layers
         self.embedding = embedding
-        self.embed_size = embedding.shape[1]
-        self.in_order_cells = Stack_FLSTMCell(self.input_size, self.hidden_size, weights[:self.num_layer])
-        self.rev_order_cells = Stack_FLSTMCell(self.input_size, self.hidden_size, weights[self.num_layer:])
+        self.embed_size = embed_size
+        self.in_order_cells = Stack_FLSTMCell(self.input_size, self.hidden_size, weights[:self.num_layer],
+                                              num_layers=num_layer)
+        self.rev_order_cells = Stack_FLSTMCell(self.input_size, self.hidden_size, weights[self.num_layer:],
+                                               num_layers=num_layer)
 
         # set some dummy input states
         self.h_0 = torch.zeros((self.num_direction * self.num_layer, self.batch_size, self.hidden_size), device=device)
@@ -109,7 +111,7 @@ class Encoder:
         in_output = in_h_t_1[-1]
         rev_output = rev_h_t_1[-1]
 
-        output = torch.stack((in_output, rev_output), dim=1)
+        output = torch.cat([in_output, rev_output], dim=1)
         assert_tensor_size(output, [self.batch_size, 2 * self.hidden_size])
         h_t_1 = in_h_t_1 + rev_h_t_1
         c_t_1 = in_c_t_1 + rev_c_t_1

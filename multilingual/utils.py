@@ -48,7 +48,7 @@ def assert_tensor_size(tensor: Tensor, expected_size: List[int]):
     try:
         assert list(tensor.shape) == expected_size
     except AssertionError:
-        print("tensor shape %s doesn't match expected size %s" % (tensor.shape, expected_size))
+        print("!!!!!!tensor shape %s doesn't match expected size %s!!!!!!" % (tensor.shape, expected_size))
         raise
 
 
@@ -89,13 +89,13 @@ class PairedDataBatch:
 
         src_sents = [e[0] for e in examples]
         tgt_sents = [e[1] for e in examples]
-        yield src_sents, tgt_sents
+        return src_sents, tgt_sents
 
 
 def sents_to_tensor(sents: List[List[int]], device: torch.device) -> Tensor:
     max_sent_len = max(map((lambda x: len(x)), sents))
     # indices are initialized with the index of '<pad>'
-    for sent in enumerate(sents):
+    for sent in sents:
         while len(sent) < max_sent_len:
             sent.append(Vocab.PAD_ID)
     return torch.tensor(sents, dtype=torch.long, device=device)

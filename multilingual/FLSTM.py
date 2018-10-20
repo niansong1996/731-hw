@@ -4,14 +4,16 @@ import torch
 import torch.tensor as Tensor
 import torch.nn as nn
 
+from utils import assert_tensor_size
+
 
 def unpack_weight(weight, input_size, hidden_size):
-    assert(weight.shape == (4*hidden_size*(input_size+hidden_size+1+1), 1))
+    assert (weight.shape == (4 * hidden_size * (input_size + hidden_size + 1 + 1), 1))
 
-    W_x_shape = (4*hidden_size, input_size)
-    W_h_shape = (4*hidden_size, hidden_size)
-    b_x_shape = (4*hidden_size, 1)
-    b_h_shape = (4*hidden_size, 1)
+    W_x_shape = (4 * hidden_size, input_size)
+    W_h_shape = (4 * hidden_size, hidden_size)
+    b_x_shape = (4 * hidden_size, 1)
+    b_h_shape = (4 * hidden_size, 1)
 
     W_x_0 = 0
     W_x_1 = W_x_shape[0] * W_x_shape[1]
@@ -28,8 +30,8 @@ def unpack_weight(weight, input_size, hidden_size):
 
 
 class Stack_FLSTMCell:
-    def __init__(self, input_size, hidden_size, weights, num_layers=1):
-        assert(len(weights) == num_layers)
+    def __init__(self, input_size, hidden_size, weights: List[List[Tensor]], num_layers=1):
+        assert (len(weights) == num_layers)
 
         # init the size constants
         self.input_size = input_size
@@ -39,7 +41,9 @@ class Stack_FLSTMCell:
         # init the cells for each layer with weight references
         self.cells = []
         for i in range(num_layers):
-            cell = FLSTMCell(self.input_size, self.hidden_size, weights[i])
+            # only the input size of the first layer is the input size of the decoder
+            cell_input_size = self.input_size if i == 0 else self.hidden_size
+            cell = FLSTMCell(cell_input_size, self.hidden_size, weights[i])
             self.cells.append(cell)
 
     def __call__(self, X: Tensor, h_0: List[Tensor], c_0: List[Tensor]) \
@@ -52,8 +56,9 @@ class Stack_FLSTMCell:
         :param c_0: a list of memory cells of size num of layers, with the first cell at 0
         :return:
         """
-        assert(len(h_0) == self.num_layers)
-        assert(len(c_0) == self.num_layers)
+        assert (len(h_0) == self.num_layers)
+        assert (len(c_0) == self.num_layers)
+        assert (X.shape[1] == self.input_size)
 
         # input and output for each layer
         input_x = X
@@ -70,8 +75,8 @@ class Stack_FLSTMCell:
             h_1.append(h)
             c_1.append(c)
 
-        assert(len(h_1) == self.num_layers)
-        assert(len(c_1) == self.num_layers) 
+        assert (len(h_1) == self.num_layers)
+        assert (len(c_1) == self.num_layers)
 
         return h_1, c_1
 
@@ -81,9 +86,16 @@ class FLSTMCell:
         # init the size constants
         self.input_size = input_size
         self.hidden_size = hidden_size
-
+        W_x_shape = [4 * hidden_size, input_size]
+        W_h_shape = [4 * hidden_size, hidden_size]
+        b_x_shape = [4 * hidden_size, 1]
+        b_h_shape = [4 * hidden_size, 1]
         # init the weights BY REFRENCE
         W_x, W_h, b_x, b_h = weights
+        assert_tensor_size(W_x, W_x_shape)
+        assert_tensor_size(W_h, W_h_shape)
+        assert_tensor_size(b_x, b_x_shape)
+        assert_tensor_size(b_h, b_h_shape)
         self.W_x = W_x
         self.W_h = W_h
         self.b_x = b_x
@@ -107,13 +119,13 @@ class FLSTMCell:
         W_x_X = torch.mm(self.W_x, X.transpose(0, 1))
         W_h_H = torch.mm(self.W_h, h_0.transpose(0, 1))
         W_x_h = W_x_X + W_h_H
-        W_x_h_b = W_x_h + self.b_x +self.b_h
+        W_x_h_b = W_x_h + self.b_x + self.b_h
 
         # (batch_size, hidden_size)
-        i = torch.sigmoid(W_x_h_b[0:hidden_size]).transpose(0,1)
-        f = torch.sigmoid(W_x_h_b[hidden_size:2*hidden_size]).transpose(0,1)
-        g = torch.tanh(W_x_h_b[2*hidden_size:3*hidden_size]).transpose(0,1)
-        o = torch.sigmoid(W_x_h_b[3*hidden_size:4*hidden_size]).transpose(0,1)
+        i = torch.sigmoid(W_x_h_b[0:hidden_size]).transpose(0, 1)
+        f = torch.sigmoid(W_x_h_b[hidden_size:2 * hidden_size]).transpose(0, 1)
+        g = torch.tanh(W_x_h_b[2 * hidden_size:3 * hidden_size]).transpose(0, 1)
+        o = torch.sigmoid(W_x_h_b[3 * hidden_size:4 * hidden_size]).transpose(0, 1)
 
         # (batch_size, hidden_size)
         c_1 = f * c_0 + i * g
@@ -122,35 +134,27 @@ class FLSTMCell:
         return h_1, c_1
 
 
-input_size_ = 256
-hidden_size_ = 512
-batch_size_ = 32
+if __name__ == '__main__':
+    input_size_ = 256
+    hidden_size_ = 512
+    batch_size_ = 32
 
-c_0_ = torch.randn((batch_size_, hidden_size_))
-h_0_ = torch.randn((batch_size_, hidden_size_))
-X_ = torch.randn((batch_size_, input_size_))
+    c_0_ = torch.randn((batch_size_, hidden_size_))
+    h_0_ = torch.randn((batch_size_, hidden_size_))
+    X_ = torch.randn((batch_size_, input_size_))
 
-lstm = nn.LSTMCell(input_size_, hidden_size_)
+    lstm = nn.LSTMCell(input_size_, hidden_size_)
 
-weights = []
-for param in lstm.parameters():
-    weights.append(param.data)
-weights[2] = weights[2].unsqueeze(1)
-weights[3] = weights[3].unsqueeze(1)
+    weights = []
+    for param in lstm.parameters():
+        weights.append(param.data)
+    weights[2] = weights[2].unsqueeze(1)
+    weights[3] = weights[3].unsqueeze(1)
 
-flstm = FLSTMCell(input_size_, hidden_size_, weights)
+    flstm = FLSTMCell(input_size_, hidden_size_, weights)
 
-lstm_output = lstm(X_, (h_0_, c_0_))
-flstm_output = flstm(X_, h_0_, c_0_)
+    lstm_output = lstm(X_, (h_0_, c_0_))
+    flstm_output = flstm(X_, h_0_, c_0_)
 
-print(lstm_output)
-print(flstm_output)
-
-
-        
-
-
-
-
-
-
+    print(lstm_output)
+    print(flstm_output)
