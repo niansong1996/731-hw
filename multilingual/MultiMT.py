@@ -24,7 +24,6 @@ class MultiNMT(nn.Module):
         self.hidden_size = int(args['--hidden-size'])
         self.vocab_size = int(args['--vocab_size'])
         self.num_layers = int(args['--num_layers'])
-        self.batch_size = int(args['--batch-size'])
         self.dropout_rate = float(args['--dropout'])
         self.NUM_DIR = 2
         # init encoder param shapes
@@ -64,11 +63,13 @@ class MultiNMT(nn.Module):
         src_sents_tensor = sents_to_tensor(src_sents, device)
         # [batch_size, sent_len]
         tgt_sents_tensor = sents_to_tensor(tgt_sents, device)
+        assert (src_sents_tensor.shape[0] == tgt_sents_tensor[0])
+        batch_size = src_sents_tensor.shape[0]
         grouped_params = self.get_grouped_params(src_lang, tgt_lang)
         # encode
-        src_encodings, decoder_init_state = self.encode(self.batch_size, src_sents_tensor, src_lang, grouped_params)
+        src_encodings, decoder_init_state = self.encode(batch_size, src_sents_tensor, src_lang, grouped_params)
         # decode
-        decoder = self.get_decoder(tgt_lang, grouped_params)
+        decoder = self.get_decoder(tgt_lang, batch_size, grouped_params)
         return decoder(src_encodings, decoder_init_state, tgt_sents_tensor)
 
     def get_grouped_params(self, src_lang: int, tgt_lang: int) -> List[List[Tensor]]:
@@ -91,10 +92,10 @@ class MultiNMT(nn.Module):
                           enc_weights)
         return encoder(src_sent_idx)
 
-    def get_decoder(self, tgt_lang: int, grouped_params: List[List[Tensor]]) -> Decoder:
+    def get_decoder(self, tgt_lang: int, batch_size: int, grouped_params: List[List[Tensor]]) -> Decoder:
         dec_lstm_weights = grouped_params[self.enc_shapes_len:self.enc_shapes_len + self.dec_lstm_shapes_len]
         attn_weights = grouped_params[self.enc_shapes_len + self.dec_lstm_shapes_len:]
-        return Decoder(self.batch_size, self.embed_size, self.decoder_hidden_size, self.num_layers,
+        return Decoder(batch_size, self.embed_size, self.decoder_hidden_size, self.num_layers,
                        self.cpg.get_embedding(tgt_lang), dec_lstm_weights, attn_weights)
 
     def beam_search(self, src_sent: List[int], src_lang: int, tgt_lang: int, beam_size: int=5,
@@ -119,7 +120,7 @@ class MultiNMT(nn.Module):
             h_t_0, c_t_0, attn = Decoder.init_decoder_step_input(decoder_init_state)
             # candidates for best hypotheses
             hypotheses_cand = [(Hypothesis([Vocab.SOS_ID], 0), h_t_0, c_t_0, attn)]
-            decoder = self.get_decoder(tgt_lang, grouped_params)
+            decoder = self.get_decoder(tgt_lang, 1, grouped_params)
             for i in range(max_decoding_time_step):
                 new_hypotheses_cand = []
                 for (sent, log_likelihood), h_t, c_t, attn in hypotheses_cand:
