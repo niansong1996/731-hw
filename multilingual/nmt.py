@@ -4,20 +4,20 @@
 A very basic implementation of neural machine translation
 
 Usage:
-    nmt.py train --vocab_size=<int> [options]
+    nmt.py train --vocab-size=<int> [options]
     nmt.py decode [options] MODEL_PATH SRC_LANG TGT_LANG OUTPUT_FILE
 
 Options:
     -h --help                               show this screen.
     --langs=<src-tgt,...>                   comma separated language pairs <src-tgt>
     --cuda                                  use GPU
-    --vocab_size=<int>                      vocab size [default: 20000]
-    --low_rank=<int>                        low rank size [default: 4]
+    --vocab-size=<int>                      vocab size [default: 20000]
+    --low-rank=<int>                        low rank size [default: 4]
     --seed=<int>                            seed [default: 0]
     --batch-size=<int>                      batch size [default: 32]
     --lang-embed-size=<int>                 language embedding size [default: 8]
     --embed-size=<int>                      word embedding size [default: 256]
-    --num_layers=<int>                      number of layers [default: 2]
+    --num-layers=<int>                      number of layers [default: 2]
     --hidden-size=<int>                     hidden size [default: 256]
     --clip-grad=<float>                     gradient clipping [default: 5.0]
     --log-every=<int>                       log every [default: 10]
@@ -127,7 +127,7 @@ def train(args: Dict[str, str]):
             train_iter += 1
             batch_size = len(src_sents)
 
-            if train_iter % 1 == 0:
+            if train_iter % 5 == 0:
                 print("#", end="", flush=True)
 
             # start training routine

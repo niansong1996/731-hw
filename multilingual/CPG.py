@@ -4,6 +4,7 @@ import torch
 import torch.nn as nn
 import torch.tensor as Tensor
 from functools import reduce
+from config import device
 
 from config import LANG_NAMES
 
@@ -21,10 +22,10 @@ class CPG(nn.Module):
 
         self.lang_embed_size = int(args['--lang-embed-size'])
         self.word_embed_size = int(args['--embed-size'])
-        self.vocab_size = int(args['--vocab_size'])
-        self.low_rank = int(args['--low_rank'])
+        self.vocab_size = int(args['--vocab-size'])
+        self.low_rank = int(args['--low-rank'])
         num_lang = len(LANG_NAMES)
-        self.lang_encode = torch.eye(num_lang)
+        self.lang_encode = torch.eye(num_lang, device=device)
 
         self.shapes = shapes
         self.group_num, self.group_param_num, self.group_param_sizes = self.get_param_meta(shapes)

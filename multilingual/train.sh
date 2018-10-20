@@ -12,19 +12,20 @@ echo save results to ${work_dir}
 python nmt.py \
     train \
     --langs 'az-en,be-en,gl-en,tr-en,ru-en,pt-en'\
-    --lang-embed-size 4\
+    --lang-embed-size 8\
     --cuda \
-    --vocab_size 20000 \
+    --vocab-size 20000 \
     --save-to ${work_dir}/${model_name} \
     --save-opt ${work_dir}/optimizer.bin \
     --valid-niter 1200 \
     --lr 0.001 \
     --log-every 50 \
-    --batch-size 64 \
-    --hidden-size 256 \
-    --num_layers 2\
+    --batch-size 32 \
+    --hidden-size 128 \
+    --low-rank 2 \
+    --num-layers 2\
     --max-epoch 100 \
-    --embed-size 256 \
+    --embed-size 64 \
     --uniform-init 0.1 \
     --dropout 0.2 \
     --clip-grad 5.0 \
