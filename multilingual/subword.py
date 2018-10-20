@@ -25,37 +25,38 @@ def train(lang, vocab_size):
 
 def get_corpus_pairs(src_lang_idx: int, tgt_lang_idx: int, data_type: str) \
         -> List[Tuple[List[int], List[int]]]:
-    src_sents = []
-    tgt_sents = []
-
-    src_lang = LANG_NAMES[src_lang_idx]
-    tgt_lang = LANG_NAMES[tgt_lang_idx]
-
-    # load the subword models for encoding these sents to indices
-    src_sp = spm.SentencePieceProcessor()
-    tgt_sp = spm.SentencePieceProcessor()
-    src_sp.Load('subword_files/%s.model' % src_lang)
-    tgt_sp.Load('subword_files/%s.model' % tgt_lang)
-
-    # read corpus for src corpus
-    file_path = 'data/%s.%s-%s.%s.txt' % (data_type, tgt_lang, src_lang, src_lang)
-    for line in open(file_path, encoding="utf-8"):
-        sent = line.strip()
-        sent_encode = src_sp.EncodeAsIds(sent)
-        src_sents.append(sent_encode)
-
-    # read corpus for tgt corpus
-    file_path = 'data/%s.%s-%s.%s.txt' % (data_type, tgt_lang, src_lang, tgt_lang)
-    for line in open(file_path, encoding="utf-8"):
-        sent = line.strip()
-        # add <s> and </s> to the tgt sents
-        sent_encode = [tgt_sp.bos_id()] + tgt_sp.EncodeAsIds(sent) + [tgt_sp.eos_id()]
-        tgt_sents.append(sent_encode)
+    # get src and tgt corpus ids separately
+    src_sents = get_corpus_ids(src_lang_idx, tgt_lang_idx, data_type, False)
+    tgt_sents = get_corpus_ids(src_lang_idx, tgt_lang_idx, data_type, True)
 
     # pair those corresponding sents together
     src_tgt_sent_pairs = list(zip(src_sents, tgt_sents))
 
     return src_tgt_sent_pairs
+
+def get_corpus_ids(src_lang_idx: int, tgt_lang_idx: int, data_type: str, is_tgt: bool):
+    sents = []
+
+    src_lang = LANG_NAMES[src_lang_idx]
+    tgt_lang = LANG_NAMES[tgt_lang_idx]
+    lang = tgt_lang if is_tgt else src_lang
+
+    # load the subword models for encoding these sents to indices
+    sp = spm.SentencePieceProcessor()
+    sp.Load('subword_files/%s.model' % lang)
+
+    # read corpus for corpus
+    file_path = 'data/%s.%s-%s.%s.txt' % (data_type, tgt_lang, src_lang, lang)
+    for line in open(file_path, encoding="utf-8"):
+        sent = line.strip()
+
+        sent_encode = src_sp.EncodeAsIds(sent)
+        if is_tgt:
+            # add <s> and </s> to the tgt sents
+            sent_encode = [tgt_sp.bos_id()] + sent_encode + [tgt_sp.eos_id()]
+        sents.append(sent_encode)
+
+    return sents
 
 def decode_corpus_ids(lang: int, sents: List[List[int]]) -> List[List[str]]:
     sp = spm.SentencePieceProcessor()

@@ -5,8 +5,7 @@ A very basic implementation of neural machine translation
 
 Usage:
     nmt.py train --train-src=<file> --train-tgt=<file> --dev-src=<file> --dev-tgt=<file> --vocab=<file> [options]
-    nmt.py decode [options] MODEL_PATH TEST_SOURCE_FILE OUTPUT_FILE
-    nmt.py decode [options] MODEL_PATH TEST_SOURCE_FILE TEST_TARGET_FILE OUTPUT_FILE
+    nmt.py decode [options] MODEL_PATH LANG OUTPUTFILE
 
 Options:
     -h --help                               show this screen.
@@ -50,7 +49,7 @@ from nltk.translate.bleu_score import corpus_bleu, sentence_bleu, SmoothingFunct
 
 from config import device, LANG_INDICES
 from MultiMT import Hypothesis, MultiNMT
-from subword import get_corpus_pairs
+from subword import get_corpus_pairs, get_corpus_ids, decode_corpus_ids
 from utils import read_corpus, batch_iter, load_matrix, PairedData, LangPair
 from vocab import Vocab, VocabEntry
 from embed import corpus_to_indices, indices_to_corpus
@@ -231,11 +230,11 @@ def train(args: Dict[str, str]):
                     exit(0)
 
 
-def beam_search(model: MultiNMT, test_data_src: List[List[str]], beam_size: int, max_decoding_time_step: int) \
-        -> List[List[Hypothesis]]:
+def beam_search(model: MultiNMT, test_data_src: List[List[int]], src_lang: int, tgt_lang: int, \
+                beam_size: int, max_decoding_time_step: int) -> List[List[Hypothesis]]:
     hypotheses = []
     for src_sent in tqdm(test_data_src, desc='Decoding', file=sys.stdout):
-        example_hyps = model.beam_search(src_sent, beam_size=beam_size,
+        example_hyps = model.beam_search(src_sent, src_lang, tgt_lang, beam_size=beam_size,
                                          max_decoding_time_step=max_decoding_time_step)
 
         hypotheses.append(example_hyps)
@@ -249,31 +248,34 @@ def decode(args: Dict[str, str]):
     If the target gold-standard sentences are given, the function also computes
     corpus-level BLEU score.
     """
-    test_data_src = read_corpus(args['TEST_SOURCE_FILE'], source='src')
-    if args['TEST_TARGET_FILE']:
-        test_data_tgt = read_corpus(args['TEST_TARGET_FILE'], source='tgt')
+
+    src_lang = args['SRC_LANG']
+    tgt_lang = args['TGT_LANG']
+    src_lang_idx = LANG_INDICES[src_lang]
+    tgt_lang_idx = LANG_INDICES[tgt_lang]
+
+    model_path = args['MODEL_PATH']
+    output_file = args['OUTPUT_FILE']
+
+    test_data_src = get_corpus_ids(src_lang_idx, tgt_lang_idx, data_type='test', False)
+    test_data_tgt = get_corpus_ids(src_lang_idx, tgt_lang_idx, data_type='test', True)
 
     print(f"load model from {args['MODEL_PATH']}")
     model = NMT.load(args['MODEL_PATH'])
 
-    vocab = pickle.load(open('data/vocab.bin', 'rb'))
-    model.vocab = vocab
     # set model to evaluate mode
     model.eval()
 
-    hypotheses = beam_search(model, test_data_src,
+    hypotheses = beam_search(model, test_data_src, src_lang_idx, tgt_lang_idx,
                              beam_size=int(args['--beam-size']),
                              max_decoding_time_step=int(args['--max-decoding-time-step']))
 
-    if args['TEST_TARGET_FILE']:
-        top_hypotheses = [hyps[0] for hyps in hypotheses]
-        bleu_score = compute_corpus_level_bleu_score(test_data_tgt, top_hypotheses)
-        print(f'Corpus BLEU: {bleu_score}')
+    top_hypotheses = [hyps[0] for hyps in hypotheses]
+    top_hypotheses = decode_corpus_ids(top_hypotheses)
 
     with open(args['OUTPUT_FILE'], 'w') as f:
-        for src_sent, hyps in zip(test_data_src, hypotheses):
-            top_hyp = hyps[0]
-            hyp_sent = ' '.join(top_hyp.value)
+        for src_sent, top_hyp in zip(test_data_src, top_hypotheses):
+            hyp_sent = top_hyp.value
             f.write(hyp_sent + '\n')
 
 
@@ -284,6 +286,7 @@ def main():
     # also want to seed the RNG of tensorflow, pytorch, dynet, etc.
     seed = int(args['--seed'])
     np.random.seed(seed * 13 // 7)
+    torch.manual_seed(seed * 13 // 7)
 
     if args['train']:
         train(args)
