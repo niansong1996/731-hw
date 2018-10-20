@@ -1,27 +1,19 @@
 #!/bin/sh
 
 vocab="data/vocab.bin"
-train_src="data/train.de-en.de.wmixerprep"
-train_tgt="data/train.de-en.en.wmixerprep"
-dev_src="data/valid.de-en.de"
-dev_tgt="data/valid.de-en.en"
-test_src="data/test.de-en.de"
-test_tgt="data/test.de-en.en"
 
 work_dir="work_dir"
-model_name="model-drop-embed-dict-hidden.bin"
-decode="drop-embed-dict-hidden.txt"
+name_prefix="mult-lang"
+model_name=${work_dir}"-model.bin"
+decode=${work_dir}"-result.txt"
 mkdir -p ${work_dir}
 echo save results to ${work_dir}
 
 python nmt.py \
     train \
+    --langs az-en,be-en,gl-en,tr-en,ru-en,pt-en\
     --cuda \
-    --vocab ${vocab} \
-    --train-src ${train_src} \
-    --train-tgt ${train_tgt} \
-    --dev-src ${dev_src} \
-    --dev-tgt ${dev_tgt} \
+    --vocab_size 20000 \
     --save-to ${work_dir}/${model_name} \
     --save-opt ${work_dir}/optimizer.bin \
     --valid-niter 1200 \
@@ -43,7 +35,6 @@ python nmt.py \
     --beam-size 5 \
     --max-decoding-time-step 100 \
     ${work_dir}/${model_name} \
-    ${test_src} \
     ${work_dir}/${decode}
 
 perl multi-bleu.perl ${test_tgt} < ${work_dir}/${decode}

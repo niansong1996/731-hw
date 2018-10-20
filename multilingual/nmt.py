@@ -9,15 +9,14 @@ Usage:
 
 Options:
     -h --help                               show this screen.
+    --langs=<src-tgt,...>                   comma separated language pairs <src-tgt>
     --cuda                                  use GPU
-    --train-src=<file>                      train source file
-    --train-tgt=<file>                      train target file
-    --dev-src=<file>                        dev source file
-    --dev-tgt=<file>                        dev target file
-    --vocab=<file>                          vocab file
+    --vocab_size=<int>                      vocab size [default: 20000]
+    --low_rank=<int>                        low rank size [default: 4]
     --seed=<int>                            seed [default: 0]
     --batch-size=<int>                      batch size [default: 32]
-    --embed-size=<int>                      embedding size [default: 256]
+    --lang-embed-size=<int>                 language embedding size [default: 8]
+    --embed-size=<int>                      word embedding size [default: 256]
     --hidden-size=<int>                     hidden size [default: 256]
     --clip-grad=<float>                     gradient clipping [default: 5.0]
     --log-every=<int>                       log every [default: 10]
@@ -31,12 +30,11 @@ Options:
     --save-to=<file>                        model save path
     --save-opt=<file>                       optimizer state save path
     --valid-niter=<int>                     perform validation after how many iterations [default: 2000]
-    --dropout=<float>                       dropout [default: 0.2]
+    --dropout=<float>                       dropout [default: 0]
     --max-decoding-time-step=<int>          maximum number of decoding time steps [default: 70]
 """
 
 import math
-import pickle
 import sys
 import time
 from typing import *
@@ -51,7 +49,6 @@ from MultiMT import Hypothesis, MultiNMT
 from config import device, LANG_INDICES
 from subword import get_corpus_pairs, get_corpus_ids, decode_corpus_ids
 from utils import batch_iter, PairedData, LangPair
-from utils import sents_to_tensor
 
 
 def compute_corpus_level_bleu_score(references: List[List[str]], hypotheses: List[Hypothesis]) -> float:
@@ -96,8 +93,6 @@ def train(args: Dict[str, str]):
     log_every = int(args['--log-every'])
     model_save_path = args['--save-to']
     optimizer_save_path = args['--save-opt']
-
-    vocab = pickle.load(open(args['--vocab'], 'rb'))
 
     model = MultiNMT().to(device)
 
