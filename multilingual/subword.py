@@ -1,4 +1,72 @@
-import sentencepiece as spm
+#!/usr/bin/env python
+"""
+Generate the subword models and vocab for languages 
+The model and vocab can be further used to encode and decode using provided functions
 
-def train():
-    spm.SentencePieceTrainer.Train('--input=data/')
+Usage:
+    vocab.py --lang=<lang-abbr> --vocab-size=<file> 
+
+Options:
+    -h --help                  Show this screen.
+    --lang=<lang-abbr>         Two letter representation of language
+    --vocab-size=<file>        The vocabulary size for subword model
+"""
+
+import sentencepiece as spm
+from docopt import docopt
+from config import LANG_INDICES
+
+def train(lang, vocab_size):
+    spm.SentencePieceTrainer.\
+    Train('--input=data/%s_mono.txt --model_prefix=subword_files/%s --vocab_size=%d' % (lang, lang, vocab_size))
+
+def get_corpus_pairs(src_lang_idx, tgt_lang_idx, source):
+    src_sents = []
+    tgt_sents = []
+
+    src_lang = LANG_INDICES[src_lang_idx]
+    tgt_lang = LANG_INDICES[tgt_lang_idx]
+
+    # load the subword models for encoding these sents to indices
+    src_sp = spm.SentencePieceProcessor()
+    tgt_sp = spm.SentencePieceProcessor()
+    src_sp.Load('subword_files/%s.model' % src_lang)
+    tgt_sp.Load('subword_files/%s.model' % tgt_lang)
+
+    # read corpus for src corpus
+    file_path = 'data/%s.%s-%s.%s.txt' % (source, tgt_lang, src_lang, src_lang)
+    for line in open(file_path, encoding="utf-8"):
+        sent = line.strip()
+        sent_encode = src_sp.EncodeAsIds(sent)
+        src_sents.append(sent_encode)
+
+    # read corpus for tgt corpus
+    file_path = 'data/%s.%s-%s.%s.txt' % (source, tgt_lang, src_lang, tgt_lang)
+    for line in open(file_path, encoding="utf-8"):
+        sent = line.strip()
+        # add <s> and </s> to the tgt sents
+        sent_encode = [tgt_sp.bos_id()] + tgt_sp.EncodeAsIds(sent) + [tgt_sp.eos_id()]
+        tgt_sents.append(sent_encode)
+
+    # pair those corresponding sents together
+    src_tgt_sent_pairs = list(zip(src_sents, tgt_sents))
+
+    return src_tgt_sent_pairs
+
+
+if __name__ == '__main__':
+    args = docopt(__doc__)
+
+    vocab_size = int(args['--vocab-size'])
+    lang = args['--lang']
+
+    print('building subword model for %s language : ' % lang)
+
+    # train the subword model for the specified language
+    if lang == 'all':
+        for lan in LANG_INDICES.values():
+            train(lan, vocab_size)
+            print('Done for %s : ' % lang)
+    else:
+        train(lang, vocab_size)
+        print('Done for %s : ' % lang)
