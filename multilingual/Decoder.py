@@ -8,7 +8,7 @@ from utils import assert_tensor_size
 from FLSTM import Stack_FLSTMCell
 
 from config import device
-from vocab import VocabEntry
+from vocab import Vocab
 
 
 class Decoder:
@@ -30,7 +30,7 @@ class Decoder:
         self.dropout_rate = dropout_rate
         self.dropout = nn.Dropout(p=self.dropout_rate)
         self.DECODER_PAD_IDX = decoder_pad_idx
-        sos_batch = torch.tensor([VocabEntry.SOS_ID for _ in range(batch_size)], dtype=torch.long).to(device)
+        sos_batch = torch.tensor([Vocab.SOS_ID for _ in range(batch_size)], dtype=torch.long).to(device)
         self.init_input = embedding(sos_batch)
         assert_tensor_size(self.init_input, [self.batch_size, self.dec_embed_size])
 

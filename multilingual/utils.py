@@ -10,7 +10,7 @@ import numpy as np
 import io
 import torch.tensor as Tensor
 
-from vocab import VocabEntry
+from vocab import Vocab
 
 LangPair = namedtuple('LangPair', ['src', 'tgt'])
 PairedData = namedtuple('PairedData', ['data', 'langs'])
@@ -97,7 +97,7 @@ def sents_to_tensor(sents: List[List[int]], device: torch.device) -> Tensor:
     # indices are initialized with the index of '<pad>'
     for sent in enumerate(sents):
         while len(sent) < max_sent_len:
-            sent.append(VocabEntry.PAD_ID)
+            sent.append(Vocab.PAD_ID)
     return torch.tensor(sents, dtype=torch.long, device=device)
 
 

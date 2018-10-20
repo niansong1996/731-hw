@@ -12,7 +12,7 @@ import numpy as np
 import vocab
 
 # look_up the dict to convert to indices and do the padding
-def corpus_to_indices(vocab: vocab.VocabEntry, corpus: List[List[str]]) -> Tensor:
+def corpus_to_indices(vocab: vocab.Vocab, corpus: List[List[str]]) -> Tensor:
     max_sent_len = max(map((lambda x: len(x)), corpus))
     # indices are initialized with the index of '<pad>'
     for i, sent in enumerate(corpus):
@@ -32,7 +32,7 @@ def corpus_to_indices(vocab: vocab.VocabEntry, corpus: List[List[str]]) -> Tenso
     '''
 
 # look up the dict for indices and convert to varied length sents
-def indices_to_corpus(vocab: vocab.VocabEntry, indices: Tensor) -> List[List[str]]:
+def indices_to_corpus(vocab: vocab.Vocab, indices: Tensor) -> List[List[str]]:
     corpus = []
     for i in range(indices.shape[0]):
         sent = []

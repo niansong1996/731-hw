@@ -52,7 +52,7 @@ from config import device, LANG_INDICES
 from MultiMT import Hypothesis, MultiNMT
 from subword import get_corpus_pairs
 from utils import read_corpus, batch_iter, load_matrix, PairedData, LangPair
-from vocab import Vocab, VocabEntry
+from vocab import Vocab, Vocab
 from embed import corpus_to_indices, indices_to_corpus
 
 import torch

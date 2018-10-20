@@ -11,7 +11,7 @@ from Decoder import Decoder
 from Encoder import Encoder
 from config import device
 from utils import batch_iter, PairedData, sents_to_tensor
-from vocab import VocabEntry
+from vocab import Vocab
 
 Hypothesis = namedtuple('Hypothesis', ['value', 'score'])
 
@@ -116,14 +116,14 @@ class MultiNMT(nn.Module):
             src_encodings, decoder_init_state = self.encode(src_sents_tensor, src_lang, grouped_params)
             h_t_0, c_t_0, attn = Decoder.init_decoder_step_input(decoder_init_state)
             # candidates for best hypotheses
-            hypotheses_cand = [(Hypothesis([VocabEntry.SOS_ID], 0), h_t_0, c_t_0, attn)]
+            hypotheses_cand = [(Hypothesis([Vocab.SOS_ID], 0), h_t_0, c_t_0, attn)]
             decoder = self.get_decoder(tgt_lang, grouped_params)
             for i in range(max_decoding_time_step):
                 new_hypotheses_cand = []
                 for (sent, log_likelihood), h_t, c_t, attn in hypotheses_cand:
                     input_word_idx = sent[-1]
                     # skip ended sentence
-                    if input_word_idx == VocabEntry.EOS_ID:
+                    if input_word_idx == Vocab.EOS_ID:
                         # directly add ended sentence to new candidates
                         new_hypotheses_cand.append((Hypothesis(sent, log_likelihood), h_t, c_t, attn))
                         continue
@@ -140,7 +140,7 @@ class MultiNMT(nn.Module):
                 # combine ended sentences with new candidates to form new hypotheses
                 hypotheses_cand = sorted(new_hypotheses_cand, key=lambda x: x[0].score, reverse=True)[:beam_size]
                 # break if all sentences have ended
-                if all(c[0].value[-1] == VocabEntry.EOS_ID for c in hypotheses_cand):
+                if all(c[0].value[-1] == Vocab.EOS_ID for c in hypotheses_cand):
                     break
             return [c[0] for c in hypotheses_cand]
 
