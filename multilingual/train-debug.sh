@@ -24,7 +24,7 @@ python nmt.py \
     --batch-size 1 \
     --hidden-size 64 \
     --low-rank 2 \
-    --num-layers 2\
+    --num-layers 1 \
     --max-epoch 100 \
     --embed-size 32 \
     --uniform-init 0.1 \

@@ -89,7 +89,7 @@ class MultiNMT(nn.Module):
         """
         enc_weights = grouped_params[:self.enc_shapes_len]
         encoder = Encoder(batch_size, self.embed_size, self.hidden_size, self.cpg.get_embedding(src_lang),
-                          enc_weights)
+                          enc_weights, num_layer=self.num_layers)
         return encoder(src_sent_idx)
 
     def get_decoder(self, tgt_lang: int, batch_size: int, grouped_params: List[List[Tensor]]) -> Decoder:
