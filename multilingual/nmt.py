@@ -267,7 +267,7 @@ def decode(args: Dict[str, str]):
 
     with open(output_file, 'w') as f:
         for sent in translated_text:
-            f.write(' '.join(sent) + '\n')
+            f.write(sent + '\n')
 
 
 def main():
