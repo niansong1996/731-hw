@@ -116,7 +116,7 @@ class Decoder:
         # vocab_size_output.shape = [batch_size, vocab_size]
         vocab_size_output = F.linear(attn_h_t, self.Ws)
         # dim = (batch_size, vocab_size)
-        softmax_output = self.log_softmax(vocab_size_output).squeeze()
+        softmax_output = self.log_softmax(vocab_size_output)
         return h_t, c_t, softmax_output, attn_h_t
 
     def global_attention(self, h_s: Tensor, h_t: List[Tensor]) -> Tensor:
