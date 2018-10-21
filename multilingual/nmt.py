@@ -138,87 +138,88 @@ def train(args: Dict[str, str]):
             torch.nn.utils.clip_grad_norm(model.parameters(), clip_grad)
             optimizer.step()
 
-            report_loss += loss
-            cum_loss += loss.detach()
+            report_loss += loss.data
+            cum_loss += loss.data
+            del loss
+            with torch.no_grad():
+                tgt_words_num_to_predict = sum(len(s[1:]) for s in tgt_sents)  # omitting leading `<s>`
+                report_tgt_words += tgt_words_num_to_predict
+                cumulative_tgt_words += tgt_words_num_to_predict
+                report_examples += batch_size
+                cumulative_examples += batch_size
 
-            tgt_words_num_to_predict = sum(len(s[1:]) for s in tgt_sents)  # omitting leading `<s>`
-            report_tgt_words += tgt_words_num_to_predict
-            cumulative_tgt_words += tgt_words_num_to_predict
-            report_examples += batch_size
-            cumulative_examples += batch_size
+                if train_iter % log_every == 0:
+                    print('epoch %d, iter %d, avg. loss %.2f, avg. ppl %.2f '
+                          'cum. examples %d, speed %.2f words/sec, time elapsed %.2f sec' %
+                          (epoch, train_iter, report_loss / report_examples, math.exp(report_loss / report_tgt_words),
+                           cumulative_examples, report_tgt_words / (time.time() - train_time), time.time() - begin_time),
+                          flush=True)
 
-            if train_iter % log_every == 0:
-                print('epoch %d, iter %d, avg. loss %.2f, avg. ppl %.2f '
-                      'cum. examples %d, speed %.2f words/sec, time elapsed %.2f sec' %
-                      (epoch, train_iter, report_loss / report_examples, math.exp(report_loss / report_tgt_words),
-                       cumulative_examples, report_tgt_words / (time.time() - train_time), time.time() - begin_time),
-                      flush=True)
+                    train_time = time.time()
+                    report_loss = report_tgt_words = report_examples = 0.
 
-                train_time = time.time()
-                report_loss = report_tgt_words = report_examples = 0.
+                # the following code performs validation on dev set, and controls the learning schedule
+                # if the dev score is better than the last check point, then the current model is saved.
+                # otherwise, we allow for that performance degeneration for up to `--patience` times;
+                # if the dev score does not increase after `--patience` iterations, we reload the previously
+                # saved best model (and the state of the optimizer), halve the learning rate and continue
+                # training. This repeats for up to `--max-num-trial` times.
+                if train_iter % valid_niter == 0:
+                    print('epoch %d, iter %d, cum. loss %.2f, cum. ppl %.2f cum. examples %d' %
+                          (epoch, train_iter, cum_loss / cumulative_examples, np.exp(cum_loss / cumulative_tgt_words),
+                           cumulative_examples))
 
-            # the following code performs validation on dev set, and controls the learning schedule
-            # if the dev score is better than the last check point, then the current model is saved.
-            # otherwise, we allow for that performance degeneration for up to `--patience` times;
-            # if the dev score does not increase after `--patience` iterations, we reload the previously
-            # saved best model (and the state of the optimizer), halve the learning rate and continue
-            # training. This repeats for up to `--max-num-trial` times.
-            if train_iter % valid_niter == 0:
-                print('epoch %d, iter %d, cum. loss %.2f, cum. ppl %.2f cum. examples %d' %
-                      (epoch, train_iter, cum_loss / cumulative_examples, np.exp(cum_loss / cumulative_tgt_words),
-                       cumulative_examples))
+                    cum_loss = cumulative_examples = cumulative_tgt_words = 0.
+                    valid_num += 1
 
-                cum_loss = cumulative_examples = cumulative_tgt_words = 0.
-                valid_num += 1
+                    print('begin validation ... size %d' % len(dev_data))
 
-                print('begin validation ... size %d' % len(dev_data))
+                    # set model to evaluate mode
+                    model.eval()
+                    # compute dev. ppl and bleu
+                    dev_ppl = model.evaluate_ppl(dev_data, batch_size=128)  # dev batch size can be a bit larger
+                    # set model back to training mode
+                    model.train()
+                    valid_metric = -dev_ppl
 
-                # set model to evaluate mode
-                model.eval()
-                # compute dev. ppl and bleu
-                dev_ppl = model.evaluate_ppl(dev_data, batch_size=128)  # dev batch size can be a bit larger
-                # set model back to training mode
-                model.train()
-                valid_metric = -dev_ppl
+                    print('validation: iter %d, dev. ppl %f' % (train_iter, dev_ppl))
 
-                print('validation: iter %d, dev. ppl %f' % (train_iter, dev_ppl))
+                    is_better = len(hist_valid_scores) == 0 or valid_metric > max(hist_valid_scores)
+                    hist_valid_scores.append(valid_metric)
 
-                is_better = len(hist_valid_scores) == 0 or valid_metric > max(hist_valid_scores)
-                hist_valid_scores.append(valid_metric)
-
-                if is_better:
-                    patience = 0
-                    print('save currently the best model to [%s]' % model_save_path)
-                    model.save(model_save_path)
-                    torch.save(optimizer, optimizer_save_path)
-
-                elif patience < int(args['--patience']):
-                    patience += 1
-                    print('hit patience %d' % patience)
-
-                    if patience == int(args['--patience']):
-                        num_trial += 1
-                        print('hit #%d trial' % num_trial)
-                        if num_trial == int(args['--max-num-trial']):
-                            print('early stop!')
-                            exit(0)
-
-                        # load model
-                        model = model.load(model_save_path)
-                        optimizer = torch.load(optimizer_save_path)
-
-                        # decay learning rate, and restore from previously best checkpoint
-                        lr = lr * float(args['--lr-decay'])
-                        for param_group in optimizer.param_groups:
-                            param_group['lr'] = lr
-                        print('load previously best model and decay learning rate to %f' % lr)
-
-                        # reset patience
+                    if is_better:
                         patience = 0
+                        print('save currently the best model to [%s]' % model_save_path)
+                        model.save(model_save_path)
+                        torch.save(optimizer, optimizer_save_path)
 
-                if epoch == int(args['--max-epoch']):
-                    print('reached maximum number of epochs!')
-                    exit(0)
+                    elif patience < int(args['--patience']):
+                        patience += 1
+                        print('hit patience %d' % patience)
+
+                        if patience == int(args['--patience']):
+                            num_trial += 1
+                            print('hit #%d trial' % num_trial)
+                            if num_trial == int(args['--max-num-trial']):
+                                print('early stop!')
+                                exit(0)
+
+                            # load model
+                            model = model.load(model_save_path)
+                            optimizer = torch.load(optimizer_save_path)
+
+                            # decay learning rate, and restore from previously best checkpoint
+                            lr = lr * float(args['--lr-decay'])
+                            for param_group in optimizer.param_groups:
+                                param_group['lr'] = lr
+                            print('load previously best model and decay learning rate to %f' % lr)
+
+                            # reset patience
+                            patience = 0
+
+                    if epoch == int(args['--max-epoch']):
+                        print('reached maximum number of epochs!')
+                        exit(0)
 
 
 def beam_search(model: MultiNMT, test_data_src: List[List[int]], src_lang: int, tgt_lang: int, \
