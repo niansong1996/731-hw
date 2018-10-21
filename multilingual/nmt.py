@@ -138,8 +138,8 @@ def train(args: Dict[str, str]):
             torch.nn.utils.clip_grad_norm(model.parameters(), clip_grad)
             optimizer.step()
 
-            report_loss += loss.data
-            cum_loss += loss.data
+            report_loss += float(loss)
+            cum_loss += float(loss)
             del loss
             with torch.no_grad():
                 tgt_words_num_to_predict = sum(len(s[1:]) for s in tgt_sents)  # omitting leading `<s>`
