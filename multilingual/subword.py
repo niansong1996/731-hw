@@ -58,7 +58,7 @@ def get_corpus_ids(src_lang_idx: int, tgt_lang_idx: int, data_type: str, is_tgt:
             if line_count in long_sent:
                 continue
         else:
-            if is_train and len(sent.split(' ')) > 50:
+            if is_train and len(sent.split(' ')) > 25:
                 long_sent_in_src.add(line_count)
                 continue
         sent_encode = sp.EncodeAsIds(sent)
