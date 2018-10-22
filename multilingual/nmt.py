@@ -113,7 +113,7 @@ def train(args: Dict[str, str]):
     model_params = model.parameters()
     for param in model_params:
         print(type(param.data), param.size())
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr, amsgrad=True)
 
     # TODO: [remove this] temporaily save inited model for testing
     model.save(model_save_path)
@@ -131,6 +131,7 @@ def train(args: Dict[str, str]):
                 print("#", end="", flush=True)
 
             # start training routine
+            #torch.cuda.empty_cache()
             optimizer.zero_grad()
             loss_v = model(src_lang, tgt_lang, src_sents, tgt_sents)
             loss = torch.sum(loss_v)
@@ -149,7 +150,6 @@ def train(args: Dict[str, str]):
                 cumulative_examples += batch_size
 
                 if train_iter % log_every == 0:
-                    torch.cuda.empty_cache()
                     print('epoch %d, iter %d, avg. loss %.2f, avg. ppl %.2f '
                           'cum. examples %d, speed %.2f words/sec, time elapsed %.2f sec' %
                           (epoch, train_iter, report_loss / report_examples, math.exp(report_loss / report_tgt_words),

@@ -116,10 +116,7 @@ class FLSTMCell:
         hidden_size = h_0.shape[1]
 
         # (4*hidden_size, batch_size)  =  (4*hidden_size, input_size) * (batch_size, input_size)^{T}
-        W_x_X = torch.mm(self.W_x, X.transpose(0, 1))
-        W_h_H = torch.mm(self.W_h, h_0.transpose(0, 1))
-        W_x_h = W_x_X + W_h_H
-        W_x_h_b = W_x_h + self.b_x + self.b_h
+        W_x_h_b = torch.mm(self.W_x, X.transpose(0, 1)) + torch.mm(self.W_h, h_0.transpose(0, 1)) + self.b_x + self.b_h
 
         # (batch_size, hidden_size)
         i = torch.sigmoid(W_x_h_b[0:hidden_size]).transpose(0, 1)
