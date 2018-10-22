@@ -55,8 +55,6 @@ class Encoder:
 
         # dim = (batch_size, sent_length, embed_size)
         embedding = self.embedding(src_sent_idx)
-        # dim = (batch_size, sent_length, embed_size)
-        assert_tensor_size(embedding, [self.batch_size, sent_len, self.embed_size])
 
         # for each of the sent words, encode step by step
         for step in range(sent_len):
@@ -65,7 +63,6 @@ class Encoder:
 
         # pack the list of tensors to one single tensor
         outputs = torch.stack(outputs, dim=0)
-        assert_tensor_size(outputs, [sent_len, self.batch_size, self.num_direction * self.hidden_size])
 
         return outputs, (self.to_tensor(h_t), self.to_tensor(c_t))
 
@@ -100,8 +97,6 @@ class Encoder:
         """
         assert(len(h_t) == self.num_direction * self.num_layer)
         assert(len(c_t) == self.num_direction * self.num_layer)
-        assert_tensor_size(in_x, [self.batch_size, self.embed_size])
-        assert_tensor_size(rev_x, [self.batch_size, self.embed_size])
 
         # one step encode for both directions
         # dim = (num_layers, batch_size, hidden_size)
@@ -112,7 +107,6 @@ class Encoder:
         rev_output = rev_h_t_1[-1]
 
         output = torch.cat([in_output, rev_output], dim=1)
-        assert_tensor_size(output, [self.batch_size, 2 * self.hidden_size])
         h_t_1 = in_h_t_1 + rev_h_t_1
         c_t_1 = in_c_t_1 + rev_c_t_1
 

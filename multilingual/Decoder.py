@@ -4,7 +4,6 @@ import torch.nn as nn
 import torch.tensor as Tensor
 import torch.nn.functional as F
 
-from utils import assert_tensor_size
 from FLSTM import Stack_FLSTMCell
 
 from config import device
@@ -32,7 +31,6 @@ class Decoder:
         self.DECODER_PAD_IDX = decoder_pad_idx
         sos_batch = torch.tensor([Vocab.SOS_ID for _ in range(batch_size)], dtype=torch.long).to(device)
         self.init_input = embedding(sos_batch)
-        assert_tensor_size(self.init_input, [self.batch_size, self.dec_embed_size])
 
     @staticmethod
     def init_decoder_step_input(decoder_init_state: Tuple[Tensor, Tensor]) \
@@ -92,7 +90,6 @@ class Decoder:
             scores = scores + masked_score_delta
             # dim = (batch_size, embed_size)
             decoder_input = tgt_sent_embed[:, i, :]
-            assert_tensor_size(decoder_input, [self.batch_size, self.dec_embed_size])
         return scores
 
     def decoder_step(self, src_encodings: Tensor, decoder_input: Tensor, h_t: Tensor, c_t: Tensor, attn: Tensor)\
@@ -117,7 +114,6 @@ class Decoder:
         vocab_size_output = F.linear(attn_h_t, self.Ws)
         # dim = (batch_size, vocab_size)
         softmax_output = self.log_softmax(vocab_size_output)
-        assert_tensor_size(softmax_output, [self.batch_size, self.Ws.shape[0]])
         return h_t, c_t, softmax_output, attn_h_t
 
     def global_attention(self, h_s: Tensor, h_t: List[Tensor]) -> Tensor:
