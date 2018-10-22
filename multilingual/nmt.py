@@ -134,6 +134,8 @@ def train(args: Dict[str, str]):
             optimizer.zero_grad()
             loss_v = model(src_lang, tgt_lang, src_sents, tgt_sents)
             loss = torch.sum(loss_v)
+            if src_lang == 1 or src_lang == 2 or src_lang ==3:
+                loss *= 10
             loss.backward()
             torch.nn.utils.clip_grad_norm(model.parameters(), clip_grad)
             optimizer.step()
