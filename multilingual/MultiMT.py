@@ -133,13 +133,13 @@ class MultiNMT(nn.Module):
                     # dim = (1 (single_word), embed_size)
                     decoder_input = decoder.embedding(torch.tensor([input_word_idx]).to(device))
                     assert_tensor_size(decoder_input, [1, self.embed_size])
-                    # softmax_output.shape = [vocab_size]
+                    # softmax_output.shape = [1, vocab_size]
                     h_t, c_t, softmax_output, attn = decoder.decoder_step(src_encodings, decoder_input, h_t, c_t, attn)
                     # dim = (1, beam_size)
-                    _, top_i = torch.topk(softmax_output.unsqueeze(0), beam_size, dim=1)
+                    _, top_i = torch.topk(softmax_output, beam_size, dim=1)
                     for word_idx_tensor in top_i[0]:
                         word_idx = word_idx_tensor.item()
-                        new_hyp = Hypothesis(sent + [word_idx], log_likelihood + softmax_output[word_idx])
+                        new_hyp = Hypothesis(sent + [word_idx], log_likelihood + float(softmax_output[0][word_idx]))
                         new_hypotheses_cand.append((new_hyp, h_t, c_t, attn))
                 # combine ended sentences with new candidates to form new hypotheses
                 hypotheses_cand = sorted(new_hypotheses_cand, key=lambda x: x[0].score, reverse=True)[:beam_size]
