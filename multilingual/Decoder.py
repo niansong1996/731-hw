@@ -13,7 +13,7 @@ from vocab import Vocab
 class Decoder:
     def __init__(self, batch_size, embed_size, hidden_size, num_layers,
                  embedding: nn.Embedding, lstm_weights: List[List[Tensor]], attn_weights: List[List[Tensor]],
-                 dropout_rate=0, decoder_pad_idx=0):
+                 dropout_rate=0):
         self.embedding = embedding
         self.dec_embed_size = embed_size
         self.dec_hidden_size = hidden_size
@@ -28,7 +28,6 @@ class Decoder:
         self.tanh = nn.Tanh()
         self.dropout_rate = dropout_rate
         self.dropout = nn.Dropout(p=self.dropout_rate)
-        self.DECODER_PAD_IDX = decoder_pad_idx
         sos_batch = torch.tensor([Vocab.SOS_ID for _ in range(batch_size)], dtype=torch.long).to(device)
         self.init_input = embedding(sos_batch)
 
@@ -84,7 +83,7 @@ class Decoder:
             target_word_indices = tgt_sent_idx[:, i].reshape(self.batch_size)
             score_delta = self.criterion(softmax_output, target_word_indices)
             # mask '<pad>' with 0
-            pad_mask = torch.where((target_word_indices == self.DECODER_PAD_IDX), zero_mask, one_mask)
+            pad_mask = torch.where((target_word_indices == Vocab.PAD_ID), zero_mask, one_mask)
             masked_score_delta = score_delta * pad_mask
             # update scores
             scores = scores + masked_score_delta
