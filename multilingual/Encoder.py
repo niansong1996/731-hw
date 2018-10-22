@@ -1,7 +1,6 @@
 from typing import List, Tuple
 
 import torch
-from utils import assert_tensor_size
 from FLSTM import Stack_FLSTMCell
 from torch import Tensor
 from config import device
@@ -42,7 +41,7 @@ class Encoder:
             src_sent_idx: source sentence word indices dim = (batch_size, sent_len)
 
         Return:
-            outputs: dim = (sent_length, batch_size, num_direction * hidden_size)
+            outputs: dim = (batch_size, sent_length, num_direction * hidden_size)
             h_t, c_t: dim = (num_layers, batch_size, num_direction * hidden_size)
         """
         # set the variables that iteratively used in encoding steps
@@ -62,7 +61,7 @@ class Encoder:
             outputs.append(output)
 
         # pack the list of tensors to one single tensor
-        outputs = torch.stack(outputs, dim=0)
+        outputs = torch.stack(outputs, dim=1)
 
         return outputs, (self.to_tensor(h_t), self.to_tensor(c_t))
 

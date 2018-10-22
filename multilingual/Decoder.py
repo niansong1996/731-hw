@@ -75,6 +75,8 @@ class Decoder:
         h_t, c_t, attn = self.init_decoder_step_input(decoder_init_state)
         # dim = (batch_size, sent_len, embed_size)
         tgt_sent_embed = self.embedding(tgt_sent_idx)
+        # cumulative count of pads
+        cum_mask = torch.zeros(self.batch_size, device=device)
         # skip the '<s>' in the tgt_sents since the output starts from the word after '<s>'
         for i in range(1, tgt_sent_idx.shape[1]):
             decoder_input = self.dropout(decoder_input)
@@ -82,8 +84,10 @@ class Decoder:
             # dim = (batch_size)
             target_word_indices = tgt_sent_idx[:, i].reshape(self.batch_size)
             score_delta = self.criterion(softmax_output, target_word_indices)
-            # mask '<pad>' with 0
-            pad_mask = torch.where((target_word_indices == Vocab.PAD_ID), zero_mask, one_mask)
+            # flag <pad> as 1 and add it to cumulative masks
+            cum_mask += torch.where((target_word_indices == Vocab.EOS_ID), one_mask, zero_mask)
+            # mask the </s> after the first one, which are used like <pad>
+            pad_mask = torch.where((cum_mask > 1), zero_mask, one_mask)
             masked_score_delta = score_delta * pad_mask
             # update scores
             scores = scores + masked_score_delta
@@ -97,57 +101,45 @@ class Decoder:
         Perform one decoder step
 
         :param src_encodings:  the output features (h_t) from the last layer in source sentences of shape
-            [src_len, batch_size, num_direction * enc_hidden_size]
+            [batch_size, src_len, num_direction * enc_hidden_size]
         :param decoder_input: (batch_size, embed_size)
         :param h_t: [num_layers, batch_size, dec_hidden_size]
         :param c_t: [num_layers, batch_size, dec_hidden_size]
         :param attn: [batch_size, num_direction * enc_hidden_size]
         :return: new h_t, c_t, softmax_output with dim (batch_size, vocab_size), attn (batch_size, num_direction * enc_hidden_size)
         """
-        # dim = (batch_size,  num_direction * enc_hidden_size + dec_embed_size)
-        cat_input = torch.cat((attn, decoder_input), 1)
-        h_t, c_t = self.lstm_cell(cat_input, h_t, c_t)
+        h_t, c_t = self.lstm_cell(
+            torch.cat((attn, decoder_input), 1),  # [batch_size,  num_direction * enc_hidden_size + dec_embed_size]
+            h_t, c_t)
         # attn_h_t.shape = [batch_size, dec_hidden_size]
-        attn_h_t = self.global_attention(src_encodings, h_t)
-        # vocab_size_output.shape = [batch_size, vocab_size]
-        vocab_size_output = F.linear(attn_h_t, self.Ws)
-        # dim = (batch_size, vocab_size)
-        softmax_output = self.log_softmax(vocab_size_output)
+        attn_h_t = self.global_attention(src_encodings, h_t[-1])
+        # softmax_output.shape = [batch_size, vocab_size]
+        softmax_output = self.log_softmax(
+            F.linear(attn_h_t, self.Ws))  # [batch_size, vocab_size]
         return h_t, c_t, softmax_output, attn_h_t
 
-    def global_attention(self, h_s: Tensor, h_t: List[Tensor]) -> Tensor:
+    def global_attention(self, h_s: Tensor, h_t_top: Tensor) -> Tensor:
         """
         Calculate global attention
 
-        :param h_s: source top hidden state of size [src_len, batch_size, num_direction * enc_hidden_size]
-        :param h_t: a list of decoder hidden state of shape [batch_size, dec_hidden_size]
+        :param h_s: source top hidden state of size [batch_size, src_len, num_direction * enc_hidden_size]
+        :param h_t_top: decoder hidden state of size [batch_size, dec_hidden_size]
         :return: an attention vector (batch_size, dec_hidden_size)
         """
-        # h_t_top.shape = [batch_size, dec_hidden_size]
-        h_t_top = h_t[-1]
-        # dim = (batch_size, src_len, num_direction * enc_hidden_size)
-        h_s_ = h_s.transpose(0, 1)
-        # dim = (batch_size, 1, src_len)
-        score = self.general_score(h_s_, h_t_top)
-        # dim = (batch_size, 1, src_len)
-        a_t = self.softmax(score)
-        # a_t = self.dropout(a_t)
         # dim = (batch_size, num_direction * enc_hidden_size)
-        c_t = torch.bmm(a_t, h_s_)[:, 0, :]
+        c_t = torch.bmm(self.softmax(self.general_score(h_s, h_t_top)), h_s)[:, 0, :]
         # dim = (batch_size, num_direction * enc_hidden_size + dec_hidden_size)
         cat_c_h = torch.cat((c_t, h_t_top), 1)
         return self.tanh(F.linear(cat_c_h, self.Wc))
 
-    def general_score(self, h_s_: Tensor, h_t_top: Tensor) -> Tensor:
+    def general_score(self, h_s: Tensor, h_t_top: Tensor) -> Tensor:
         """
         Calculate general attention score
 
-        :param h_s_: transposed source top hidden state of size [batch_size, src_len, num_direction * enc_hidden_size]
+        :param h_s: source top hidden state of size [batch_size, src_len, num_direction * enc_hidden_size]
         :param h_t_top: decoder hidden state of size [batch_size, dec_hidden_size]
         :return: a score of size (batch_size, 1, src_len)
         """
-        # dim = (batch_size, src_len, num_direction * enc_hidden_size)
-        W_a_h_s = F.linear(h_s_, self.Wa)
-        # dim = (batch_size, num_direction * enc_hidden_size, src_len)
-        W_a_h_s = W_a_h_s.transpose(1, 2)
-        return torch.bmm(h_t_top.unsqueeze(1), W_a_h_s)
+        return torch.bmm(h_t_top.unsqueeze(1),
+                         # [batch_size, num_direction * enc_hidden_size = dec_hidden_size, src_len]
+                         F.linear(h_s, self.Wa).transpose(1, 2))
