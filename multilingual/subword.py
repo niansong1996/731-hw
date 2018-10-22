@@ -11,7 +11,7 @@ Options:
     --lang=<lang-abbr>         Two letter representation of language
     --vocab-size=<file>        The vocabulary size for subword model
 """
-from typing import List, Tuple
+from typing import List, Tuple, Set
 
 import sentencepiece as spm
 from docopt import docopt
@@ -26,16 +26,16 @@ def train(lang, vocab_size):
 def get_corpus_pairs(src_lang_idx: int, tgt_lang_idx: int, data_type: str) \
         -> List[Tuple[List[int], List[int]]]:
     # get src and tgt corpus ids separately
-    src_sents = get_corpus_ids(src_lang_idx, tgt_lang_idx, data_type, False)
-    tgt_sents = get_corpus_ids(src_lang_idx, tgt_lang_idx, data_type, True)
+    src_sents, long_sent = get_corpus_ids(src_lang_idx, tgt_lang_idx, data_type, False, None)
+    tgt_sents, _ = get_corpus_ids(src_lang_idx, tgt_lang_idx, data_type, True, long_sent)
 
     # pair those corresponding sents together
-    src_tgt_sent_pairs = list(zip(src_sents, tgt_sents))
+    src_tgt_sent_pairs = list((s, t) for s, t in zip(src_sents, tgt_sents) if len(s) <= 64)
 
     return src_tgt_sent_pairs
 
 
-def get_corpus_ids(src_lang_idx: int, tgt_lang_idx: int, data_type: str, is_tgt: bool)\
+def get_corpus_ids(src_lang_idx: int, tgt_lang_idx: int, data_type: str, is_tgt: bool, long_sent)\
         -> List[List[int]]:
     sents = []
 
@@ -49,16 +49,24 @@ def get_corpus_ids(src_lang_idx: int, tgt_lang_idx: int, data_type: str, is_tgt:
 
     # read corpus for corpus
     file_path = 'data/%s.%s-%s.%s.txt' % (data_type, tgt_lang, src_lang, lang)
+    line_count = 0
+    long_sent_in_src = set()
     for line in open(file_path, encoding="utf-8"):
         sent = line.strip()
-
+        line_count += 1
+        if is_tgt:
+            if line_count in long_sent:
+                continue
+        else:
+            if len(sent.split(' ')) > 50:
+                long_sent_in_src.add(line_count)
+                continue
         sent_encode = sp.EncodeAsIds(sent)
         if is_tgt:
             # add <s> and </s> to the tgt sents
             sent_encode = [sp.bos_id()] + sent_encode + [sp.eos_id()]
         sents.append(sent_encode)
-
-    return sents
+    return sents, long_sent_in_src
 
 
 def decode_corpus_ids(lang_name: str, sents: List[List[int]]) -> List[List[str]]:
