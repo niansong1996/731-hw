@@ -83,12 +83,10 @@ class CPG(nn.Module):
             ell_j = self.L(self.lang_encode[langs[j]])
             P_j = self.Ps[j]
             W_j = self.Ws[j]
-            P_j_ell_j = P_j(ell_j)
-            W_j_P_j_ell_j = W_j(P_j_ell_j)
+            W_j_P_j_ell_j = W_j(P_j(ell_j))
             params.append(W_j_P_j_ell_j)
 
         # separate the params inside the group and reshape to desired shape
-        grouped_params = []
         for j in range(self.group_num):
             vecs_in_group = torch.split(params[j], self.group_param_num[j], dim=0)
 
@@ -96,8 +94,8 @@ class CPG(nn.Module):
             for i in range(len(vecs_in_group)):
                 tsr = vecs_in_group[i].reshape(self.shapes[j][i])
                 tensors_in_group.append(tsr)
-            grouped_params.append(tensors_in_group)
-        return grouped_params
+            params[j] = tensors_in_group
+        return params
 
     def get_embedding(self, lang: int):
         # get the word embedding for the language
