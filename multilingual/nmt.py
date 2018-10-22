@@ -249,7 +249,7 @@ def decode(args: Dict[str, str]):
     model_path = args['MODEL_PATH']
     output_file = args['OUTPUT_FILE']
 
-    test_data_src = get_corpus_ids(src_lang_idx, tgt_lang_idx, data_type='test', is_tgt=False)
+    test_data_src, _ = get_corpus_ids(src_lang_idx, tgt_lang_idx, data_type='test', is_tgt=False, is_train=False)
     # test_data_tgt = get_corpus_ids(src_lang_idx, tgt_lang_idx, data_type='test', is_tgt=True)
 
     print(f"load model from {model_path}")

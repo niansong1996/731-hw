@@ -26,17 +26,17 @@ def train(lang, vocab_size):
 def get_corpus_pairs(src_lang_idx: int, tgt_lang_idx: int, data_type: str) \
         -> List[Tuple[List[int], List[int]]]:
     # get src and tgt corpus ids separately
-    src_sents, long_sent = get_corpus_ids(src_lang_idx, tgt_lang_idx, data_type, False, None)
-    tgt_sents, _ = get_corpus_ids(src_lang_idx, tgt_lang_idx, data_type, True, long_sent)
+    src_sents, long_sent = get_corpus_ids(src_lang_idx, tgt_lang_idx, data_type, False)
+    tgt_sents, _ = get_corpus_ids(src_lang_idx, tgt_lang_idx, data_type, True, long_sent=long_sent)
 
     # pair those corresponding sents together
-    src_tgt_sent_pairs = list((s, t) for s, t in zip(src_sents, tgt_sents) if len(s) <= 64)
+    src_tgt_sent_pairs = list(zip(src_sents, tgt_sents))
 
     return src_tgt_sent_pairs
 
 
-def get_corpus_ids(src_lang_idx: int, tgt_lang_idx: int, data_type: str, is_tgt: bool, long_sent)\
-        -> List[List[int]]:
+def get_corpus_ids(src_lang_idx: int, tgt_lang_idx: int, data_type: str, is_tgt: bool, is_train=True, long_sent=None)\
+        -> Tuple[List[List[int]], Set[int]]:
     sents = []
 
     src_lang = LANG_NAMES[src_lang_idx]
@@ -58,7 +58,7 @@ def get_corpus_ids(src_lang_idx: int, tgt_lang_idx: int, data_type: str, is_tgt:
             if line_count in long_sent:
                 continue
         else:
-            if len(sent.split(' ')) > 50:
+            if is_train and len(sent.split(' ')) > 50:
                 long_sent_in_src.add(line_count)
                 continue
         sent_encode = sp.EncodeAsIds(sent)
