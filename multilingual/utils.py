@@ -96,6 +96,8 @@ class PairedDataBatch:
 
 def sents_to_tensor(sents: List[List[int]], device: torch.device) -> Tensor:
     max_sent_len = max(map((lambda x: len(x)), sents))
+    min_sent_len = min(map((lambda x: len(x)), sents))
+    print('longest %d, shortest %d' % (max_sent_len, min_sent_len))
     # indices are initialized with the index of '<pad>'
     for sent in sents:
         while len(sent) < max_sent_len:
