@@ -24,7 +24,7 @@ class Decoder:
         self.Wa, self.Wc, self.Ws = attn_weights[0]
         self.log_softmax = nn.LogSoftmax(dim=1)
         self.softmax = nn.Softmax(dim=2)
-        weights = torch.ones(vocab_size)
+        weights = torch.ones(vocab_size).to(device)
         weights[Vocab.PAD_ID] = 0
         self.criterion = nn.NLLLoss(weight=weights)
         self.tanh = nn.Tanh()
