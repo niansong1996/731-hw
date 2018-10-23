@@ -9,7 +9,7 @@ import torch.tensor as Tensor
 from CPG import CPG
 from Decoder import Decoder
 from Encoder import Encoder
-from config import device
+from config import device, LANG_INDICES, LANG_NAMES
 from utils import batch_iter, PairedData, sents_to_tensor, assert_tensor_size
 from vocab import Vocab
 
@@ -47,6 +47,13 @@ class MultiNMT(nn.Module):
         self.param_shapes = self.enc_shapes + self.dec_shapes
         # init CPG
         self.cpg = CPG(self.param_shapes, args)
+
+        # load subword models
+        self.sps = []
+        for i in range(len(LANG_INDICES)):
+            sp = spm.SentencePieceProcessor()
+            sp.Load('subword_files/%s.model' % LANG_INDICES[i])
+            self.sps.append(sp)
 
     def forward(self, src_lang: int, tgt_lang: int, src_sents: List[List[int]], tgt_sents: List[List[int]]) \
             -> Tensor:
@@ -147,6 +154,10 @@ class MultiNMT(nn.Module):
                 if all(c[0].value[-1] == Vocab.EOS_ID for c in hypotheses_cand):
                     break
             return [c[0] for c in hypotheses_cand]
+
+    def decode_sent_ids(lang_name: str, sent: List[int]) -> str:
+        sp = self.sps[LANG_NAMES[lang_name]] 
+        return sp.DecodeIds(sent)
 
     def save(self, path: str):
         torch.save(self, path)
