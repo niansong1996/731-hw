@@ -30,20 +30,6 @@ def input_transpose(sents, pad_token):
         sents_t.append([sents[k][i] if len(sents[k]) > i else pad_token for k in range(batch_size)])
 
     return sents_t
-
-
-def read_corpus(file_path, source):
-    data = []
-    for line in open(file_path, encoding="utf-8"):
-        sent = line.strip().split(' ')
-        # only append <s> and </s> to the target sentence
-        if source == 'tgt':
-            sent = ['<s>'] + sent + ['</s>']
-        data.append(sent)
-
-    return data
-
-
 def read_corpus(src_lang_idx: int, tgt_lang_idx: int, data_type: str, is_tgt: bool):
     src_lang = LANG_NAMES[src_lang_idx]
     tgt_lang = LANG_NAMES[tgt_lang_idx]

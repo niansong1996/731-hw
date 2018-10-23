@@ -9,8 +9,14 @@ decode=${name_prefix}"-result.txt"
 test_tgt="data/test.en-az.en.txt"
 mkdir -p ${work_dir}
 echo save results to ${work_dir}
+echo "#########################################"
+echo "##### Print out Git commit and diff######"
+echo "#########################################"
 git log -1
-git diff
+git diff --color | cat
+echo "#########################################"
+echo "########### Start Training ##############"
+echo "#########################################"
 python nmt.py \
     train \
     --langs 'az-en,be-en,gl-en,tr-en,ru-en,pt-en'\

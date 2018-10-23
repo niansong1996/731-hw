@@ -1,0 +1,593 @@
+save results to work_dir
+GeForce GTX 1080
+Done loading train data for az-en parallel translation
+Done loading train data for tr-en parallel translation
+Done loading dev data for az-en parallel translation
+Done loading dev data for tr-en parallel translation
+Model initializing...
+begin Maximum Likelihood training
+<class 'torch.Tensor'> torch.Size([8, 7])
+<class 'torch.Tensor'> torch.Size([3, 8])
+<class 'torch.Tensor'> torch.Size([3, 8])
+<class 'torch.Tensor'> torch.Size([3, 8])
+<class 'torch.Tensor'> torch.Size([3, 8])
+<class 'torch.Tensor'> torch.Size([526336, 3])
+<class 'torch.Tensor'> torch.Size([526336, 3])
+<class 'torch.Tensor'> torch.Size([2625536, 3])
+<class 'torch.Tensor'> torch.Size([11026432, 3])
+<class 'torch.Tensor'> torch.Size([20000, 256])
+<class 'torch.Tensor'> torch.Size([20000, 256])
+<class 'torch.Tensor'> torch.Size([20000, 256])
+<class 'torch.Tensor'> torch.Size([20000, 256])
+<class 'torch.Tensor'> torch.Size([20000, 256])
+<class 'torch.Tensor'> torch.Size([20000, 256])
+<class 'torch.Tensor'> torch.Size([20000, 256])
+save currently the best model to [work_dir/tune-model.bin]
+##########epoch 1, iter 50, avg. loss 46.37, avg. ppl 2.55 cum. examples 1600, speed 6764.33 words/sec, time elapsed 11.69 sec
+##########epoch 1, iter 100, avg. loss 51.66, avg. ppl 2.91 cum. examples 3200, speed 7073.82 words/sec, time elapsed 22.63 sec
+##########epoch 1, iter 150, avg. loss 50.91, avg. ppl 2.93 cum. examples 4800, speed 7085.96 words/sec, time elapsed 33.33 sec
+##########epoch 1, iter 200, avg. loss 45.39, avg. ppl 2.71 cum. examples 6400, speed 7014.93 words/sec, time elapsed 43.70 sec
+##########epoch 1, iter 250, avg. loss 40.78, avg. ppl 2.46 cum. examples 8000, speed 6964.62 words/sec, time elapsed 54.13 sec
+##########epoch 1, iter 300, avg. loss 50.75, avg. ppl 3.17 cum. examples 9600, speed 6752.08 words/sec, time elapsed 64.57 sec
+##########epoch 1, iter 350, avg. loss 56.76, avg. ppl 3.03 cum. examples 11200, speed 7089.11 words/sec, time elapsed 76.13 sec
+##########epoch 1, iter 400, avg. loss 51.71, avg. ppl 3.11 cum. examples 12800, speed 6876.45 words/sec, time elapsed 86.74 sec
+##########epoch 1, iter 450, avg. loss 44.46, avg. ppl 2.94 cum. examples 14400, speed 6619.38 words/sec, time elapsed 96.71 sec
+##########epoch 1, iter 500, avg. loss 53.09, avg. ppl 3.05 cum. examples 16000, speed 6932.97 words/sec, time elapsed 107.69 sec
+##########epoch 1, iter 550, avg. loss 49.78, avg. ppl 2.73 cum. examples 17600, speed 7133.57 words/sec, time elapsed 118.79 sec
+##########epoch 1, iter 600, avg. loss 49.35, avg. ppl 3.08 cum. examples 19200, speed 6763.24 words/sec, time elapsed 129.16 sec
+##########epoch 1, iter 650, avg. loss 52.63, avg. ppl 2.93 cum. examples 20800, speed 7086.69 words/sec, time elapsed 140.23 sec
+##########epoch 1, iter 700, avg. loss 46.59, avg. ppl 3.15 cum. examples 22400, speed 6578.89 words/sec, time elapsed 150.10 sec
+##########epoch 1, iter 750, avg. loss 51.34, avg. ppl 2.78 cum. examples 24000, speed 7234.55 words/sec, time elapsed 161.22 sec
+##########epoch 1, iter 800, avg. loss 50.40, avg. ppl 3.01 cum. examples 25600, speed 6877.02 words/sec, time elapsed 171.85 sec
+##########epoch 1, iter 850, avg. loss 50.09, avg. ppl 2.73 cum. examples 27200, speed 7246.01 words/sec, time elapsed 182.86 sec
+##########epoch 1, iter 900, avg. loss 53.10, avg. ppl 3.05 cum. examples 28800, speed 6747.75 words/sec, time elapsed 194.14 sec
+##########epoch 1, iter 950, avg. loss 42.12, avg. ppl 2.62 cum. examples 30400, speed 6879.87 words/sec, time elapsed 204.30 sec
+##########epoch 1, iter 1000, avg. loss 52.92, avg. ppl 3.35 cum. examples 32000, speed 6722.05 words/sec, time elapsed 214.71 sec
+epoch 1, iter 1000, cum. loss 49.51, cum. ppl 2.90 cum. examples 32000
+begin validation ... size 2
+validation: iter 1000, dev. ppl 2.406204
+save currently the best model to [work_dir/tune-model.bin]
+##########epoch 1, iter 1050, avg. loss 51.63, avg. ppl 2.94 cum. examples 1600, speed 4452.54 words/sec, time elapsed 231.92 sec
+##########epoch 1, iter 1100, avg. loss 44.17, avg. ppl 2.94 cum. examples 3200, speed 6601.48 words/sec, time elapsed 241.83 sec
+##########epoch 1, iter 1150, avg. loss 48.23, avg. ppl 3.17 cum. examples 4800, speed 6674.22 words/sec, time elapsed 251.84 sec
+##########epoch 1, iter 1200, avg. loss 43.07, avg. ppl 2.73 cum. examples 6400, speed 6831.19 words/sec, time elapsed 261.90 sec
+##########epoch 1, iter 1250, avg. loss 55.01, avg. ppl 3.18 cum. examples 8000, speed 6990.59 words/sec, time elapsed 272.80 sec
+##########epoch 1, iter 1300, avg. loss 46.90, avg. ppl 2.69 cum. examples 9600, speed 7075.13 words/sec, time elapsed 283.51 sec
+##########epoch 1, iter 1350, avg. loss 51.10, avg. ppl 3.20 cum. examples 11170, speed 6717.92 words/sec, time elapsed 293.79 sec
+##########epoch 1, iter 1400, avg. loss 50.85, avg. ppl 3.27 cum. examples 12770, speed 6693.53 words/sec, time elapsed 304.04 sec
+##########epoch 1, iter 1450, avg. loss 49.00, avg. ppl 2.78 cum. examples 14370, speed 7046.59 words/sec, time elapsed 314.91 sec
+##########epoch 1, iter 1500, avg. loss 50.51, avg. ppl 3.14 cum. examples 15970, speed 6778.92 words/sec, time elapsed 325.33 sec
+##########epoch 1, iter 1550, avg. loss 52.00, avg. ppl 3.08 cum. examples 17570, speed 6906.67 words/sec, time elapsed 336.03 sec
+##########epoch 1, iter 1600, avg. loss 48.97, avg. ppl 2.93 cum. examples 19170, speed 6944.53 words/sec, time elapsed 346.53 sec
+##########epoch 1, iter 1650, avg. loss 49.65, avg. ppl 3.08 cum. examples 20770, speed 6786.80 words/sec, time elapsed 356.95 sec
+##########epoch 1, iter 1700, avg. loss 46.99, avg. ppl 2.89 cum. examples 22370, speed 6857.33 words/sec, time elapsed 367.28 sec
+##########epoch 1, iter 1750, avg. loss 43.05, avg. ppl 2.73 cum. examples 23970, speed 6834.32 words/sec, time elapsed 377.31 sec
+##########epoch 1, iter 1800, avg. loss 49.24, avg. ppl 3.12 cum. examples 25570, speed 6745.93 words/sec, time elapsed 387.57 sec
+##########epoch 1, iter 1850, avg. loss 52.24, avg. ppl 3.17 cum. examples 27170, speed 6823.19 words/sec, time elapsed 398.18 sec
+##########epoch 1, iter 1900, avg. loss 48.31, avg. ppl 2.77 cum. examples 28752, speed 6997.94 words/sec, time elapsed 408.91 sec
+##########epoch 1, iter 1950, avg. loss 61.38, avg. ppl 3.51 cum. examples 30352, speed 6961.25 words/sec, time elapsed 420.14 sec
+##########epoch 1, iter 2000, avg. loss 52.36, avg. ppl 3.15 cum. examples 31952, speed 6850.76 words/sec, time elapsed 430.81 sec
+epoch 1, iter 2000, cum. loss 49.73, cum. ppl 3.02 cum. examples 31952
+begin validation ... size 2
+validation: iter 2000, dev. ppl 2.336104
+save currently the best model to [work_dir/tune-model.bin]
+##########epoch 1, iter 2050, avg. loss 48.02, avg. ppl 2.83 cum. examples 1600, speed 4355.67 words/sec, time elapsed 447.75 sec
+##########epoch 1, iter 2100, avg. loss 46.40, avg. ppl 3.05 cum. examples 3200, speed 6673.04 words/sec, time elapsed 457.73 sec
+##########epoch 1, iter 2150, avg. loss 55.94, avg. ppl 3.16 cum. examples 4800, speed 6996.62 words/sec, time elapsed 468.85 sec
+##########epoch 1, iter 2200, avg. loss 50.30, avg. ppl 3.01 cum. examples 6400, speed 6896.70 words/sec, time elapsed 479.45 sec
+##########epoch 1, iter 2250, avg. loss 51.39, avg. ppl 2.87 cum. examples 8000, speed 7058.85 words/sec, time elapsed 490.49 sec
+##########epoch 1, iter 2300, avg. loss 53.90, avg. ppl 2.92 cum. examples 9600, speed 7134.30 words/sec, time elapsed 501.79 sec
+##########epoch 1, iter 2350, avg. loss 42.13, avg. ppl 2.60 cum. examples 11200, speed 6927.92 words/sec, time elapsed 511.99 sec
+##########epoch 1, iter 2400, avg. loss 50.98, avg. ppl 3.29 cum. examples 12800, speed 6692.91 words/sec, time elapsed 522.23 sec
+##########epoch 1, iter 2450, avg. loss 54.44, avg. ppl 2.91 cum. examples 14400, speed 7159.47 words/sec, time elapsed 533.62 sec
+##########epoch 1, iter 2500, avg. loss 52.14, avg. ppl 3.17 cum. examples 16000, speed 6823.71 words/sec, time elapsed 544.21 sec
+##########epoch 1, iter 2550, avg. loss 44.83, avg. ppl 2.98 cum. examples 17600, speed 6672.95 words/sec, time elapsed 554.05 sec
+##########epoch 1, iter 2600, avg. loss 46.81, avg. ppl 2.70 cum. examples 19200, speed 7043.30 words/sec, time elapsed 564.77 sec
+##########epoch 1, iter 2650, avg. loss 54.34, avg. ppl 2.80 cum. examples 20800, speed 7299.64 words/sec, time elapsed 576.32 sec
+##########epoch 1, iter 2700, avg. loss 47.02, avg. ppl 2.93 cum. examples 22400, speed 6790.10 words/sec, time elapsed 586.64 sec
+##########epoch 1, iter 2750, avg. loss 52.22, avg. ppl 3.00 cum. examples 24000, speed 6958.68 words/sec, time elapsed 597.56 sec
+##########epoch 1, iter 2800, avg. loss 49.02, avg. ppl 3.04 cum. examples 25600, speed 6837.37 words/sec, time elapsed 607.89 sec
+##########epoch 1, iter 2850, avg. loss 58.49, avg. ppl 3.13 cum. examples 27200, speed 7125.59 words/sec, time elapsed 619.39 sec
+##########epoch 1, iter 2900, avg. loss 59.24, avg. ppl 3.56 cum. examples 28800, speed 6838.17 words/sec, time elapsed 630.31 sec
+##########epoch 1, iter 2950, avg. loss 46.30, avg. ppl 2.65 cum. examples 30400, speed 7036.71 words/sec, time elapsed 641.11 sec
+##########epoch 1, iter 3000, avg. loss 50.47, avg. ppl 2.71 cum. examples 32000, speed 7275.84 words/sec, time elapsed 652.25 sec
+epoch 1, iter 3000, cum. loss 50.72, cum. ppl 2.95 cum. examples 32000
+begin validation ... size 2
+validation: iter 3000, dev. ppl 2.326107
+save currently the best model to [work_dir/tune-model.bin]
+##########epoch 1, iter 3050, avg. loss 46.04, avg. ppl 2.94 cum. examples 1600, speed 4138.94 words/sec, time elapsed 668.73 sec
+##########epoch 1, iter 3100, avg. loss 49.82, avg. ppl 2.74 cum. examples 3200, speed 7173.86 words/sec, time elapsed 679.74 sec
+##########epoch 1, iter 3150, avg. loss 42.90, avg. ppl 2.86 cum. examples 4800, speed 6644.22 words/sec, time elapsed 689.57 sec
+##########epoch 1, iter 3200, avg. loss 43.81, avg. ppl 2.89 cum. examples 6400, speed 6689.39 words/sec, time elapsed 699.43 sec
+##########epoch 1, iter 3250, avg. loss 48.12, avg. ppl 2.82 cum. examples 8000, speed 6998.86 words/sec, time elapsed 710.05 sec
+##########epoch 1, iter 3300, avg. loss 51.20, avg. ppl 2.99 cum. examples 9600, speed 7018.11 words/sec, time elapsed 720.73 sec
+##########epoch 1, iter 3350, avg. loss 51.21, avg. ppl 2.96 cum. examples 11200, speed 6953.09 words/sec, time elapsed 731.57 sec
+##########epoch 1, iter 3400, avg. loss 52.48, avg. ppl 3.06 cum. examples 12800, speed 6933.11 words/sec, time elapsed 742.40 sec
+##########epoch 1, iter 3450, avg. loss 55.44, avg. ppl 3.37 cum. examples 14400, speed 6832.65 words/sec, time elapsed 753.08 sec
+##########epoch 1, iter 3500, avg. loss 46.84, avg. ppl 2.81 cum. examples 16000, speed 6931.53 words/sec, time elapsed 763.55 sec
+##########epoch 1, iter 3550, avg. loss 48.30, avg. ppl 2.71 cum. examples 17600, speed 7096.72 words/sec, time elapsed 774.48 sec
+##########epoch 1, iter 3600, avg. loss 49.35, avg. ppl 3.03 cum. examples 19200, speed 6798.86 words/sec, time elapsed 784.96 sec
+##########epoch 1, iter 3650, avg. loss 47.61, avg. ppl 2.71 cum. examples 20800, speed 7015.22 words/sec, time elapsed 795.83 sec
+##########epoch 1, iter 3700, avg. loss 52.07, avg. ppl 2.83 cum. examples 22400, speed 7131.27 words/sec, time elapsed 807.05 sec
+##########epoch 1, iter 3750, avg. loss 54.87, avg. ppl 3.07 cum. examples 24000, speed 7008.29 words/sec, time elapsed 818.23 sec
+##########epoch 1, iter 3800, avg. loss 51.09, avg. ppl 3.17 cum. examples 25600, speed 6765.49 words/sec, time elapsed 828.71 sec
+##########epoch 1, iter 3850, avg. loss 48.69, avg. ppl 2.79 cum. examples 27200, speed 6971.37 words/sec, time elapsed 839.59 sec
+##########epoch 1, iter 3900, avg. loss 55.82, avg. ppl 2.91 cum. examples 28800, speed 7209.84 words/sec, time elapsed 851.18 sec
+##########epoch 1, iter 3950, avg. loss 47.44, avg. ppl 3.19 cum. examples 30400, speed 6583.82 words/sec, time elapsed 861.13 sec
+##########epoch 1, iter 4000, avg. loss 48.12, avg. ppl 2.92 cum. examples 32000, speed 6841.20 words/sec, time elapsed 871.64 sec
+epoch 1, iter 4000, cum. loss 49.56, cum. ppl 2.93 cum. examples 32000
+begin validation ... size 2
+validation: iter 4000, dev. ppl 2.300686
+save currently the best model to [work_dir/tune-model.bin]
+##########epoch 1, iter 4050, avg. loss 51.47, avg. ppl 3.05 cum. examples 1600, speed 4339.90 words/sec, time elapsed 888.68 sec
+##########epoch 1, iter 4100, avg. loss 44.52, avg. ppl 2.78 cum. examples 3200, speed 6769.63 words/sec, time elapsed 898.98 sec
+##########epoch 1, iter 4150, avg. loss 45.73, avg. ppl 2.88 cum. examples 4800, speed 6764.67 words/sec, time elapsed 909.19 sec
+##########epoch 1, iter 4200, avg. loss 46.12, avg. ppl 2.81 cum. examples 6400, speed 6851.91 words/sec, time elapsed 919.62 sec
+##########epoch 1, iter 4250, avg. loss 51.75, avg. ppl 3.16 cum. examples 8000, speed 6746.28 words/sec, time elapsed 930.29 sec
+##########epoch 1, iter 4300, avg. loss 48.59, avg. ppl 2.63 cum. examples 9600, speed 7125.00 words/sec, time elapsed 941.57 sec
+##########epoch 1, iter 4350, avg. loss 54.61, avg. ppl 2.83 cum. examples 11200, speed 7164.70 words/sec, time elapsed 953.30 sec
+##########epoch 1, iter 4400, avg. loss 53.92, avg. ppl 3.05 cum. examples 12800, speed 6951.93 words/sec, time elapsed 964.45 sec
+##########epoch 1, iter 4450, avg. loss 45.96, avg. ppl 2.86 cum. examples 14400, speed 6745.02 words/sec, time elapsed 974.82 sec
+##########epoch 1, iter 4500, avg. loss 53.73, avg. ppl 2.57 cum. examples 16000, speed 7523.93 words/sec, time elapsed 986.94 sec
+##########epoch 1, iter 4550, avg. loss 40.84, avg. ppl 2.68 cum. examples 17600, speed 6705.75 words/sec, time elapsed 996.81 sec
+##########epoch 1, iter 4600, avg. loss 46.54, avg. ppl 2.74 cum. examples 19200, speed 6993.93 words/sec, time elapsed 1007.39 sec
+##########epoch 1, iter 4650, avg. loss 50.55, avg. ppl 3.01 cum. examples 20800, speed 6901.05 words/sec, time elapsed 1018.02 sec
+##########epoch 1, iter 4700, avg. loss 50.30, avg. ppl 2.85 cum. examples 22400, speed 7007.41 words/sec, time elapsed 1028.97 sec
+##########epoch 1, iter 4750, avg. loss 51.95, avg. ppl 3.00 cum. examples 24000, speed 6937.96 words/sec, time elapsed 1039.86 sec
+##########epoch 1, iter 4800, avg. loss 52.74, avg. ppl 2.69 cum. examples 25600, speed 7299.23 words/sec, time elapsed 1051.53 sec
+##########epoch 1, iter 4850, avg. loss 45.90, avg. ppl 2.69 cum. examples 27200, speed 6966.00 words/sec, time elapsed 1062.17 sec
+##########epoch 1, iter 4900, avg. loss 46.22, avg. ppl 2.83 cum. examples 28800, speed 6832.13 words/sec, time elapsed 1072.59 sec
+##########epoch 1, iter 4950, avg. loss 50.73, avg. ppl 3.19 cum. examples 30400, speed 6685.51 words/sec, time elapsed 1083.05 sec
+##########epoch 1, iter 5000, avg. loss 46.44, avg. ppl 2.78 cum. examples 32000, speed 6890.79 words/sec, time elapsed 1093.60 sec
+epoch 1, iter 5000, cum. loss 48.93, cum. ppl 2.84 cum. examples 32000
+begin validation ... size 2
+validation: iter 5000, dev. ppl 2.290177
+save currently the best model to [work_dir/tune-model.bin]
+##########epoch 1, iter 5050, avg. loss 50.05, avg. ppl 3.09 cum. examples 1600, speed 4218.97 words/sec, time elapsed 1110.41 sec
+##########epoch 1, iter 5100, avg. loss 50.61, avg. ppl 3.21 cum. examples 3200, speed 6663.47 words/sec, time elapsed 1120.83 sec
+##########epoch 1, iter 5150, avg. loss 53.54, avg. ppl 2.83 cum. examples 4800, speed 7130.54 words/sec, time elapsed 1132.36 sec
+##########epoch 1, iter 5200, avg. loss 49.10, avg. ppl 3.11 cum. examples 6400, speed 6646.20 words/sec, time elapsed 1142.79 sec
+##########epoch 1, iter 5250, avg. loss 46.21, avg. ppl 2.84 cum. examples 8000, speed 6809.93 words/sec, time elapsed 1153.21 sec
+##########epoch 1, iter 5300, avg. loss 53.41, avg. ppl 3.03 cum. examples 9600, speed 7002.56 words/sec, time elapsed 1164.22 sec
+##########epoch 1, iter 5350, avg. loss 51.60, avg. ppl 3.09 cum. examples 11200, speed 6837.11 words/sec, time elapsed 1174.91 sec
+##########epoch 2, iter 5400, avg. loss 47.49, avg. ppl 3.05 cum. examples 12800, speed 6593.41 words/sec, time elapsed 1185.26 sec
+##########epoch 2, iter 5450, avg. loss 46.10, avg. ppl 2.44 cum. examples 14400, speed 7147.40 words/sec, time elapsed 1196.82 sec
+##########epoch 2, iter 5500, avg. loss 39.28, avg. ppl 1.91 cum. examples 16000, speed 7786.09 words/sec, time elapsed 1209.31 sec
+##########epoch 2, iter 5550, avg. loss 35.35, avg. ppl 2.05 cum. examples 17600, speed 7224.94 words/sec, time elapsed 1220.21 sec
+##########epoch 2, iter 5600, avg. loss 42.23, avg. ppl 2.05 cum. examples 19200, speed 7492.15 words/sec, time elapsed 1232.75 sec
+##########epoch 2, iter 5650, avg. loss 40.66, avg. ppl 2.04 cum. examples 20800, speed 7602.23 words/sec, time elapsed 1244.73 sec
+##########epoch 2, iter 5700, avg. loss 37.64, avg. ppl 1.98 cum. examples 22400, speed 7531.45 words/sec, time elapsed 1256.47 sec
+##########epoch 2, iter 5750, avg. loss 52.39, avg. ppl 2.17 cum. examples 24000, speed 7901.87 words/sec, time elapsed 1270.19 sec
+##########epoch 2, iter 5800, avg. loss 46.80, avg. ppl 2.17 cum. examples 25600, speed 7667.92 words/sec, time elapsed 1282.78 sec
+##########epoch 2, iter 5850, avg. loss 39.76, avg. ppl 2.09 cum. examples 27200, speed 7438.13 words/sec, time elapsed 1294.40 sec
+##########epoch 2, iter 5900, avg. loss 36.17, avg. ppl 2.06 cum. examples 28800, speed 7281.63 words/sec, time elapsed 1305.42 sec
+##########epoch 2, iter 5950, avg. loss 40.65, avg. ppl 2.18 cum. examples 30400, speed 7259.61 words/sec, time elapsed 1316.91 sec
+##########epoch 2, iter 6000, avg. loss 50.62, avg. ppl 2.34 cum. examples 32000, speed 7565.68 words/sec, time elapsed 1329.50 sec
+epoch 2, iter 6000, cum. loss 45.48, cum. ppl 2.40 cum. examples 32000
+begin validation ... size 2
+validation: iter 6000, dev. ppl 2.320116
+hit patience 1
+##########epoch 2, iter 6050, avg. loss 43.59, avg. ppl 2.20 cum. examples 1600, speed 5813.80 words/sec, time elapsed 1344.72 sec
+##########epoch 2, iter 6100, avg. loss 43.03, avg. ppl 2.17 cum. examples 3200, speed 7436.03 words/sec, time elapsed 1356.66 sec
+##########epoch 2, iter 6150, avg. loss 41.56, avg. ppl 2.32 cum. examples 4800, speed 7153.08 words/sec, time elapsed 1367.68 sec
+##########epoch 2, iter 6200, avg. loss 44.93, avg. ppl 2.22 cum. examples 6400, speed 7497.59 words/sec, time elapsed 1379.74 sec
+##########epoch 2, iter 6250, avg. loss 43.20, avg. ppl 2.17 cum. examples 8000, speed 7484.91 words/sec, time elapsed 1391.66 sec
+##########epoch 2, iter 6300, avg. loss 39.66, avg. ppl 2.10 cum. examples 9600, speed 7411.47 words/sec, time elapsed 1403.17 sec
+##########epoch 2, iter 6350, avg. loss 54.10, avg. ppl 2.64 cum. examples 11200, speed 7258.60 words/sec, time elapsed 1415.47 sec
+##########epoch 2, iter 6400, avg. loss 47.17, avg. ppl 2.31 cum. examples 12800, speed 7417.48 words/sec, time elapsed 1427.63 sec
+##########epoch 2, iter 6450, avg. loss 43.26, avg. ppl 2.25 cum. examples 14400, speed 7312.06 words/sec, time elapsed 1439.28 sec
+##########epoch 2, iter 6500, avg. loss 41.35, avg. ppl 2.10 cum. examples 16000, speed 7516.62 words/sec, time elapsed 1451.17 sec
+##########epoch 2, iter 6550, avg. loss 37.89, avg. ppl 1.96 cum. examples 17600, speed 7646.82 words/sec, time elapsed 1462.99 sec
+##########epoch 2, iter 6600, avg. loss 40.88, avg. ppl 2.18 cum. examples 19200, speed 7333.48 words/sec, time elapsed 1474.43 sec
+##########epoch 2, iter 6650, avg. loss 41.64, avg. ppl 2.06 cum. examples 20800, speed 7503.79 words/sec, time elapsed 1486.72 sec
+##########epoch 2, iter 6700, avg. loss 38.17, avg. ppl 2.02 cum. examples 22400, speed 7438.25 words/sec, time elapsed 1498.41 sec
+##########epoch 2, iter 6750, avg. loss 40.29, avg. ppl 2.14 cum. examples 24000, speed 7346.51 words/sec, time elapsed 1509.96 sec
+##########epoch 2, iter 6800, avg. loss 49.24, avg. ppl 2.23 cum. examples 25600, speed 7633.96 words/sec, time elapsed 1522.80 sec
+##########epoch 2, iter 6850, avg. loss 47.95, avg. ppl 2.45 cum. examples 27200, speed 7267.92 words/sec, time elapsed 1534.57 sec
+##########epoch 2, iter 6900, avg. loss 37.13, avg. ppl 1.99 cum. examples 28800, speed 7497.70 words/sec, time elapsed 1546.11 sec
+##########epoch 2, iter 6950, avg. loss 45.80, avg. ppl 2.28 cum. examples 30400, speed 7433.08 words/sec, time elapsed 1558.09 sec
+##########epoch 2, iter 7000, avg. loss 46.11, avg. ppl 2.41 cum. examples 32000, speed 7200.75 words/sec, time elapsed 1569.72 sec
+epoch 2, iter 7000, cum. loss 43.35, cum. ppl 2.20 cum. examples 32000
+begin validation ... size 2
+validation: iter 7000, dev. ppl 2.321463
+hit patience 2
+##########epoch 2, iter 7050, avg. loss 39.29, avg. ppl 2.09 cum. examples 1600, speed 5747.13 words/sec, time elapsed 1584.56 sec
+##########epoch 2, iter 7100, avg. loss 44.89, avg. ppl 2.33 cum. examples 3200, speed 7269.54 words/sec, time elapsed 1596.26 sec
+##########epoch 2, iter 7150, avg. loss 43.77, avg. ppl 2.19 cum. examples 4800, speed 7512.36 words/sec, time elapsed 1608.12 sec
+##########epoch 2, iter 7200, avg. loss 46.22, avg. ppl 2.48 cum. examples 6400, speed 7096.32 words/sec, time elapsed 1619.61 sec
+##########epoch 2, iter 7250, avg. loss 42.78, avg. ppl 2.27 cum. examples 8000, speed 7222.79 words/sec, time elapsed 1631.18 sec
+##########epoch 2, iter 7300, avg. loss 41.97, avg. ppl 2.22 cum. examples 9600, speed 7244.19 words/sec, time elapsed 1642.82 sec
+##########epoch 2, iter 7350, avg. loss 45.64, avg. ppl 2.14 cum. examples 11200, speed 7619.54 words/sec, time elapsed 1655.42 sec
+##########epoch 2, iter 7400, avg. loss 37.87, avg. ppl 2.08 cum. examples 12800, speed 7315.47 words/sec, time elapsed 1666.71 sec
+##########epoch 2, iter 7450, avg. loss 48.30, avg. ppl 2.36 cum. examples 14400, speed 7332.24 words/sec, time elapsed 1678.96 sec
+##########epoch 2, iter 7500, avg. loss 47.74, avg. ppl 2.21 cum. examples 16000, speed 7569.73 words/sec, time elapsed 1691.66 sec
+##########epoch 2, iter 7550, avg. loss 49.07, avg. ppl 2.25 cum. examples 17600, speed 7483.04 words/sec, time elapsed 1704.57 sec
+##########epoch 2, iter 7600, avg. loss 43.08, avg. ppl 2.24 cum. examples 19200, speed 7277.65 words/sec, time elapsed 1716.35 sec
+##########epoch 2, iter 7650, avg. loss 40.73, avg. ppl 2.05 cum. examples 20800, speed 7529.55 words/sec, time elapsed 1728.37 sec
+##########epoch 2, iter 7700, avg. loss 44.59, avg. ppl 2.15 cum. examples 22400, speed 7589.36 words/sec, time elapsed 1740.65 sec
+##########epoch 2, iter 7750, avg. loss 46.22, avg. ppl 2.30 cum. examples 24000, speed 7362.27 words/sec, time elapsed 1752.70 sec
+##########epoch 2, iter 7800, avg. loss 45.13, avg. ppl 2.25 cum. examples 25600, speed 7415.37 words/sec, time elapsed 1764.70 sec
+##########epoch 2, iter 7850, avg. loss 40.61, avg. ppl 2.25 cum. examples 27200, speed 7159.35 words/sec, time elapsed 1775.89 sec
+##########epoch 2, iter 7900, avg. loss 51.81, avg. ppl 2.52 cum. examples 28800, speed 7302.45 words/sec, time elapsed 1788.18 sec
+##########epoch 2, iter 7950, avg. loss 46.64, avg. ppl 2.53 cum. examples 30400, speed 7054.36 words/sec, time elapsed 1799.55 sec
+##########epoch 2, iter 8000, avg. loss 41.25, avg. ppl 2.21 cum. examples 32000, speed 7247.31 words/sec, time elapsed 1811.05 sec
+epoch 2, iter 8000, cum. loss 44.38, cum. ppl 2.25 cum. examples 32000
+begin validation ... size 2
+validation: iter 8000, dev. ppl 2.337529
+hit patience 3
+hit #1 trial
+load previously best model and decay learning rate to 0.000500
+##########epoch 2, iter 8050, avg. loss 45.73, avg. ppl 2.27 cum. examples 1600, speed 5934.78 words/sec, time elapsed 1826.10 sec
+##########epoch 2, iter 8100, avg. loss 42.41, avg. ppl 2.19 cum. examples 3200, speed 8033.22 words/sec, time elapsed 1836.85 sec
+##########epoch 2, iter 8150, avg. loss 39.09, avg. ppl 1.93 cum. examples 4800, speed 8346.72 words/sec, time elapsed 1848.21 sec
+##########epoch 2, iter 8200, avg. loss 44.53, avg. ppl 2.35 cum. examples 6400, speed 7906.75 words/sec, time elapsed 1858.74 sec
+##########epoch 2, iter 8250, avg. loss 42.88, avg. ppl 2.20 cum. examples 8000, speed 8082.54 words/sec, time elapsed 1869.51 sec
+##########epoch 2, iter 8300, avg. loss 42.21, avg. ppl 2.17 cum. examples 9600, speed 8078.93 words/sec, time elapsed 1880.33 sec
+##########epoch 2, iter 8350, avg. loss 46.63, avg. ppl 2.30 cum. examples 11200, speed 8082.09 words/sec, time elapsed 1891.42 sec
+##########epoch 2, iter 8400, avg. loss 45.65, avg. ppl 2.32 cum. examples 12800, speed 8031.44 words/sec, time elapsed 1902.24 sec
+##########epoch 2, iter 8450, avg. loss 44.71, avg. ppl 2.13 cum. examples 14400, speed 8271.72 words/sec, time elapsed 1913.70 sec
+##########epoch 2, iter 8500, avg. loss 48.10, avg. ppl 2.29 cum. examples 16000, speed 8129.08 words/sec, time elapsed 1925.15 sec
+##########epoch 2, iter 8550, avg. loss 44.38, avg. ppl 2.27 cum. examples 17600, speed 8024.77 words/sec, time elapsed 1935.95 sec
+##########epoch 2, iter 8600, avg. loss 42.61, avg. ppl 2.19 cum. examples 19200, speed 8046.15 words/sec, time elapsed 1946.75 sec
+##########epoch 2, iter 8650, avg. loss 48.16, avg. ppl 2.34 cum. examples 20800, speed 8069.29 words/sec, time elapsed 1957.98 sec
+##########epoch 2, iter 8700, avg. loss 43.04, avg. ppl 2.19 cum. examples 22400, speed 8117.48 words/sec, time elapsed 1968.79 sec
+##########epoch 2, iter 8750, avg. loss 43.35, avg. ppl 2.36 cum. examples 24000, speed 7841.61 words/sec, time elapsed 1979.11 sec
+##########epoch 2, iter 8800, avg. loss 43.73, avg. ppl 2.39 cum. examples 25600, speed 7858.08 words/sec, time elapsed 1989.34 sec
+##########epoch 2, iter 8850, avg. loss 41.31, avg. ppl 2.26 cum. examples 27200, speed 7946.15 words/sec, time elapsed 1999.57 sec
+##########epoch 2, iter 8900, avg. loss 39.83, avg. ppl 2.06 cum. examples 28782, speed 8128.13 words/sec, time elapsed 2010.30 sec
+##########epoch 2, iter 8950, avg. loss 47.86, avg. ppl 2.38 cum. examples 30382, speed 8002.05 words/sec, time elapsed 2021.36 sec
+##########epoch 2, iter 9000, avg. loss 44.17, avg. ppl 2.21 cum. examples 31982, speed 8122.13 words/sec, time elapsed 2032.36 sec
+epoch 2, iter 9000, cum. loss 44.02, cum. ppl 2.23 cum. examples 31982
+begin validation ... size 2
+validation: iter 9000, dev. ppl 2.290177
+hit patience 1
+##########epoch 2, iter 9050, avg. loss 44.62, avg. ppl 2.17 cum. examples 1600, speed 6343.82 words/sec, time elapsed 2046.92 sec
+##########epoch 2, iter 9100, avg. loss 48.92, avg. ppl 2.33 cum. examples 3200, speed 8086.78 words/sec, time elapsed 2058.34 sec
+##########epoch 2, iter 9150, avg. loss 43.41, avg. ppl 2.21 cum. examples 4800, speed 8089.85 words/sec, time elapsed 2069.20 sec
+##########epoch 2, iter 9200, avg. loss 48.27, avg. ppl 2.39 cum. examples 6400, speed 8064.41 words/sec, time elapsed 2080.19 sec
+##########epoch 2, iter 9250, avg. loss 45.85, avg. ppl 2.35 cum. examples 8000, speed 7949.87 words/sec, time elapsed 2091.01 sec
+##########epoch 2, iter 9300, avg. loss 49.07, avg. ppl 2.35 cum. examples 9600, speed 8102.04 words/sec, time elapsed 2102.35 sec
+##########epoch 2, iter 9350, avg. loss 41.35, avg. ppl 2.27 cum. examples 11200, speed 7835.69 words/sec, time elapsed 2112.62 sec
+##########epoch 2, iter 9400, avg. loss 44.56, avg. ppl 2.18 cum. examples 12800, speed 8174.78 words/sec, time elapsed 2123.81 sec
+##########epoch 2, iter 9450, avg. loss 42.14, avg. ppl 2.18 cum. examples 14400, speed 8072.31 words/sec, time elapsed 2134.55 sec
+##########epoch 2, iter 9500, avg. loss 40.54, avg. ppl 2.00 cum. examples 16000, speed 8342.37 words/sec, time elapsed 2145.79 sec
+##########epoch 2, iter 9550, avg. loss 45.90, avg. ppl 2.21 cum. examples 17600, speed 8128.96 words/sec, time elapsed 2157.18 sec
+##########epoch 2, iter 9600, avg. loss 42.54, avg. ppl 2.21 cum. examples 19200, speed 8037.04 words/sec, time elapsed 2167.88 sec
+##########epoch 2, iter 9650, avg. loss 42.19, avg. ppl 2.13 cum. examples 20800, speed 8120.85 words/sec, time elapsed 2178.89 sec
+##########epoch 2, iter 9700, avg. loss 36.90, avg. ppl 1.91 cum. examples 22400, speed 8327.47 words/sec, time elapsed 2189.86 sec
+##########epoch 2, iter 9750, avg. loss 41.57, avg. ppl 2.16 cum. examples 24000, speed 8098.59 words/sec, time elapsed 2200.51 sec
+##########epoch 2, iter 9800, avg. loss 38.76, avg. ppl 2.06 cum. examples 25600, speed 8143.89 words/sec, time elapsed 2211.05 sec
+##########epoch 2, iter 9850, avg. loss 40.91, avg. ppl 2.28 cum. examples 27200, speed 7857.41 words/sec, time elapsed 2221.14 sec
+##########epoch 2, iter 9900, avg. loss 41.02, avg. ppl 2.07 cum. examples 28800, speed 8219.87 words/sec, time elapsed 2232.10 sec
+##########epoch 2, iter 9950, avg. loss 45.79, avg. ppl 2.23 cum. examples 30400, speed 8070.55 words/sec, time elapsed 2243.41 sec
+##########epoch 2, iter 10000, avg. loss 43.19, avg. ppl 2.26 cum. examples 32000, speed 7998.86 words/sec, time elapsed 2254.02 sec
+epoch 2, iter 10000, cum. loss 43.37, cum. ppl 2.19 cum. examples 32000
+begin validation ... size 2
+validation: iter 10000, dev. ppl 2.290177
+save currently the best model to [work_dir/tune-model.bin]
+##########epoch 2, iter 10050, avg. loss 36.91, avg. ppl 1.93 cum. examples 1600, speed 5247.10 words/sec, time elapsed 2271.13 sec
+##########epoch 2, iter 10100, avg. loss 42.80, avg. ppl 2.25 cum. examples 3200, speed 7966.93 words/sec, time elapsed 2281.71 sec
+##########epoch 2, iter 10150, avg. loss 40.81, avg. ppl 2.24 cum. examples 4800, speed 7886.57 words/sec, time elapsed 2291.97 sec
+##########epoch 2, iter 10200, avg. loss 41.75, avg. ppl 2.18 cum. examples 6400, speed 8065.53 words/sec, time elapsed 2302.62 sec
+##########epoch 2, iter 10250, avg. loss 41.85, avg. ppl 1.99 cum. examples 8000, speed 8385.61 words/sec, time elapsed 2314.22 sec
+##########epoch 2, iter 10300, avg. loss 41.27, avg. ppl 2.25 cum. examples 9600, speed 7869.09 words/sec, time elapsed 2324.60 sec
+##########epoch 2, iter 10350, avg. loss 37.12, avg. ppl 1.95 cum. examples 11170, speed 8179.24 words/sec, time elapsed 2335.25 sec
+##########epoch 2, iter 10400, avg. loss 44.47, avg. ppl 2.43 cum. examples 12770, speed 7769.03 words/sec, time elapsed 2345.56 sec
+##########epoch 2, iter 10450, avg. loss 42.31, avg. ppl 2.22 cum. examples 14370, speed 7971.49 words/sec, time elapsed 2356.22 sec
+##########epoch 2, iter 10500, avg. loss 41.54, avg. ppl 2.15 cum. examples 15970, speed 8051.09 words/sec, time elapsed 2367.00 sec
+##########epoch 2, iter 10550, avg. loss 42.59, avg. ppl 2.12 cum. examples 17570, speed 8164.65 words/sec, time elapsed 2378.07 sec
+##########epoch 2, iter 10600, avg. loss 44.60, avg. ppl 2.33 cum. examples 19170, speed 7850.36 words/sec, time elapsed 2388.79 sec
+##########epoch 2, iter 10650, avg. loss 41.32, avg. ppl 2.07 cum. examples 20770, speed 8255.27 words/sec, time elapsed 2399.77 sec
+##########epoch 2, iter 10700, avg. loss 36.55, avg. ppl 1.99 cum. examples 22370, speed 8135.16 words/sec, time elapsed 2410.20 sec
+##########epoch 2, iter 10750, avg. loss 42.59, avg. ppl 2.06 cum. examples 23970, speed 8266.31 words/sec, time elapsed 2421.64 sec
+##########epoch 3, iter 10800, avg. loss 52.74, avg. ppl 2.63 cum. examples 25570, speed 7722.20 words/sec, time elapsed 2432.96 sec
+##########epoch 3, iter 10850, avg. loss 38.89, avg. ppl 2.01 cum. examples 27170, speed 8165.04 words/sec, time elapsed 2443.87 sec
+##########epoch 3, iter 10900, avg. loss 42.01, avg. ppl 2.21 cum. examples 28770, speed 8018.18 words/sec, time elapsed 2454.44 sec
+##########epoch 3, iter 10950, avg. loss 38.26, avg. ppl 2.01 cum. examples 30370, speed 8136.35 words/sec, time elapsed 2465.22 sec
+##########epoch 3, iter 11000, avg. loss 46.58, avg. ppl 2.16 cum. examples 31970, speed 8272.92 words/sec, time elapsed 2476.91 sec
+epoch 3, iter 11000, cum. loss 41.85, cum. ppl 2.15 cum. examples 31970
+begin validation ... size 2
+validation: iter 11000, dev. ppl 2.290177
+hit patience 1
+##########epoch 3, iter 11050, avg. loss 42.88, avg. ppl 2.25 cum. examples 1600, speed 6094.86 words/sec, time elapsed 2490.80 sec
+##########epoch 3, iter 11100, avg. loss 37.91, avg. ppl 2.03 cum. examples 3200, speed 8129.87 words/sec, time elapsed 2501.31 sec
+##########epoch 3, iter 11150, avg. loss 45.51, avg. ppl 2.30 cum. examples 4800, speed 8028.68 words/sec, time elapsed 2512.19 sec
+##########epoch 3, iter 11200, avg. loss 40.48, avg. ppl 2.08 cum. examples 6400, speed 8197.33 words/sec, time elapsed 2522.96 sec
+##########epoch 3, iter 11250, avg. loss 40.72, avg. ppl 2.02 cum. examples 8000, speed 8306.72 words/sec, time elapsed 2534.09 sec
+##########epoch 3, iter 11300, avg. loss 40.41, avg. ppl 2.19 cum. examples 9600, speed 7947.47 words/sec, time elapsed 2544.49 sec
+##########epoch 3, iter 11350, avg. loss 45.32, avg. ppl 2.37 cum. examples 11200, speed 7962.41 words/sec, time elapsed 2555.04 sec
+##########epoch 3, iter 11400, avg. loss 45.58, avg. ppl 2.43 cum. examples 12800, speed 7809.69 words/sec, time elapsed 2565.57 sec
+##########epoch 3, iter 11450, avg. loss 41.98, avg. ppl 2.23 cum. examples 14400, speed 7940.33 words/sec, time elapsed 2576.10 sec
+##########epoch 3, iter 11500, avg. loss 44.00, avg. ppl 2.07 cum. examples 16000, speed 8302.97 words/sec, time elapsed 2587.75 sec
+##########epoch 3, iter 11550, avg. loss 45.06, avg. ppl 2.24 cum. examples 17600, speed 8065.41 words/sec, time elapsed 2598.83 sec
+##########epoch 3, iter 11600, avg. loss 42.36, avg. ppl 2.19 cum. examples 19200, speed 8004.63 words/sec, time elapsed 2609.63 sec
+##########epoch 3, iter 11650, avg. loss 46.95, avg. ppl 2.43 cum. examples 20800, speed 7922.15 words/sec, time elapsed 2620.32 sec
+##########epoch 3, iter 11700, avg. loss 46.43, avg. ppl 2.39 cum. examples 22400, speed 7896.74 words/sec, time elapsed 2631.11 sec
+##########epoch 3, iter 11750, avg. loss 51.09, avg. ppl 2.39 cum. examples 24000, speed 8080.14 words/sec, time elapsed 2642.70 sec
+##########epoch 3, iter 11800, avg. loss 35.34, avg. ppl 2.06 cum. examples 25600, speed 7921.10 words/sec, time elapsed 2652.55 sec
+##########epoch 3, iter 11850, avg. loss 44.74, avg. ppl 2.17 cum. examples 27200, speed 8179.52 words/sec, time elapsed 2663.87 sec
+##########epoch 3, iter 11900, avg. loss 39.06, avg. ppl 1.95 cum. examples 28800, speed 8289.79 words/sec, time elapsed 2675.15 sec
+##########epoch 3, iter 11950, avg. loss 43.18, avg. ppl 2.19 cum. examples 30400, speed 7997.02 words/sec, time elapsed 2686.17 sec
+##########epoch 3, iter 12000, avg. loss 44.08, avg. ppl 2.20 cum. examples 32000, speed 8080.32 words/sec, time elapsed 2697.21 sec
+epoch 3, iter 12000, cum. loss 43.15, cum. ppl 2.20 cum. examples 32000
+begin validation ... size 2
+validation: iter 12000, dev. ppl 2.290177
+hit patience 2
+##########epoch 3, iter 12050, avg. loss 43.65, avg. ppl 2.35 cum. examples 1600, speed 5973.47 words/sec, time elapsed 2710.92 sec
+##########epoch 3, iter 12100, avg. loss 48.37, avg. ppl 2.39 cum. examples 3200, speed 8041.49 words/sec, time elapsed 2721.96 sec
+##########epoch 3, iter 12150, avg. loss 45.81, avg. ppl 2.17 cum. examples 4800, speed 8243.96 words/sec, time elapsed 2733.42 sec
+##########epoch 3, iter 12200, avg. loss 49.84, avg. ppl 2.63 cum. examples 6400, speed 7695.91 words/sec, time elapsed 2744.16 sec
+##########epoch 3, iter 12250, avg. loss 41.07, avg. ppl 2.24 cum. examples 8000, speed 7836.49 words/sec, time elapsed 2754.58 sec
+##########epoch 3, iter 12300, avg. loss 42.29, avg. ppl 2.17 cum. examples 9600, speed 8076.00 words/sec, time elapsed 2765.42 sec
+##########epoch 3, iter 12350, avg. loss 46.06, avg. ppl 2.31 cum. examples 11200, speed 8021.68 words/sec, time elapsed 2776.37 sec
+##########epoch 3, iter 12400, avg. loss 46.31, avg. ppl 2.35 cum. examples 12800, speed 7920.88 words/sec, time elapsed 2787.30 sec
+##########epoch 3, iter 12450, avg. loss 44.14, avg. ppl 2.26 cum. examples 14400, speed 8088.95 words/sec, time elapsed 2798.03 sec
+##########epoch 3, iter 12500, avg. loss 44.16, avg. ppl 2.21 cum. examples 16000, speed 8114.75 words/sec, time elapsed 2809.02 sec
+##########epoch 3, iter 12550, avg. loss 43.97, avg. ppl 2.21 cum. examples 17600, speed 8036.17 words/sec, time elapsed 2820.04 sec
+##########epoch 3, iter 12600, avg. loss 39.18, avg. ppl 2.08 cum. examples 19200, speed 8057.13 words/sec, time elapsed 2830.63 sec
+##########epoch 3, iter 12650, avg. loss 49.89, avg. ppl 2.32 cum. examples 20800, speed 8081.33 words/sec, time elapsed 2842.36 sec
+##########epoch 3, iter 12700, avg. loss 41.62, avg. ppl 2.26 cum. examples 22400, speed 7861.38 words/sec, time elapsed 2852.76 sec
+##########epoch 3, iter 12750, avg. loss 40.86, avg. ppl 2.05 cum. examples 24000, speed 8215.98 words/sec, time elapsed 2863.89 sec
+##########epoch 3, iter 12800, avg. loss 38.05, avg. ppl 1.96 cum. examples 25600, speed 8249.40 words/sec, time elapsed 2874.88 sec
+##########epoch 3, iter 12850, avg. loss 34.47, avg. ppl 1.80 cum. examples 27200, speed 8490.66 words/sec, time elapsed 2885.89 sec
+##########epoch 3, iter 12900, avg. loss 42.07, avg. ppl 2.15 cum. examples 28800, speed 8097.41 words/sec, time elapsed 2896.78 sec
+##########epoch 3, iter 12950, avg. loss 40.19, avg. ppl 2.02 cum. examples 30400, speed 8279.53 words/sec, time elapsed 2907.85 sec
+##########epoch 3, iter 13000, avg. loss 38.25, avg. ppl 2.09 cum. examples 32000, speed 8027.46 words/sec, time elapsed 2918.17 sec
+epoch 3, iter 13000, cum. loss 43.01, cum. ppl 2.19 cum. examples 32000
+begin validation ... size 2
+validation: iter 13000, dev. ppl 2.290177
+hit patience 3
+hit #2 trial
+load previously best model and decay learning rate to 0.000250
+##########epoch 3, iter 13050, avg. loss 46.50, avg. ppl 2.35 cum. examples 1600, speed 5851.59 words/sec, time elapsed 2933.08 sec
+##########epoch 3, iter 13100, avg. loss 44.86, avg. ppl 2.36 cum. examples 3200, speed 7848.26 words/sec, time elapsed 2943.72 sec
+##########epoch 3, iter 13150, avg. loss 43.43, avg. ppl 2.18 cum. examples 4800, speed 8028.34 words/sec, time elapsed 2954.84 sec
+##########epoch 3, iter 13200, avg. loss 39.89, avg. ppl 2.16 cum. examples 6400, speed 7965.02 words/sec, time elapsed 2965.25 sec
+##########epoch 3, iter 13250, avg. loss 45.07, avg. ppl 2.31 cum. examples 8000, speed 8023.29 words/sec, time elapsed 2975.96 sec
+##########epoch 3, iter 13300, avg. loss 46.44, avg. ppl 2.27 cum. examples 9600, speed 8050.94 words/sec, time elapsed 2987.22 sec
+##########epoch 3, iter 13350, avg. loss 41.69, avg. ppl 2.23 cum. examples 11200, speed 7946.07 words/sec, time elapsed 2997.69 sec
+##########epoch 3, iter 13400, avg. loss 47.21, avg. ppl 2.37 cum. examples 12800, speed 7850.06 words/sec, time elapsed 3008.85 sec
+##########epoch 3, iter 13450, avg. loss 41.43, avg. ppl 2.04 cum. examples 14400, speed 8231.84 words/sec, time elapsed 3020.18 sec
+##########epoch 3, iter 13500, avg. loss 45.66, avg. ppl 2.21 cum. examples 16000, speed 8111.90 words/sec, time elapsed 3031.53 sec
+##########epoch 3, iter 13550, avg. loss 40.70, avg. ppl 2.03 cum. examples 17600, speed 8258.40 words/sec, time elapsed 3042.64 sec
+##########epoch 3, iter 13600, avg. loss 42.54, avg. ppl 2.16 cum. examples 19200, speed 8057.11 words/sec, time elapsed 3053.61 sec
+##########epoch 3, iter 13650, avg. loss 45.69, avg. ppl 2.19 cum. examples 20770, speed 8093.67 words/sec, time elapsed 3064.88 sec
+##########epoch 3, iter 13700, avg. loss 42.36, avg. ppl 2.07 cum. examples 22370, speed 8262.82 words/sec, time elapsed 3076.15 sec
+##########epoch 3, iter 13750, avg. loss 48.53, avg. ppl 2.54 cum. examples 23970, speed 7781.79 words/sec, time elapsed 3086.85 sec
+##########epoch 3, iter 13800, avg. loss 39.02, avg. ppl 2.18 cum. examples 25552, speed 7828.86 words/sec, time elapsed 3096.98 sec
+##########epoch 3, iter 13850, avg. loss 41.17, avg. ppl 2.17 cum. examples 27152, speed 7999.07 words/sec, time elapsed 3107.59 sec
+##########epoch 3, iter 13900, avg. loss 43.29, avg. ppl 2.31 cum. examples 28752, speed 7945.67 words/sec, time elapsed 3118.03 sec
+##########epoch 3, iter 13950, avg. loss 39.07, avg. ppl 2.14 cum. examples 30352, speed 7980.65 words/sec, time elapsed 3128.35 sec
+##########epoch 3, iter 14000, avg. loss 39.50, avg. ppl 2.21 cum. examples 31952, speed 7870.91 words/sec, time elapsed 3138.49 sec
+epoch 3, iter 14000, cum. loss 43.20, cum. ppl 2.22 cum. examples 31952
+begin validation ... size 2
+validation: iter 14000, dev. ppl 2.290177
+save currently the best model to [work_dir/tune-model.bin]
+##########epoch 3, iter 14050, avg. loss 45.47, avg. ppl 2.32 cum. examples 1600, speed 5009.23 words/sec, time elapsed 3155.73 sec
+##########epoch 3, iter 14100, avg. loss 39.25, avg. ppl 2.26 cum. examples 3200, speed 7715.69 words/sec, time elapsed 3165.71 sec
+##########epoch 3, iter 14150, avg. loss 42.18, avg. ppl 2.15 cum. examples 4800, speed 8126.30 words/sec, time elapsed 3176.53 sec
+##########epoch 3, iter 14200, avg. loss 49.22, avg. ppl 2.22 cum. examples 6400, speed 8278.71 words/sec, time elapsed 3188.46 sec
+##########epoch 3, iter 14250, avg. loss 42.92, avg. ppl 2.28 cum. examples 8000, speed 7912.94 words/sec, time elapsed 3198.97 sec
+##########epoch 3, iter 14300, avg. loss 43.91, avg. ppl 2.35 cum. examples 9600, speed 7832.86 words/sec, time elapsed 3209.46 sec
+##########epoch 3, iter 14350, avg. loss 49.31, avg. ppl 2.49 cum. examples 11200, speed 7886.81 words/sec, time elapsed 3220.44 sec
+##########epoch 3, iter 14400, avg. loss 45.13, avg. ppl 2.40 cum. examples 12800, speed 7871.40 words/sec, time elapsed 3230.94 sec
+##########epoch 3, iter 14450, avg. loss 50.25, avg. ppl 2.63 cum. examples 14400, speed 7780.84 words/sec, time elapsed 3241.64 sec
+##########epoch 3, iter 14500, avg. loss 42.22, avg. ppl 2.09 cum. examples 16000, speed 8222.32 words/sec, time elapsed 3252.82 sec
+##########epoch 3, iter 14550, avg. loss 45.30, avg. ppl 2.20 cum. examples 17600, speed 8150.44 words/sec, time elapsed 3264.10 sec
+##########epoch 3, iter 14600, avg. loss 42.36, avg. ppl 2.14 cum. examples 19200, speed 8161.52 words/sec, time elapsed 3275.05 sec
+##########epoch 3, iter 14650, avg. loss 43.81, avg. ppl 2.14 cum. examples 20800, speed 8179.31 words/sec, time elapsed 3286.31 sec
+##########epoch 3, iter 14700, avg. loss 38.04, avg. ppl 2.02 cum. examples 22400, speed 8005.50 words/sec, time elapsed 3297.14 sec
+##########epoch 3, iter 14750, avg. loss 39.66, avg. ppl 2.07 cum. examples 24000, speed 8136.82 words/sec, time elapsed 3307.86 sec
+##########epoch 3, iter 14800, avg. loss 45.35, avg. ppl 2.31 cum. examples 25600, speed 7983.57 words/sec, time elapsed 3318.70 sec
+##########epoch 3, iter 14850, avg. loss 42.77, avg. ppl 2.17 cum. examples 27200, speed 8121.05 words/sec, time elapsed 3329.60 sec
+##########epoch 3, iter 14900, avg. loss 39.76, avg. ppl 2.28 cum. examples 28800, speed 7658.10 words/sec, time elapsed 3339.71 sec
+##########epoch 3, iter 14950, avg. loss 48.92, avg. ppl 2.24 cum. examples 30400, speed 8218.72 words/sec, time elapsed 3351.51 sec
+##########epoch 3, iter 15000, avg. loss 43.87, avg. ppl 2.25 cum. examples 32000, speed 8011.68 words/sec, time elapsed 3362.34 sec
+epoch 3, iter 15000, cum. loss 43.99, cum. ppl 2.24 cum. examples 32000
+begin validation ... size 2
+validation: iter 15000, dev. ppl 2.290177
+hit patience 1
+##########epoch 3, iter 15050, avg. loss 39.09, avg. ppl 2.06 cum. examples 1600, speed 6175.43 words/sec, time elapsed 3376.32 sec
+##########epoch 3, iter 15100, avg. loss 43.52, avg. ppl 2.11 cum. examples 3200, speed 8182.47 words/sec, time elapsed 3387.69 sec
+##########epoch 3, iter 15150, avg. loss 40.28, avg. ppl 2.13 cum. examples 4800, speed 8029.28 words/sec, time elapsed 3398.28 sec
+##########epoch 3, iter 15200, avg. loss 44.15, avg. ppl 2.36 cum. examples 6400, speed 7881.68 words/sec, time elapsed 3408.72 sec
+##########epoch 3, iter 15250, avg. loss 40.49, avg. ppl 1.96 cum. examples 8000, speed 8424.35 words/sec, time elapsed 3420.18 sec
+##########epoch 3, iter 15300, avg. loss 35.62, avg. ppl 1.91 cum. examples 9600, speed 8202.80 words/sec, time elapsed 3430.91 sec
+##########epoch 3, iter 15350, avg. loss 42.47, avg. ppl 2.29 cum. examples 11200, speed 7867.89 words/sec, time elapsed 3441.33 sec
+##########epoch 3, iter 15400, avg. loss 45.74, avg. ppl 2.12 cum. examples 12800, speed 8343.49 words/sec, time elapsed 3452.97 sec
+##########epoch 3, iter 15450, avg. loss 43.82, avg. ppl 2.16 cum. examples 14400, speed 8124.81 words/sec, time elapsed 3464.16 sec
+##########epoch 3, iter 15500, avg. loss 40.29, avg. ppl 2.18 cum. examples 16000, speed 7956.14 words/sec, time elapsed 3474.53 sec
+##########epoch 3, iter 15550, avg. loss 41.35, avg. ppl 2.20 cum. examples 17600, speed 7921.30 words/sec, time elapsed 3485.14 sec
+##########epoch 3, iter 15600, avg. loss 48.03, avg. ppl 2.46 cum. examples 19200, speed 7810.80 words/sec, time elapsed 3496.05 sec
+##########epoch 3, iter 15650, avg. loss 43.98, avg. ppl 2.13 cum. examples 20800, speed 8192.72 words/sec, time elapsed 3507.40 sec
+##########epoch 3, iter 15700, avg. loss 46.97, avg. ppl 2.21 cum. examples 22400, speed 8213.78 words/sec, time elapsed 3518.92 sec
+##########epoch 3, iter 15750, avg. loss 40.64, avg. ppl 2.14 cum. examples 24000, speed 8066.41 words/sec, time elapsed 3529.54 sec
+##########epoch 3, iter 15800, avg. loss 42.07, avg. ppl 2.13 cum. examples 25600, speed 8142.99 words/sec, time elapsed 3540.50 sec
+##########epoch 3, iter 15850, avg. loss 40.87, avg. ppl 1.94 cum. examples 27200, speed 8272.50 words/sec, time elapsed 3552.42 sec
+##########epoch 3, iter 15900, avg. loss 43.23, avg. ppl 2.22 cum. examples 28800, speed 8020.94 words/sec, time elapsed 3563.21 sec
+##########epoch 3, iter 15950, avg. loss 43.09, avg. ppl 2.19 cum. examples 30400, speed 8114.45 words/sec, time elapsed 3574.06 sec
+##########epoch 3, iter 16000, avg. loss 49.46, avg. ppl 2.26 cum. examples 32000, speed 8164.97 words/sec, time elapsed 3585.93 sec
+epoch 3, iter 16000, cum. loss 42.76, cum. ppl 2.15 cum. examples 32000
+begin validation ... size 2
+validation: iter 16000, dev. ppl 2.290177
+hit patience 2
+##########epoch 3, iter 16050, avg. loss 48.62, avg. ppl 2.31 cum. examples 1600, speed 6295.88 words/sec, time elapsed 3600.72 sec
+##########epoch 3, iter 16100, avg. loss 42.81, avg. ppl 2.09 cum. examples 3200, speed 8158.51 words/sec, time elapsed 3612.12 sec
+##########epoch 3, iter 16150, avg. loss 44.20, avg. ppl 2.13 cum. examples 4800, speed 8239.12 words/sec, time elapsed 3623.46 sec
+##########epoch 4, iter 16200, avg. loss 40.30, avg. ppl 1.96 cum. examples 6400, speed 8245.36 words/sec, time elapsed 3635.05 sec
+##########epoch 4, iter 16250, avg. loss 45.24, avg. ppl 2.22 cum. examples 8000, speed 8105.85 words/sec, time elapsed 3646.24 sec
+##########epoch 4, iter 16300, avg. loss 47.10, avg. ppl 2.22 cum. examples 9600, speed 8150.24 words/sec, time elapsed 3657.87 sec
+##########epoch 4, iter 16350, avg. loss 43.31, avg. ppl 2.13 cum. examples 11200, speed 8171.71 words/sec, time elapsed 3669.05 sec
+##########epoch 4, iter 16400, avg. loss 41.98, avg. ppl 2.11 cum. examples 12800, speed 8163.36 words/sec, time elapsed 3680.10 sec
+##########epoch 4, iter 16450, avg. loss 46.94, avg. ppl 2.42 cum. examples 14400, speed 7860.51 words/sec, time elapsed 3690.90 sec
+##########epoch 4, iter 16500, avg. loss 47.74, avg. ppl 2.11 cum. examples 16000, speed 8399.60 words/sec, time elapsed 3703.05 sec
+##########epoch 4, iter 16550, avg. loss 43.66, avg. ppl 2.22 cum. examples 17600, speed 8092.13 words/sec, time elapsed 3713.87 sec
+##########epoch 4, iter 16600, avg. loss 46.51, avg. ppl 2.15 cum. examples 19170, speed 8196.72 words/sec, time elapsed 3725.50 sec
+##########epoch 4, iter 16650, avg. loss 37.99, avg. ppl 2.11 cum. examples 20770, speed 7962.96 words/sec, time elapsed 3735.74 sec
+##########epoch 4, iter 16700, avg. loss 40.26, avg. ppl 2.15 cum. examples 22370, speed 8019.88 words/sec, time elapsed 3746.22 sec
+##########epoch 4, iter 16750, avg. loss 53.96, avg. ppl 2.33 cum. examples 23970, speed 8175.02 words/sec, time elapsed 3758.73 sec
+##########epoch 4, iter 16800, avg. loss 49.99, avg. ppl 2.56 cum. examples 25570, speed 7826.38 words/sec, time elapsed 3769.60 sec
+##########epoch 4, iter 16850, avg. loss 41.29, avg. ppl 2.14 cum. examples 27170, speed 8086.00 words/sec, time elapsed 3780.33 sec
+##########epoch 4, iter 16900, avg. loss 42.47, avg. ppl 2.08 cum. examples 28770, speed 8241.82 words/sec, time elapsed 3791.60 sec
+##########epoch 4, iter 16950, avg. loss 39.05, avg. ppl 2.13 cum. examples 30370, speed 7968.94 words/sec, time elapsed 3801.97 sec
+##########epoch 4, iter 17000, avg. loss 39.16, avg. ppl 2.17 cum. examples 31970, speed 7901.72 words/sec, time elapsed 3812.20 sec
+epoch 4, iter 17000, cum. loss 44.13, cum. ppl 2.18 cum. examples 31970
+begin validation ... size 2
+validation: iter 17000, dev. ppl 2.290177
+hit patience 3
+hit #3 trial
+load previously best model and decay learning rate to 0.000125
+##########epoch 4, iter 17050, avg. loss 39.49, avg. ppl 2.09 cum. examples 1600, speed 5873.27 words/sec, time elapsed 3826.83 sec
+##########epoch 4, iter 17100, avg. loss 41.68, avg. ppl 2.27 cum. examples 3200, speed 7902.08 words/sec, time elapsed 3837.11 sec
+##########epoch 4, iter 17150, avg. loss 46.22, avg. ppl 2.18 cum. examples 4800, speed 8219.11 words/sec, time elapsed 3848.64 sec
+##########epoch 4, iter 17200, avg. loss 44.68, avg. ppl 2.29 cum. examples 6400, speed 7931.84 words/sec, time elapsed 3859.52 sec
+##########epoch 4, iter 17250, avg. loss 36.16, avg. ppl 1.96 cum. examples 8000, speed 8150.22 words/sec, time elapsed 3870.09 sec
+##########epoch 4, iter 17300, avg. loss 40.42, avg. ppl 2.20 cum. examples 9600, speed 7956.89 words/sec, time elapsed 3880.41 sec
+##########epoch 4, iter 17350, avg. loss 43.60, avg. ppl 2.04 cum. examples 11200, speed 8389.03 words/sec, time elapsed 3892.05 sec
+##########epoch 4, iter 17400, avg. loss 40.80, avg. ppl 2.20 cum. examples 12800, speed 7927.28 words/sec, time elapsed 3902.48 sec
+##########epoch 4, iter 17450, avg. loss 43.22, avg. ppl 2.30 cum. examples 14400, speed 7875.39 words/sec, time elapsed 3913.01 sec
+##########epoch 4, iter 17500, avg. loss 39.27, avg. ppl 2.07 cum. examples 16000, speed 8075.89 words/sec, time elapsed 3923.67 sec
+##########epoch 4, iter 17550, avg. loss 50.05, avg. ppl 2.34 cum. examples 17600, speed 8130.78 words/sec, time elapsed 3935.26 sec
+##########epoch 4, iter 17600, avg. loss 40.57, avg. ppl 2.03 cum. examples 19200, speed 8246.19 words/sec, time elapsed 3946.38 sec
+##########epoch 4, iter 17650, avg. loss 40.30, avg. ppl 2.14 cum. examples 20800, speed 8036.58 words/sec, time elapsed 3956.96 sec
+##########epoch 4, iter 17700, avg. loss 49.15, avg. ppl 2.43 cum. examples 22400, speed 7952.88 words/sec, time elapsed 3968.09 sec
+##########epoch 4, iter 17750, avg. loss 41.26, avg. ppl 2.22 cum. examples 24000, speed 7900.18 words/sec, time elapsed 3978.57 sec
+##########epoch 4, iter 17800, avg. loss 43.83, avg. ppl 2.11 cum. examples 25600, speed 8238.27 words/sec, time elapsed 3989.98 sec
+##########epoch 4, iter 17850, avg. loss 37.20, avg. ppl 2.03 cum. examples 27200, speed 8030.35 words/sec, time elapsed 4000.46 sec
+##########epoch 4, iter 17900, avg. loss 39.80, avg. ppl 2.28 cum. examples 28800, speed 7789.90 words/sec, time elapsed 4010.41 sec
+##########epoch 4, iter 17950, avg. loss 44.66, avg. ppl 2.34 cum. examples 30400, speed 7866.60 words/sec, time elapsed 4021.11 sec
+##########epoch 4, iter 18000, avg. loss 41.93, avg. ppl 2.16 cum. examples 32000, speed 8099.34 words/sec, time elapsed 4031.84 sec
+epoch 4, iter 18000, cum. loss 42.21, cum. ppl 2.18 cum. examples 32000
+begin validation ... size 2
+validation: iter 18000, dev. ppl 2.290178
+hit patience 1
+##########epoch 4, iter 18050, avg. loss 44.27, avg. ppl 2.26 cum. examples 1600, speed 6141.79 words/sec, time elapsed 4045.97 sec
+##########epoch 4, iter 18100, avg. loss 49.33, avg. ppl 2.25 cum. examples 3200, speed 8229.22 words/sec, time elapsed 4057.77 sec
+##########epoch 4, iter 18150, avg. loss 40.85, avg. ppl 2.36 cum. examples 4800, speed 7684.01 words/sec, time elapsed 4067.68 sec
+##########epoch 4, iter 18200, avg. loss 39.77, avg. ppl 2.05 cum. examples 6400, speed 8142.28 words/sec, time elapsed 4078.56 sec
+##########epoch 4, iter 18250, avg. loss 41.84, avg. ppl 2.07 cum. examples 8000, speed 8247.86 words/sec, time elapsed 4089.68 sec
+##########epoch 4, iter 18300, avg. loss 41.17, avg. ppl 2.04 cum. examples 9600, speed 8226.49 words/sec, time elapsed 4100.89 sec
+##########epoch 4, iter 18350, avg. loss 37.95, avg. ppl 2.19 cum. examples 11200, speed 7829.03 words/sec, time elapsed 4110.81 sec
+##########epoch 4, iter 18400, avg. loss 41.32, avg. ppl 2.17 cum. examples 12800, speed 8071.67 words/sec, time elapsed 4121.41 sec
+##########epoch 4, iter 18450, avg. loss 46.16, avg. ppl 2.19 cum. examples 14400, speed 8233.11 words/sec, time elapsed 4132.87 sec
+##########epoch 4, iter 18500, avg. loss 42.68, avg. ppl 2.23 cum. examples 16000, speed 7987.08 words/sec, time elapsed 4143.55 sec
+##########epoch 4, iter 18550, avg. loss 47.94, avg. ppl 2.30 cum. examples 17600, speed 8130.52 words/sec, time elapsed 4154.91 sec
+##########epoch 4, iter 18600, avg. loss 42.10, avg. ppl 2.20 cum. examples 19200, speed 7943.64 words/sec, time elapsed 4165.63 sec
+##########epoch 4, iter 18650, avg. loss 39.89, avg. ppl 1.99 cum. examples 20800, speed 8269.01 words/sec, time elapsed 4176.86 sec
+##########epoch 4, iter 18700, avg. loss 49.64, avg. ppl 2.36 cum. examples 22400, speed 8099.36 words/sec, time elapsed 4188.28 sec
+##########epoch 4, iter 18750, avg. loss 45.66, avg. ppl 2.36 cum. examples 24000, speed 7929.81 words/sec, time elapsed 4198.98 sec
+##########epoch 4, iter 18800, avg. loss 43.93, avg. ppl 2.23 cum. examples 25600, speed 8071.74 words/sec, time elapsed 4209.86 sec
+##########epoch 4, iter 18850, avg. loss 41.13, avg. ppl 2.12 cum. examples 27200, speed 8086.49 words/sec, time elapsed 4220.67 sec
+##########epoch 4, iter 18900, avg. loss 44.08, avg. ppl 2.26 cum. examples 28800, speed 7963.75 words/sec, time elapsed 4231.55 sec
+##########epoch 4, iter 18950, avg. loss 47.68, avg. ppl 2.30 cum. examples 30400, speed 8101.57 words/sec, time elapsed 4242.86 sec
+##########epoch 4, iter 19000, avg. loss 46.49, avg. ppl 2.46 cum. examples 32000, speed 7808.81 words/sec, time elapsed 4253.43 sec
+epoch 4, iter 19000, cum. loss 43.69, cum. ppl 2.21 cum. examples 32000
+begin validation ... size 2
+validation: iter 19000, dev. ppl 2.290177
+hit patience 2
+##########epoch 4, iter 19050, avg. loss 43.25, avg. ppl 2.32 cum. examples 1600, speed 5977.57 words/sec, time elapsed 4267.21 sec
+##########epoch 4, iter 19100, avg. loss 39.68, avg. ppl 2.23 cum. examples 3200, speed 7811.07 words/sec, time elapsed 4277.36 sec
+##########epoch 4, iter 19150, avg. loss 43.55, avg. ppl 2.11 cum. examples 4800, speed 8264.66 words/sec, time elapsed 4288.65 sec
+##########epoch 4, iter 19200, avg. loss 45.64, avg. ppl 2.37 cum. examples 6400, speed 7899.25 words/sec, time elapsed 4299.37 sec
+##########epoch 4, iter 19250, avg. loss 42.89, avg. ppl 2.27 cum. examples 7982, speed 7854.12 words/sec, time elapsed 4309.94 sec
+##########epoch 4, iter 19300, avg. loss 46.40, avg. ppl 2.35 cum. examples 9582, speed 7908.05 words/sec, time elapsed 4320.93 sec
+##########epoch 4, iter 19350, avg. loss 50.21, avg. ppl 2.26 cum. examples 11182, speed 8172.36 words/sec, time elapsed 4332.97 sec
+##########epoch 4, iter 19400, avg. loss 40.94, avg. ppl 2.20 cum. examples 12782, speed 7924.51 words/sec, time elapsed 4343.44 sec
+##########epoch 4, iter 19450, avg. loss 38.78, avg. ppl 2.06 cum. examples 14382, speed 8117.16 words/sec, time elapsed 4353.99 sec
+##########epoch 4, iter 19500, avg. loss 49.86, avg. ppl 2.62 cum. examples 15982, speed 7724.64 words/sec, time elapsed 4364.69 sec
+##########epoch 4, iter 19550, avg. loss 40.29, avg. ppl 2.15 cum. examples 17582, speed 7940.46 words/sec, time elapsed 4375.30 sec
+##########epoch 4, iter 19600, avg. loss 43.49, avg. ppl 2.25 cum. examples 19182, speed 8012.39 words/sec, time elapsed 4385.99 sec
+##########epoch 4, iter 19650, avg. loss 45.75, avg. ppl 2.31 cum. examples 20782, speed 7966.11 words/sec, time elapsed 4396.95 sec
+##########epoch 4, iter 19700, avg. loss 41.58, avg. ppl 2.17 cum. examples 22382, speed 8041.63 words/sec, time elapsed 4407.60 sec
+##########epoch 4, iter 19750, avg. loss 54.97, avg. ppl 2.27 cum. examples 23982, speed 8372.48 words/sec, time elapsed 4420.42 sec
+##########epoch 4, iter 19800, avg. loss 42.98, avg. ppl 2.17 cum. examples 25582, speed 7970.30 words/sec, time elapsed 4431.55 sec
+##########epoch 4, iter 19850, avg. loss 46.60, avg. ppl 2.10 cum. examples 27182, speed 8334.09 words/sec, time elapsed 4443.58 sec
+##########epoch 4, iter 19900, avg. loss 48.06, avg. ppl 2.33 cum. examples 28782, speed 7968.61 words/sec, time elapsed 4454.99 sec
+##########epoch 4, iter 19950, avg. loss 39.67, avg. ppl 2.19 cum. examples 30382, speed 7868.53 words/sec, time elapsed 4465.26 sec
+##########epoch 4, iter 20000, avg. loss 42.55, avg. ppl 2.17 cum. examples 31982, speed 8038.14 words/sec, time elapsed 4476.23 sec
+epoch 4, iter 20000, cum. loss 44.36, cum. ppl 2.24 cum. examples 31982
+begin validation ... size 2
+validation: iter 20000, dev. ppl 2.290177
+hit patience 3
+hit #4 trial
+load previously best model and decay learning rate to 0.000063
+##########epoch 4, iter 20050, avg. loss 36.20, avg. ppl 1.94 cum. examples 1600, speed 5987.10 words/sec, time elapsed 4490.86 sec
+##########epoch 4, iter 20100, avg. loss 38.77, avg. ppl 1.99 cum. examples 3200, speed 8102.62 words/sec, time elapsed 4501.97 sec
+##########epoch 4, iter 20150, avg. loss 46.09, avg. ppl 2.29 cum. examples 4800, speed 7987.47 words/sec, time elapsed 4513.12 sec
+##########epoch 4, iter 20200, avg. loss 44.99, avg. ppl 2.24 cum. examples 6400, speed 8063.00 words/sec, time elapsed 4524.17 sec
+##########epoch 4, iter 20250, avg. loss 41.55, avg. ppl 2.13 cum. examples 8000, speed 8075.71 words/sec, time elapsed 4535.09 sec
+##########epoch 4, iter 20300, avg. loss 39.47, avg. ppl 2.11 cum. examples 9600, speed 8049.58 words/sec, time elapsed 4545.60 sec
+##########epoch 4, iter 20350, avg. loss 50.75, avg. ppl 2.45 cum. examples 11200, speed 7982.49 words/sec, time elapsed 4556.93 sec
+##########epoch 4, iter 20400, avg. loss 47.41, avg. ppl 2.55 cum. examples 12800, speed 7735.20 words/sec, time elapsed 4567.43 sec
+##########epoch 4, iter 20450, avg. loss 45.71, avg. ppl 2.24 cum. examples 14400, speed 8068.07 words/sec, time elapsed 4578.65 sec
+##########epoch 4, iter 20500, avg. loss 44.32, avg. ppl 2.36 cum. examples 16000, speed 7872.18 words/sec, time elapsed 4589.15 sec
+##########epoch 4, iter 20550, avg. loss 38.28, avg. ppl 2.00 cum. examples 17600, speed 8167.20 words/sec, time elapsed 4599.96 sec
+##########epoch 4, iter 20600, avg. loss 40.44, avg. ppl 2.08 cum. examples 19200, speed 7972.09 words/sec, time elapsed 4611.01 sec
+##########epoch 4, iter 20650, avg. loss 43.00, avg. ppl 2.46 cum. examples 20800, speed 7647.88 words/sec, time elapsed 4621.01 sec
+##########epoch 4, iter 20700, avg. loss 38.70, avg. ppl 2.14 cum. examples 22400, speed 7878.69 words/sec, time elapsed 4631.37 sec
+##########epoch 4, iter 20750, avg. loss 39.08, avg. ppl 2.02 cum. examples 24000, speed 8137.71 words/sec, time elapsed 4642.29 sec
+##########epoch 4, iter 20800, avg. loss 43.49, avg. ppl 2.32 cum. examples 25600, speed 7821.58 words/sec, time elapsed 4652.89 sec
+##########epoch 4, iter 20850, avg. loss 38.33, avg. ppl 1.96 cum. examples 27200, speed 8281.65 words/sec, time elapsed 4663.90 sec
+##########epoch 4, iter 20900, avg. loss 39.12, avg. ppl 2.13 cum. examples 28800, speed 8019.58 words/sec, time elapsed 4674.23 sec
+##########epoch 4, iter 20950, avg. loss 39.00, avg. ppl 2.12 cum. examples 30400, speed 8030.47 words/sec, time elapsed 4684.57 sec
+##########epoch 4, iter 21000, avg. loss 38.85, avg. ppl 2.08 cum. examples 32000, speed 8133.43 words/sec, time elapsed 4695.00 sec
+epoch 4, iter 21000, cum. loss 41.68, cum. ppl 2.17 cum. examples 32000
+begin validation ... size 2
+validation: iter 21000, dev. ppl 2.290177
+hit patience 1
+##########epoch 4, iter 21050, avg. loss 42.81, avg. ppl 2.22 cum. examples 1600, speed 6131.39 words/sec, time elapsed 4709.02 sec
+##########epoch 4, iter 21100, avg. loss 47.03, avg. ppl 2.37 cum. examples 3200, speed 7858.39 words/sec, time elapsed 4720.10 sec
+##########epoch 4, iter 21150, avg. loss 43.68, avg. ppl 2.04 cum. examples 4800, speed 8328.53 words/sec, time elapsed 4731.85 sec
+##########epoch 4, iter 21200, avg. loss 43.16, avg. ppl 2.23 cum. examples 6400, speed 7976.47 words/sec, time elapsed 4742.63 sec
+##########epoch 4, iter 21250, avg. loss 43.15, avg. ppl 2.22 cum. examples 8000, speed 8019.80 words/sec, time elapsed 4753.45 sec
+##########epoch 4, iter 21300, avg. loss 38.87, avg. ppl 2.00 cum. examples 9600, speed 8215.85 words/sec, time elapsed 4764.36 sec
+##########epoch 4, iter 21350, avg. loss 46.82, avg. ppl 2.25 cum. examples 11200, speed 8134.98 words/sec, time elapsed 4775.71 sec
+##########epoch 4, iter 21400, avg. loss 41.92, avg. ppl 2.01 cum. examples 12800, speed 8350.44 words/sec, time elapsed 4787.25 sec
+##########epoch 4, iter 21450, avg. loss 43.88, avg. ppl 2.06 cum. examples 14400, speed 8392.68 words/sec, time elapsed 4798.84 sec
+##########epoch 4, iter 21500, avg. loss 39.47, avg. ppl 2.04 cum. examples 16000, speed 8158.79 words/sec, time elapsed 4809.68 sec
+##########epoch 4, iter 21550, avg. loss 48.44, avg. ppl 2.16 cum. examples 17600, speed 8382.90 words/sec, time elapsed 4821.68 sec
+##########epoch 5, iter 21600, avg. loss 43.69, avg. ppl 2.21 cum. examples 19200, speed 8032.34 words/sec, time elapsed 4832.66 sec
+##########epoch 5, iter 21650, avg. loss 43.31, avg. ppl 2.28 cum. examples 20800, speed 7986.68 words/sec, time elapsed 4843.21 sec
+##########epoch 5, iter 21700, avg. loss 43.53, avg. ppl 2.30 cum. examples 22400, speed 7963.24 words/sec, time elapsed 4853.73 sec
+##########epoch 5, iter 21750, avg. loss 44.62, avg. ppl 2.19 cum. examples 24000, speed 8181.94 words/sec, time elapsed 4864.86 sec
+##########epoch 5, iter 21800, avg. loss 46.38, avg. ppl 2.13 cum. examples 25600, speed 8298.08 words/sec, time elapsed 4876.66 sec
+##########epoch 5, iter 21850, avg. loss 43.01, avg. ppl 2.23 cum. examples 27200, speed 7994.86 words/sec, time elapsed 4887.39 sec
+##########epoch 5, iter 21900, avg. loss 39.39, avg. ppl 2.08 cum. examples 28800, speed 8108.28 words/sec, time elapsed 4898.01 sec
+##########epoch 5, iter 21950, avg. loss 39.38, avg. ppl 2.39 cum. examples 30400, speed 7564.81 words/sec, time elapsed 4907.59 sec
+##########epoch 5, iter 22000, avg. loss 45.38, avg. ppl 2.36 cum. examples 32000, speed 7911.73 words/sec, time elapsed 4918.27 sec
+epoch 5, iter 22000, cum. loss 43.40, cum. ppl 2.18 cum. examples 32000
+begin validation ... size 2
+validation: iter 22000, dev. ppl 2.290177
+hit patience 2
+##########epoch 5, iter 22050, avg. loss 48.90, avg. ppl 2.49 cum. examples 1600, speed 6058.76 words/sec, time elapsed 4932.45 sec
+##########epoch 5, iter 22100, avg. loss 48.00, avg. ppl 2.41 cum. examples 3200, speed 7964.60 words/sec, time elapsed 4943.43 sec
+##########epoch 5, iter 22150, avg. loss 37.34, avg. ppl 1.96 cum. examples 4800, speed 8267.64 words/sec, time elapsed 4954.17 sec
+##########epoch 5, iter 22200, avg. loss 42.83, avg. ppl 2.20 cum. examples 6400, speed 8103.00 words/sec, time elapsed 4964.92 sec
+##########epoch 5, iter 22250, avg. loss 41.36, avg. ppl 2.10 cum. examples 8000, speed 8199.53 words/sec, time elapsed 4975.80 sec
+##########epoch 5, iter 22300, avg. loss 43.67, avg. ppl 2.14 cum. examples 9600, speed 8205.51 words/sec, time elapsed 4986.97 sec
+##########epoch 5, iter 22350, avg. loss 44.69, avg. ppl 2.31 cum. examples 11200, speed 7966.25 words/sec, time elapsed 4997.66 sec
+##########epoch 5, iter 22400, avg. loss 44.63, avg. ppl 2.26 cum. examples 12800, speed 8065.96 words/sec, time elapsed 5008.54 sec
+##########epoch 5, iter 22450, avg. loss 41.95, avg. ppl 2.26 cum. examples 14400, speed 7941.33 words/sec, time elapsed 5018.89 sec
+##########epoch 5, iter 22500, avg. loss 42.10, avg. ppl 2.23 cum. examples 16000, speed 8004.31 words/sec, time elapsed 5029.37 sec
+##########epoch 5, iter 22550, avg. loss 37.73, avg. ppl 2.02 cum. examples 17600, speed 8106.35 words/sec, time elapsed 5039.98 sec
+##########epoch 5, iter 22600, avg. loss 45.34, avg. ppl 2.16 cum. examples 19200, speed 8242.20 words/sec, time elapsed 5051.42 sec
+##########epoch 5, iter 22650, avg. loss 44.97, avg. ppl 2.07 cum. examples 20800, speed 8412.68 words/sec, time elapsed 5063.18 sec
+##########epoch 5, iter 22700, avg. loss 44.52, avg. ppl 2.10 cum. examples 22400, speed 8223.77 words/sec, time elapsed 5074.89 sec
+##########epoch 5, iter 22750, avg. loss 40.43, avg. ppl 2.10 cum. examples 24000, speed 8073.70 words/sec, time elapsed 5085.70 sec
+##########epoch 5, iter 22800, avg. loss 44.12, avg. ppl 2.25 cum. examples 25600, speed 8024.13 words/sec, time elapsed 5096.53 sec
+##########epoch 5, iter 22850, avg. loss 40.49, avg. ppl 2.17 cum. examples 27200, speed 7984.47 words/sec, time elapsed 5107.01 sec
+##########epoch 5, iter 22900, avg. loss 47.23, avg. ppl 2.27 cum. examples 28800, speed 8090.43 words/sec, time elapsed 5118.37 sec
+##########epoch 5, iter 22950, avg. loss 41.12, avg. ppl 2.12 cum. examples 30400, speed 8146.06 words/sec, time elapsed 5129.13 sec
+##########epoch 5, iter 23000, avg. loss 40.37, avg. ppl 2.05 cum. examples 32000, speed 8143.50 words/sec, time elapsed 5140.17 sec
+nmt.py:140: UserWarning: torch.nn.utils.clip_grad_norm is now deprecated in favor of torch.nn.utils.clip_grad_norm_.
+  torch.nn.utils.clip_grad_norm(model.parameters(), clip_grad)
+epoch 5, iter 23000, cum. loss 43.09, cum. ppl 2.18 cum. examples 32000
+begin validation ... size 2
+validation: iter 23000, dev. ppl 2.290177
+hit patience 3
+hit #5 trial
+early stop!
+GeForce GTX 1080
+load model from work_dir/tune-model.bin
+Decoding:   0%|          | 0/998 [00:00<?, ?it/s]Decoding:   0%|          | 2/998 [00:00<01:20, 12.36it/s]Decoding:   0%|          | 3/998 [00:00<02:14,  7.37it/s]Decoding:   1%|          | 5/998 [00:00<01:59,  8.32it/s]Decoding:   1%|          | 7/998 [00:00<01:46,  9.29it/s]Decoding:   1%|          | 8/998 [00:01<02:39,  6.19it/s]Decoding:   1%|          | 10/998 [00:01<02:12,  7.44it/s]Decoding:   1%|          | 12/998 [00:01<01:49,  9.03it/s]Decoding:   1%|▏         | 14/998 [00:01<01:31, 10.72it/s]Decoding:   2%|▏         | 16/998 [00:01<01:41,  9.71it/s]Decoding:   2%|▏         | 18/998 [00:02<02:10,  7.48it/s]Decoding:   2%|▏         | 19/998 [00:02<02:16,  7.16it/s]Decoding:   2%|▏         | 20/998 [00:02<03:27,  4.70it/s]Decoding:   2%|▏         | 21/998 [00:03<04:32,  3.59it/s]Decoding:   2%|▏         | 23/998 [00:03<03:56,  4.13it/s]Decoding:   3%|▎         | 25/998 [00:03<03:09,  5.14it/s]Decoding:   3%|▎         | 27/998 [00:03<02:45,  5.86it/s]Decoding:   3%|▎         | 28/998 [00:03<02:29,  6.48it/s]Decoding:   3%|▎         | 29/998 [00:04<02:36,  6.19it/s]Decoding:   3%|▎         | 30/998 [00:04<03:08,  5.13it/s]Decoding:   3%|▎         | 31/998 [00:04<02:43,  5.91it/s]Decoding:   3%|▎         | 33/998 [00:04<02:27,  6.56it/s]Decoding:   3%|▎         | 34/998 [00:05<03:38,  4.42it/s]Decoding:   4%|▎         | 35/998 [00:05<03:07,  5.13it/s]Decoding:   4%|▎         | 37/998 [00:05<02:27,  6.52it/s]Decoding:   4%|▍         | 39/998 [00:05<02:11,  7.31it/s]Decoding:   4%|▍         | 41/998 [00:05<01:58,  8.07it/s]Decoding:   4%|▍         | 43/998 [00:05<01:53,  8.39it/s]Decoding:   5%|▍         | 45/998 [00:06<02:05,  7.61it/s]Decoding:   5%|▍         | 46/998 [00:06<01:59,  7.98it/s]Decoding:   5%|▍         | 47/998 [00:06<02:22,  6.66it/s]Decoding:   5%|▍         | 48/998 [00:06<02:59,  5.30it/s]Decoding:   5%|▍         | 49/998 [00:06<02:48,  5.64it/s]Decoding:   5%|▌         | 50/998 [00:07<02:56,  5.38it/s]Decoding:   5%|▌         | 51/998 [00:07<02:48,  5.62it/s]Decoding:   5%|▌         | 52/998 [00:07<03:06,  5.07it/s]Decoding:   5%|▌         | 53/998 [00:07<03:35,  4.39it/s]Decoding:   5%|▌         | 54/998 [00:08<03:35,  4.38it/s]Decoding:   6%|▌         | 56/998 [00:08<02:51,  5.49it/s]Decoding:   6%|▌         | 57/998 [00:08<03:38,  4.31it/s]Decoding:   6%|▌         | 58/998 [00:08<03:26,  4.54it/s]Decoding:   6%|▌         | 59/998 [00:08<03:10,  4.92it/s]Decoding:   6%|▌         | 60/998 [00:09<03:21,  4.65it/s]Decoding:   6%|▌         | 62/998 [00:09<02:51,  5.46it/s]Decoding:   6%|▋         | 63/998 [00:09<02:51,  5.46it/s]Decoding:   6%|▋         | 64/998 [00:09<02:51,  5.45it/s]Decoding:   7%|▋         | 65/998 [00:09<02:31,  6.16it/s]Decoding:   7%|▋         | 66/998 [00:10<02:48,  5.54it/s]Decoding:   7%|▋         | 67/998 [00:10<02:27,  6.29it/s]Decoding:   7%|▋         | 68/998 [00:10<02:50,  5.44it/s]Decoding:   7%|▋         | 70/998 [00:10<02:20,  6.58it/s]Decoding:   7%|▋         | 71/998 [00:10<02:54,  5.32it/s]Decoding:   7%|▋         | 72/998 [00:11<03:33,  4.35it/s]Decoding:   7%|▋         | 74/998 [00:11<03:15,  4.71it/s]Decoding:   8%|▊         | 76/998 [00:11<03:12,  4.79it/s]Decoding:   8%|▊         | 77/998 [00:12<03:13,  4.76it/s]Decoding:   8%|▊         | 79/998 [00:12<02:42,  5.66it/s]Decoding:   8%|▊         | 80/998 [00:12<02:44,  5.57it/s]Decoding:   8%|▊         | 82/998 [00:12<02:15,  6.76it/s]Decoding:   8%|▊         | 84/998 [00:12<02:00,  7.59it/s]Decoding:   9%|▊         | 85/998 [00:13<02:22,  6.41it/s]Decoding:   9%|▊         | 86/998 [00:13<03:30,  4.32it/s]Decoding:   9%|▊         | 87/998 [00:13<03:10,  4.78it/s]Decoding:   9%|▉         | 89/998 [00:13<02:32,  5.97it/s]Decoding:   9%|▉         | 91/998 [00:13<02:11,  6.90it/s]Decoding:   9%|▉         | 92/998 [00:14<02:02,  7.39it/s]Decoding:   9%|▉         | 93/998 [00:14<03:11,  4.73it/s]Decoding:  10%|▉         | 95/998 [00:14<03:00,  5.01it/s]Decoding:  10%|▉         | 96/998 [00:14<02:35,  5.80it/s]Decoding:  10%|▉         | 97/998 [00:15<03:09,  4.74it/s]Decoding:  10%|▉         | 98/998 [00:15<03:05,  4.86it/s]Decoding:  10%|█         | 100/998 [00:15<03:12,  4.66it/s]Decoding:  10%|█         | 102/998 [00:16<02:41,  5.54it/s]Decoding:  10%|█         | 104/998 [00:16<02:58,  5.01it/s]Decoding:  11%|█         | 106/998 [00:16<02:27,  6.05it/s]Decoding:  11%|█         | 108/998 [00:16<02:04,  7.14it/s]Decoding:  11%|█         | 109/998 [00:17<02:01,  7.30it/s]Decoding:  11%|█         | 112/998 [00:17<01:42,  8.65it/s]Decoding:  11%|█▏        | 114/998 [00:17<01:32,  9.52it/s]Decoding:  12%|█▏        | 116/998 [00:17<01:29,  9.90it/s]Decoding:  12%|█▏        | 118/998 [00:18<02:21,  6.23it/s]Decoding:  12%|█▏        | 120/998 [00:18<02:07,  6.88it/s]Decoding:  12%|█▏        | 122/998 [00:18<02:01,  7.21it/s]Decoding:  12%|█▏        | 123/998 [00:18<02:23,  6.10it/s]Decoding:  12%|█▏        | 124/998 [00:19<02:17,  6.35it/s]Decoding:  13%|█▎        | 125/998 [00:19<02:14,  6.49it/s]Decoding:  13%|█▎        | 127/998 [00:19<02:13,  6.52it/s]Decoding:  13%|█▎        | 128/998 [00:19<02:21,  6.15it/s]Decoding:  13%|█▎        | 129/998 [00:19<02:05,  6.92it/s]Decoding:  13%|█▎        | 130/998 [00:19<01:59,  7.27it/s]Decoding:  13%|█▎        | 131/998 [00:20<02:52,  5.01it/s]Decoding:  13%|█▎        | 133/998 [00:20<02:38,  5.46it/s]Decoding:  14%|█▎        | 135/998 [00:20<02:49,  5.08it/s]Decoding:  14%|█▎        | 137/998 [00:21<02:34,  5.57it/s]Decoding:  14%|█▍        | 139/998 [00:21<02:53,  4.95it/s]Decoding:  14%|█▍        | 140/998 [00:22<03:16,  4.37it/s]Decoding:  14%|█▍        | 142/998 [00:22<02:36,  5.48it/s]Decoding:  14%|█▍        | 143/998 [00:22<03:00,  4.73it/s]Decoding:  14%|█▍        | 144/998 [00:22<03:06,  4.58it/s]Decoding:  15%|█▍        | 145/998 [00:23<04:05,  3.47it/s]Decoding:  15%|█▍        | 146/998 [00:23<04:45,  2.98it/s]Decoding:  15%|█▍        | 147/998 [00:23<04:39,  3.05it/s]Decoding:  15%|█▍        | 149/998 [00:24<03:28,  4.08it/s]Decoding:  15%|█▌        | 150/998 [00:24<02:52,  4.92it/s]Decoding:  15%|█▌        | 152/998 [00:24<02:28,  5.71it/s]Decoding:  15%|█▌        | 154/998 [00:24<02:14,  6.27it/s]Decoding:  16%|█▌        | 155/998 [00:24<02:41,  5.22it/s]Decoding:  16%|█▌        | 157/998 [00:25<02:13,  6.29it/s]Decoding:  16%|█▌        | 159/998 [00:25<01:56,  7.17it/s]Decoding:  16%|█▌        | 160/998 [00:25<02:36,  5.36it/s]Decoding:  16%|█▌        | 162/998 [00:25<02:07,  6.54it/s]Decoding:  16%|█▋        | 164/998 [00:26<02:27,  5.66it/s]Decoding:  17%|█▋        | 166/998 [00:26<02:03,  6.72it/s]Decoding:  17%|█▋        | 167/998 [00:26<03:15,  4.25it/s]Decoding:  17%|█▋        | 168/998 [00:27<03:39,  3.78it/s]Decoding:  17%|█▋        | 169/998 [00:27<04:17,  3.23it/s]Decoding:  17%|█▋        | 170/998 [00:27<04:05,  3.37it/s]Decoding:  17%|█▋        | 171/998 [00:28<04:26,  3.10it/s]Decoding:  17%|█▋        | 172/998 [00:28<03:37,  3.80it/s]Decoding:  17%|█▋        | 173/998 [00:28<03:47,  3.62it/s]Decoding:  18%|█▊        | 176/998 [00:28<02:51,  4.79it/s]Decoding:  18%|█▊        | 178/998 [00:28<02:33,  5.34it/s]Decoding:  18%|█▊        | 179/998 [00:29<02:43,  5.02it/s]Decoding:  18%|█▊        | 180/998 [00:29<03:00,  4.54it/s]Decoding:  18%|█▊        | 181/998 [00:29<02:52,  4.74it/s]Decoding:  18%|█▊        | 182/998 [00:29<02:55,  4.65it/s]Decoding:  18%|█▊        | 183/998 [00:30<03:40,  3.69it/s]Decoding:  18%|█▊        | 184/998 [00:30<03:22,  4.01it/s]Decoding:  19%|█▊        | 185/998 [00:30<03:16,  4.14it/s]Decoding:  19%|█▊        | 186/998 [00:30<03:18,  4.09it/s]Decoding:  19%|█▉        | 188/998 [00:31<03:01,  4.47it/s]Decoding:  19%|█▉        | 190/998 [00:31<02:35,  5.20it/s]Decoding:  19%|█▉        | 191/998 [00:31<03:17,  4.09it/s]Decoding:  19%|█▉        | 192/998 [00:32<03:07,  4.30it/s]Decoding:  19%|█▉        | 193/998 [00:32<02:54,  4.61it/s]Decoding:  19%|█▉        | 194/998 [00:32<02:36,  5.14it/s]Decoding:  20%|█▉        | 195/998 [00:32<03:37,  3.70it/s]Decoding:  20%|█▉        | 197/998 [00:33<02:59,  4.46it/s]Decoding:  20%|█▉        | 198/998 [00:33<03:05,  4.32it/s]Decoding:  20%|█▉        | 199/998 [00:33<03:56,  3.38it/s]Decoding:  20%|██        | 200/998 [00:34<04:24,  3.02it/s]Decoding:  20%|██        | 201/998 [00:34<04:26,  2.99it/s]Decoding:  20%|██        | 202/998 [00:34<03:47,  3.51it/s]Decoding:  20%|██        | 203/998 [00:35<04:15,  3.11it/s]Decoding:  20%|██        | 204/998 [00:35<04:31,  2.92it/s]Decoding:  21%|██        | 206/998 [00:36<04:08,  3.19it/s]Decoding:  21%|██        | 207/998 [00:36<03:44,  3.53it/s]Decoding:  21%|██        | 208/998 [00:36<03:43,  3.53it/s]Decoding:  21%|██        | 209/998 [00:36<03:51,  3.41it/s]Decoding:  21%|██        | 210/998 [00:36<03:13,  4.08it/s]Decoding:  21%|██        | 211/998 [00:37<03:04,  4.27it/s]Decoding:  21%|██        | 212/998 [00:37<02:47,  4.70it/s]Decoding:  21%|██▏       | 214/998 [00:37<02:30,  5.21it/s]Decoding:  22%|██▏       | 215/998 [00:37<02:44,  4.77it/s]Decoding:  22%|██▏       | 216/998 [00:38<03:40,  3.55it/s]Decoding:  22%|██▏       | 218/998 [00:38<03:15,  3.98it/s]Decoding:  22%|██▏       | 219/998 [00:38<02:53,  4.50it/s]Decoding:  22%|██▏       | 220/998 [00:38<02:28,  5.25it/s]Decoding:  22%|██▏       | 221/998 [00:39<03:12,  4.04it/s]Decoding:  22%|██▏       | 223/998 [00:39<02:44,  4.72it/s]Decoding:  22%|██▏       | 224/998 [00:39<03:09,  4.09it/s]Decoding:  23%|██▎       | 225/998 [00:40<03:56,  3.27it/s]Decoding:  23%|██▎       | 226/998 [00:40<03:48,  3.38it/s]Decoding:  23%|██▎       | 228/998 [00:40<03:17,  3.89it/s]Decoding:  23%|██▎       | 229/998 [00:41<03:36,  3.55it/s]Decoding:  23%|██▎       | 230/998 [00:41<03:59,  3.21it/s]Decoding:  23%|██▎       | 231/998 [00:42<04:28,  2.86it/s]Decoding:  23%|██▎       | 232/998 [00:42<03:42,  3.45it/s]Decoding:  23%|██▎       | 233/998 [00:42<03:13,  3.96it/s]Decoding:  23%|██▎       | 234/998 [00:42<03:58,  3.20it/s]Decoding:  24%|██▎       | 235/998 [00:43<03:14,  3.92it/s]Decoding:  24%|██▎       | 236/998 [00:43<03:54,  3.24it/s]Decoding:  24%|██▎       | 237/998 [00:43<03:40,  3.44it/s]Decoding:  24%|██▍       | 238/998 [00:43<03:14,  3.91it/s]Decoding:  24%|██▍       | 239/998 [00:44<02:59,  4.23it/s]Decoding:  24%|██▍       | 240/998 [00:44<03:17,  3.85it/s]Decoding:  24%|██▍       | 241/998 [00:44<03:05,  4.09it/s]Decoding:  24%|██▍       | 242/998 [00:44<03:03,  4.12it/s]Decoding:  24%|██▍       | 243/998 [00:45<02:57,  4.24it/s]Decoding:  25%|██▍       | 245/998 [00:45<02:38,  4.74it/s]Decoding:  25%|██▍       | 246/998 [00:45<02:23,  5.25it/s]Decoding:  25%|██▍       | 247/998 [00:45<02:51,  4.39it/s]Decoding:  25%|██▍       | 248/998 [00:45<02:24,  5.20it/s]Decoding:  25%|██▍       | 249/998 [00:46<02:26,  5.12it/s]Decoding:  25%|██▌       | 250/998 [00:46<03:00,  4.15it/s]Decoding:  25%|██▌       | 251/998 [00:46<03:31,  3.53it/s]Decoding:  25%|██▌       | 252/998 [00:47<03:19,  3.74it/s]Decoding:  25%|██▌       | 253/998 [00:47<03:01,  4.11it/s]Decoding:  25%|██▌       | 254/998 [00:47<03:17,  3.77it/s]Decoding:  26%|██▌       | 255/998 [00:48<03:56,  3.14it/s]Decoding:  26%|██▌       | 256/998 [00:48<04:20,  2.84it/s]Decoding:  26%|██▌       | 257/998 [00:48<04:07,  2.99it/s]Decoding:  26%|██▌       | 258/998 [00:49<04:07,  2.99it/s]Decoding:  26%|██▌       | 259/998 [00:49<04:33,  2.70it/s]Decoding:  26%|██▌       | 260/998 [00:49<03:50,  3.21it/s]Decoding:  26%|██▌       | 261/998 [00:50<04:03,  3.03it/s]Decoding:  26%|██▋       | 262/998 [00:50<03:30,  3.49it/s]Decoding:  26%|██▋       | 263/998 [00:50<04:00,  3.05it/s]Decoding:  26%|██▋       | 264/998 [00:50<03:39,  3.35it/s]Decoding:  27%|██▋       | 266/998 [00:51<02:55,  4.16it/s]Decoding:  27%|██▋       | 267/998 [00:51<02:25,  5.03it/s]Decoding:  27%|██▋       | 269/998 [00:51<02:33,  4.75it/s]Decoding:  27%|██▋       | 270/998 [00:51<02:44,  4.43it/s]Decoding:  27%|██▋       | 271/998 [00:52<02:55,  4.13it/s]Decoding:  27%|██▋       | 272/998 [00:52<03:06,  3.90it/s]Decoding:  27%|██▋       | 273/998 [00:52<03:11,  3.79it/s]Decoding:  28%|██▊       | 275/998 [00:53<02:47,  4.31it/s]Decoding:  28%|██▊       | 277/998 [00:53<02:08,  5.61it/s]Decoding:  28%|██▊       | 278/998 [00:53<02:22,  5.05it/s]Decoding:  28%|██▊       | 280/998 [00:53<02:07,  5.64it/s]Decoding:  28%|██▊       | 281/998 [00:53<02:09,  5.55it/s]Decoding:  28%|██▊       | 282/998 [00:54<02:01,  5.90it/s]Decoding:  28%|██▊       | 283/998 [00:54<02:57,  4.03it/s]Decoding:  28%|██▊       | 284/998 [00:54<03:40,  3.24it/s]Decoding:  29%|██▊       | 285/998 [00:55<03:57,  3.00it/s]Decoding:  29%|██▊       | 286/998 [00:55<03:58,  2.98it/s]Decoding:  29%|██▉       | 287/998 [00:55<03:35,  3.30it/s]Decoding:  29%|██▉       | 288/998 [00:56<03:03,  3.88it/s]Decoding:  29%|██▉       | 290/998 [00:56<02:19,  5.06it/s]Decoding:  29%|██▉       | 292/998 [00:56<01:53,  6.23it/s]Decoding:  29%|██▉       | 294/998 [00:56<01:36,  7.27it/s]Decoding:  30%|██▉       | 296/998 [00:56<01:51,  6.30it/s]Decoding:  30%|██▉       | 297/998 [00:57<02:01,  5.77it/s]Decoding:  30%|██▉       | 298/998 [00:57<01:48,  6.46it/s]Decoding:  30%|██▉       | 299/998 [00:57<01:37,  7.17it/s]Decoding:  30%|███       | 301/998 [00:57<01:21,  8.60it/s]Decoding:  30%|███       | 303/998 [00:57<01:18,  8.81it/s]Decoding:  31%|███       | 305/998 [00:58<01:49,  6.32it/s]Decoding:  31%|███       | 306/998 [00:58<01:37,  7.07it/s]Decoding:  31%|███       | 307/998 [00:58<01:33,  7.36it/s]Decoding:  31%|███       | 308/998 [00:58<01:27,  7.84it/s]Decoding:  31%|███       | 310/998 [00:58<01:14,  9.22it/s]Decoding:  31%|███▏      | 312/998 [00:59<01:32,  7.40it/s]Decoding:  31%|███▏      | 313/998 [00:59<01:44,  6.53it/s]Decoding:  32%|███▏      | 315/998 [00:59<01:32,  7.36it/s]Decoding:  32%|███▏      | 316/998 [00:59<01:48,  6.29it/s]Decoding:  32%|███▏      | 317/998 [00:59<01:38,  6.94it/s]Decoding:  32%|███▏      | 318/998 [01:00<01:53,  6.02it/s]Decoding:  32%|███▏      | 319/998 [01:00<02:00,  5.62it/s]Decoding:  32%|███▏      | 321/998 [01:00<02:04,  5.44it/s]Decoding:  32%|███▏      | 323/998 [01:00<01:55,  5.82it/s]Decoding:  32%|███▏      | 324/998 [01:00<01:41,  6.65it/s]Decoding:  33%|███▎      | 326/998 [01:01<01:28,  7.56it/s]Decoding:  33%|███▎      | 328/998 [01:01<01:32,  7.27it/s]Decoding:  33%|███▎      | 329/998 [01:01<02:33,  4.35it/s]Decoding:  33%|███▎      | 331/998 [01:02<02:20,  4.75it/s]Decoding:  33%|███▎      | 332/998 [01:02<01:59,  5.56it/s]Decoding:  33%|███▎      | 333/998 [01:02<01:56,  5.73it/s]Decoding:  33%|███▎      | 334/998 [01:02<01:41,  6.53it/s]Decoding:  34%|███▎      | 335/998 [01:02<02:05,  5.30it/s]Decoding:  34%|███▍      | 337/998 [01:03<01:42,  6.42it/s]Decoding:  34%|███▍      | 338/998 [01:03<01:47,  6.16it/s]Decoding:  34%|███▍      | 339/998 [01:03<01:45,  6.27it/s]Decoding:  34%|███▍      | 340/998 [01:03<02:41,  4.07it/s]Decoding:  34%|███▍      | 342/998 [01:04<02:31,  4.34it/s]Decoding:  34%|███▍      | 344/998 [01:04<02:03,  5.30it/s]Decoding:  35%|███▍      | 345/998 [01:04<02:53,  3.77it/s]Decoding:  35%|███▍      | 347/998 [01:05<02:23,  4.54it/s]Decoding:  35%|███▍      | 348/998 [01:05<02:00,  5.39it/s]Decoding:  35%|███▍      | 349/998 [01:05<01:48,  5.98it/s]Decoding:  35%|███▌      | 350/998 [01:05<01:37,  6.67it/s]Decoding:  35%|███▌      | 351/998 [01:05<02:37,  4.10it/s]Decoding:  35%|███▌      | 352/998 [01:06<02:22,  4.53it/s]Decoding:  35%|███▌      | 354/998 [01:06<02:06,  5.10it/s]Decoding:  36%|███▌      | 355/998 [01:06<02:44,  3.90it/s]Decoding:  36%|███▌      | 356/998 [01:07<03:27,  3.10it/s]Decoding:  36%|███▌      | 358/998 [01:07<02:39,  4.02it/s]Decoding:  36%|███▌      | 359/998 [01:07<02:27,  4.34it/s]Decoding:  36%|███▌      | 360/998 [01:07<02:05,  5.07it/s]Decoding:  36%|███▌      | 361/998 [01:07<01:50,  5.79it/s]Decoding:  36%|███▋      | 362/998 [01:08<02:26,  4.35it/s]Decoding:  36%|███▋      | 363/998 [01:08<02:46,  3.82it/s]Decoding:  36%|███▋      | 364/998 [01:08<02:24,  4.40it/s]Decoding:  37%|███▋      | 365/998 [01:08<02:36,  4.04it/s]Decoding:  37%|███▋      | 366/998 [01:09<02:19,  4.52it/s]Decoding:  37%|███▋      | 367/998 [01:09<02:31,  4.16it/s]Decoding:  37%|███▋      | 368/998 [01:09<02:11,  4.80it/s]Decoding:  37%|███▋      | 369/998 [01:09<01:52,  5.57it/s]Decoding:  37%|███▋      | 370/998 [01:10<02:42,  3.87it/s]Decoding:  37%|███▋      | 372/998 [01:10<02:04,  5.04it/s]Decoding:  37%|███▋      | 373/998 [01:10<01:47,  5.81it/s]Decoding:  38%|███▊      | 375/998 [01:10<01:28,  7.01it/s]Decoding:  38%|███▊      | 377/998 [01:10<01:24,  7.36it/s]Decoding:  38%|███▊      | 378/998 [01:10<01:25,  7.23it/s]Decoding:  38%|███▊      | 379/998 [01:10<01:26,  7.19it/s]Decoding:  38%|███▊      | 380/998 [01:11<02:24,  4.27it/s]Decoding:  38%|███▊      | 381/998 [01:11<02:46,  3.70it/s]Decoding:  38%|███▊      | 382/998 [01:12<03:20,  3.08it/s]Decoding:  38%|███▊      | 384/998 [01:12<02:42,  3.77it/s]Decoding:  39%|███▊      | 386/998 [01:12<02:11,  4.66it/s]Decoding:  39%|███▉      | 388/998 [01:12<01:47,  5.66it/s]Decoding:  39%|███▉      | 390/998 [01:12<01:29,  6.83it/s]Decoding:  39%|███▉      | 391/998 [01:13<01:37,  6.21it/s]Decoding:  39%|███▉      | 392/998 [01:13<01:43,  5.86it/s]Decoding:  39%|███▉      | 394/998 [01:13<01:24,  7.17it/s]Decoding:  40%|███▉      | 395/998 [01:13<01:46,  5.65it/s]Decoding:  40%|███▉      | 396/998 [01:13<01:35,  6.31it/s]Decoding:  40%|███▉      | 397/998 [01:14<01:29,  6.71it/s]Decoding:  40%|███▉      | 399/998 [01:14<01:22,  7.26it/s]Decoding:  40%|████      | 401/998 [01:14<01:11,  8.41it/s]Decoding:  40%|████      | 402/998 [01:14<01:14,  8.02it/s]Decoding:  40%|████      | 403/998 [01:14<01:14,  7.96it/s]Decoding:  41%|████      | 405/998 [01:14<01:10,  8.43it/s]Decoding:  41%|████      | 406/998 [01:15<02:15,  4.36it/s]Decoding:  41%|████      | 407/998 [01:15<02:06,  4.69it/s]Decoding:  41%|████      | 408/998 [01:15<02:14,  4.39it/s]Decoding:  41%|████      | 409/998 [01:15<01:57,  5.00it/s]Decoding:  41%|████      | 410/998 [01:16<02:28,  3.95it/s]Decoding:  41%|████▏     | 412/998 [01:16<02:01,  4.82it/s]Decoding:  41%|████▏     | 413/998 [01:16<01:57,  5.00it/s]Decoding:  41%|████▏     | 414/998 [01:16<01:51,  5.25it/s]Decoding:  42%|████▏     | 416/998 [01:16<01:26,  6.73it/s]Decoding:  42%|████▏     | 418/998 [01:17<01:39,  5.81it/s]Decoding:  42%|████▏     | 419/998 [01:17<02:02,  4.74it/s]Decoding:  42%|████▏     | 421/998 [01:17<01:46,  5.42it/s]Decoding:  42%|████▏     | 422/998 [01:18<02:21,  4.07it/s]Decoding:  42%|████▏     | 423/998 [01:18<02:20,  4.10it/s]Decoding:  42%|████▏     | 424/998 [01:18<02:14,  4.28it/s]Decoding:  43%|████▎     | 425/998 [01:19<02:36,  3.65it/s]Decoding:  43%|████▎     | 427/998 [01:19<02:27,  3.88it/s]Decoding:  43%|████▎     | 428/998 [01:20<03:00,  3.15it/s]Decoding:  43%|████▎     | 429/998 [01:20<02:53,  3.27it/s]Decoding:  43%|████▎     | 430/998 [01:20<02:46,  3.42it/s]Decoding:  43%|████▎     | 431/998 [01:20<02:27,  3.84it/s]Decoding:  43%|████▎     | 433/998 [01:21<02:07,  4.43it/s]Decoding:  43%|████▎     | 434/998 [01:21<01:54,  4.91it/s]Decoding:  44%|████▎     | 435/998 [01:21<02:24,  3.91it/s]Decoding:  44%|████▎     | 436/998 [01:21<02:30,  3.74it/s]Decoding:  44%|████▍     | 437/998 [01:22<02:28,  3.79it/s]Decoding:  44%|████▍     | 438/998 [01:22<02:00,  4.64it/s]Decoding:  44%|████▍     | 439/998 [01:22<01:53,  4.91it/s]Decoding:  44%|████▍     | 440/998 [01:22<02:18,  4.03it/s]Decoding:  44%|████▍     | 441/998 [01:22<02:07,  4.35it/s]Decoding:  44%|████▍     | 442/998 [01:23<02:31,  3.67it/s]Decoding:  44%|████▍     | 443/998 [01:23<02:08,  4.32it/s]Decoding:  44%|████▍     | 444/998 [01:23<01:50,  5.02it/s]Decoding:  45%|████▍     | 445/998 [01:24<02:27,  3.74it/s]Decoding:  45%|████▍     | 446/998 [01:24<02:56,  3.13it/s]Decoding:  45%|████▍     | 447/998 [01:24<02:59,  3.07it/s]Decoding:  45%|████▍     | 449/998 [01:25<02:48,  3.25it/s]Decoding:  45%|████▌     | 450/998 [01:25<02:42,  3.38it/s]Decoding:  45%|████▌     | 451/998 [01:26<03:01,  3.02it/s]Decoding:  45%|████▌     | 452/998 [01:26<03:10,  2.87it/s]Decoding:  45%|████▌     | 453/998 [01:26<03:14,  2.80it/s]Decoding:  45%|████▌     | 454/998 [01:27<03:06,  2.92it/s]Decoding:  46%|████▌     | 456/998 [01:27<02:33,  3.53it/s]Decoding:  46%|████▌     | 457/998 [01:27<02:50,  3.17it/s]Decoding:  46%|████▌     | 459/998 [01:28<02:25,  3.70it/s]Decoding:  46%|████▌     | 460/998 [01:28<02:47,  3.21it/s]Decoding:  46%|████▌     | 461/998 [01:28<02:50,  3.15it/s]Decoding:  46%|████▋     | 462/998 [01:29<02:58,  3.01it/s]Decoding:  46%|████▋     | 463/998 [01:29<03:07,  2.85it/s]Decoding:  46%|████▋     | 464/998 [01:30<03:25,  2.60it/s]Decoding:  47%|████▋     | 465/998 [01:30<02:41,  3.30it/s]Decoding:  47%|████▋     | 466/998 [01:30<03:05,  2.87it/s]Decoding:  47%|████▋     | 467/998 [01:30<02:45,  3.20it/s]Decoding:  47%|████▋     | 468/998 [01:31<03:07,  2.82it/s]Decoding:  47%|████▋     | 469/998 [01:31<02:52,  3.06it/s]Decoding:  47%|████▋     | 470/998 [01:32<03:10,  2.77it/s]Decoding:  47%|████▋     | 471/998 [01:32<02:35,  3.39it/s]Decoding:  47%|████▋     | 472/998 [01:32<02:37,  3.33it/s]Decoding:  47%|████▋     | 473/998 [01:32<02:46,  3.15it/s]Decoding:  48%|████▊     | 475/998 [01:33<02:22,  3.68it/s]Decoding:  48%|████▊     | 476/998 [01:33<02:51,  3.05it/s]Decoding:  48%|████▊     | 477/998 [01:33<02:37,  3.31it/s]Decoding:  48%|████▊     | 478/998 [01:34<02:59,  2.89it/s]Decoding:  48%|████▊     | 479/998 [01:34<03:08,  2.75it/s]Decoding:  48%|████▊     | 480/998 [01:35<03:04,  2.80it/s]Decoding:  48%|████▊     | 481/998 [01:35<03:03,  2.81it/s]Decoding:  48%|████▊     | 482/998 [01:35<03:15,  2.64it/s]Decoding:  48%|████▊     | 483/998 [01:35<02:39,  3.22it/s]Decoding:  48%|████▊     | 484/998 [01:36<02:36,  3.29it/s]Decoding:  49%|████▊     | 485/998 [01:36<02:05,  4.08it/s]Decoding:  49%|████▊     | 486/998 [01:36<02:26,  3.50it/s]Decoding:  49%|████▉     | 487/998 [01:37<02:21,  3.61it/s]Decoding:  49%|████▉     | 488/998 [01:37<02:06,  4.02it/s]Decoding:  49%|████▉     | 489/998 [01:37<02:30,  3.39it/s]Decoding:  49%|████▉     | 490/998 [01:37<02:33,  3.32it/s]Decoding:  49%|████▉     | 492/998 [01:38<02:06,  4.00it/s]Decoding:  49%|████▉     | 493/998 [01:38<01:46,  4.74it/s]Decoding:  49%|████▉     | 494/998 [01:38<01:31,  5.50it/s]Decoding:  50%|████▉     | 495/998 [01:38<02:02,  4.11it/s]Decoding:  50%|████▉     | 496/998 [01:39<02:33,  3.26it/s]Decoding:  50%|████▉     | 497/998 [01:39<02:27,  3.39it/s]Decoding:  50%|████▉     | 498/998 [01:39<02:40,  3.12it/s]Decoding:  50%|█████     | 499/998 [01:40<02:21,  3.54it/s]Decoding:  50%|█████     | 501/998 [01:40<01:57,  4.24it/s]Decoding:  50%|█████     | 503/998 [01:40<01:46,  4.65it/s]Decoding:  51%|█████     | 505/998 [01:40<01:35,  5.19it/s]Decoding:  51%|█████     | 507/998 [01:41<01:16,  6.42it/s]Decoding:  51%|█████     | 508/998 [01:41<01:17,  6.33it/s]Decoding:  51%|█████     | 509/998 [01:41<01:19,  6.17it/s]Decoding:  51%|█████     | 510/998 [01:41<01:43,  4.69it/s]Decoding:  51%|█████     | 511/998 [01:41<01:44,  4.66it/s]Decoding:  51%|█████▏    | 512/998 [01:42<01:38,  4.95it/s]Decoding:  52%|█████▏    | 514/998 [01:42<01:26,  5.62it/s]Decoding:  52%|█████▏    | 515/998 [01:42<01:16,  6.34it/s]Decoding:  52%|█████▏    | 517/998 [01:42<01:05,  7.40it/s]Decoding:  52%|█████▏    | 518/998 [01:42<01:14,  6.41it/s]Decoding:  52%|█████▏    | 519/998 [01:43<01:10,  6.80it/s]Decoding:  52%|█████▏    | 520/998 [01:43<01:48,  4.41it/s]Decoding:  52%|█████▏    | 521/998 [01:43<01:37,  4.87it/s]Decoding:  52%|█████▏    | 522/998 [01:43<01:23,  5.67it/s]Decoding:  52%|█████▏    | 523/998 [01:43<01:16,  6.20it/s]Decoding:  53%|█████▎    | 525/998 [01:43<01:01,  7.64it/s]Decoding:  53%|█████▎    | 527/998 [01:44<00:59,  7.87it/s]Decoding:  53%|█████▎    | 528/998 [01:44<01:16,  6.17it/s]Decoding:  53%|█████▎    | 529/998 [01:44<01:20,  5.80it/s]Decoding:  53%|█████▎    | 531/998 [01:44<01:17,  6.06it/s]Decoding:  53%|█████▎    | 533/998 [01:45<01:10,  6.63it/s]Decoding:  54%|█████▎    | 534/998 [01:45<01:10,  6.62it/s]Decoding:  54%|█████▎    | 536/998 [01:45<01:06,  6.91it/s]Decoding:  54%|█████▍    | 538/998 [01:45<00:58,  7.90it/s]Decoding:  54%|█████▍    | 539/998 [01:45<01:17,  5.93it/s]Decoding:  54%|█████▍    | 540/998 [01:46<01:17,  5.91it/s]Decoding:  54%|█████▍    | 541/998 [01:46<01:11,  6.41it/s]Decoding:  54%|█████▍    | 543/998 [01:46<01:02,  7.25it/s]Decoding:  55%|█████▍    | 544/998 [01:46<00:58,  7.78it/s]Decoding:  55%|█████▍    | 545/998 [01:46<00:55,  8.22it/s]Decoding:  55%|█████▍    | 546/998 [01:46<00:57,  7.91it/s]Decoding:  55%|█████▍    | 547/998 [01:47<01:26,  5.19it/s]Decoding:  55%|█████▍    | 548/998 [01:47<01:21,  5.52it/s]Decoding:  55%|█████▌    | 549/998 [01:47<01:58,  3.79it/s]Decoding:  55%|█████▌    | 551/998 [01:48<01:41,  4.41it/s]Decoding:  55%|█████▌    | 552/998 [01:48<01:30,  4.95it/s]Decoding:  55%|█████▌    | 553/998 [01:48<01:36,  4.60it/s]Decoding:  56%|█████▌    | 555/998 [01:48<01:28,  4.99it/s]Decoding:  56%|█████▌    | 556/998 [01:48<01:19,  5.58it/s]Decoding:  56%|█████▌    | 558/998 [01:49<01:06,  6.62it/s]Decoding:  56%|█████▌    | 559/998 [01:49<01:13,  5.97it/s]Decoding:  56%|█████▌    | 561/998 [01:49<01:05,  6.72it/s]Decoding:  56%|█████▋    | 563/998 [01:49<00:56,  7.73it/s]Decoding:  57%|█████▋    | 564/998 [01:49<01:09,  6.28it/s]Decoding:  57%|█████▋    | 565/998 [01:50<01:14,  5.80it/s]Decoding:  57%|█████▋    | 567/998 [01:50<01:07,  6.42it/s]Decoding:  57%|█████▋    | 569/998 [01:50<01:06,  6.41it/s]Decoding:  57%|█████▋    | 571/998 [01:50<00:53,  7.98it/s]Decoding:  57%|█████▋    | 573/998 [01:51<01:01,  6.86it/s]Decoding:  58%|█████▊    | 575/998 [01:51<00:53,  7.98it/s]Decoding:  58%|█████▊    | 577/998 [01:51<01:16,  5.53it/s]Decoding:  58%|█████▊    | 578/998 [01:52<01:50,  3.81it/s]Decoding:  58%|█████▊    | 579/998 [01:52<01:49,  3.82it/s]Decoding:  58%|█████▊    | 580/998 [01:52<01:52,  3.71it/s]Decoding:  58%|█████▊    | 581/998 [01:53<01:39,  4.19it/s]Decoding:  58%|█████▊    | 582/998 [01:53<01:29,  4.64it/s]Decoding:  59%|█████▊    | 584/998 [01:53<01:11,  5.78it/s]Decoding:  59%|█████▊    | 586/998 [01:53<00:56,  7.33it/s]Decoding:  59%|█████▉    | 588/998 [01:53<00:49,  8.22it/s]Decoding:  59%|█████▉    | 590/998 [01:53<00:51,  7.85it/s]Decoding:  59%|█████▉    | 592/998 [01:54<00:59,  6.84it/s]Decoding:  59%|█████▉    | 593/998 [01:54<01:08,  5.90it/s]Decoding:  60%|█████▉    | 594/998 [01:54<01:02,  6.49it/s]Decoding:  60%|█████▉    | 595/998 [01:54<01:08,  5.91it/s]Decoding:  60%|█████▉    | 596/998 [01:55<01:41,  3.96it/s]Decoding:  60%|█████▉    | 597/998 [01:55<01:53,  3.53it/s]Decoding:  60%|█████▉    | 598/998 [01:55<01:51,  3.59it/s]Decoding:  60%|██████    | 600/998 [01:56<01:26,  4.59it/s]Decoding:  60%|██████    | 601/998 [01:56<01:39,  3.98it/s]Decoding:  60%|██████    | 602/998 [01:56<01:22,  4.80it/s]Decoding:  61%|██████    | 604/998 [01:56<01:06,  5.93it/s]Decoding:  61%|██████    | 605/998 [01:56<01:03,  6.18it/s]Decoding:  61%|██████    | 607/998 [01:57<00:59,  6.52it/s]Decoding:  61%|██████    | 609/998 [01:57<00:52,  7.47it/s]Decoding:  61%|██████    | 610/998 [01:57<00:48,  8.01it/s]Decoding:  61%|██████▏   | 612/998 [01:57<00:39,  9.73it/s]Decoding:  62%|██████▏   | 614/998 [01:58<01:05,  5.84it/s]Decoding:  62%|██████▏   | 615/998 [01:58<00:57,  6.65it/s]Decoding:  62%|██████▏   | 617/998 [01:58<00:51,  7.38it/s]Decoding:  62%|██████▏   | 619/998 [01:58<00:53,  7.10it/s]Decoding:  62%|██████▏   | 620/998 [01:59<01:26,  4.38it/s]Decoding:  62%|██████▏   | 621/998 [01:59<01:27,  4.30it/s]Decoding:  62%|██████▏   | 623/998 [01:59<01:09,  5.40it/s]Decoding:  63%|██████▎   | 624/998 [01:59<00:59,  6.24it/s]Decoding:  63%|██████▎   | 626/998 [02:00<01:00,  6.11it/s]Decoding:  63%|██████▎   | 628/998 [02:00<00:53,  6.91it/s]Decoding:  63%|██████▎   | 630/998 [02:00<00:46,  7.91it/s]Decoding:  63%|██████▎   | 631/998 [02:00<00:55,  6.65it/s]Decoding:  63%|██████▎   | 632/998 [02:01<01:23,  4.37it/s]Decoding:  63%|██████▎   | 633/998 [02:01<01:14,  4.88it/s]Decoding:  64%|██████▎   | 634/998 [02:01<01:37,  3.74it/s]Decoding:  64%|██████▎   | 636/998 [02:01<01:14,  4.89it/s]Decoding:  64%|██████▍   | 637/998 [02:01<01:10,  5.14it/s]Decoding:  64%|██████▍   | 638/998 [02:02<01:17,  4.65it/s]Decoding:  64%|██████▍   | 640/998 [02:02<01:03,  5.68it/s]Decoding:  64%|██████▍   | 641/998 [02:02<01:29,  3.99it/s]Decoding:  64%|██████▍   | 642/998 [02:02<01:17,  4.60it/s]Decoding:  65%|██████▍   | 644/998 [02:03<01:03,  5.60it/s]Decoding:  65%|██████▍   | 646/998 [02:03<00:57,  6.15it/s]Decoding:  65%|██████▍   | 647/998 [02:03<00:54,  6.39it/s]Decoding:  65%|██████▍   | 648/998 [02:03<01:11,  4.91it/s]Decoding:  65%|██████▌   | 649/998 [02:03<01:05,  5.31it/s]Decoding:  65%|██████▌   | 650/998 [02:04<01:14,  4.68it/s]Decoding:  65%|██████▌   | 652/998 [02:04<00:59,  5.82it/s]Decoding:  65%|██████▌   | 653/998 [02:04<00:58,  5.89it/s]Decoding:  66%|██████▌   | 654/998 [02:04<01:14,  4.62it/s]Decoding:  66%|██████▌   | 656/998 [02:05<01:16,  4.47it/s]Decoding:  66%|██████▌   | 657/998 [02:05<01:06,  5.13it/s]Decoding:  66%|██████▌   | 658/998 [02:05<01:07,  5.03it/s]Decoding:  66%|██████▌   | 659/998 [02:05<01:06,  5.09it/s]Decoding:  66%|██████▌   | 661/998 [02:06<01:02,  5.37it/s]Decoding:  66%|██████▋   | 662/998 [02:06<00:59,  5.62it/s]Decoding:  67%|██████▋   | 664/998 [02:06<00:53,  6.23it/s]Decoding:  67%|██████▋   | 665/998 [02:06<00:49,  6.68it/s]Decoding:  67%|██████▋   | 667/998 [02:06<00:47,  7.01it/s]Decoding:  67%|██████▋   | 668/998 [02:07<00:53,  6.22it/s]Decoding:  67%|██████▋   | 669/998 [02:07<00:49,  6.60it/s]Decoding:  67%|██████▋   | 670/998 [02:07<01:06,  4.91it/s]Decoding:  67%|██████▋   | 671/998 [02:07<01:16,  4.25it/s]Decoding:  67%|██████▋   | 672/998 [02:08<01:07,  4.83it/s]Decoding:  67%|██████▋   | 673/998 [02:08<00:58,  5.54it/s]Decoding:  68%|██████▊   | 674/998 [02:08<00:50,  6.36it/s]Decoding:  68%|██████▊   | 676/998 [02:08<00:41,  7.73it/s]Decoding:  68%|██████▊   | 678/998 [02:08<00:37,  8.46it/s]Decoding:  68%|██████▊   | 680/998 [02:08<00:37,  8.45it/s]Decoding:  68%|██████▊   | 682/998 [02:08<00:31,  9.92it/s]Decoding:  69%|██████▊   | 684/998 [02:09<00:36,  8.52it/s]Decoding:  69%|██████▊   | 686/998 [02:09<00:45,  6.80it/s]Decoding:  69%|██████▉   | 687/998 [02:09<00:46,  6.68it/s]Decoding:  69%|██████▉   | 689/998 [02:10<00:44,  6.98it/s]Decoding:  69%|██████▉   | 690/998 [02:10<00:47,  6.47it/s]Decoding:  69%|██████▉   | 692/998 [02:10<00:58,  5.25it/s]Decoding:  70%|██████▉   | 694/998 [02:10<00:48,  6.33it/s]Decoding:  70%|██████▉   | 695/998 [02:11<00:58,  5.15it/s]Decoding:  70%|██████▉   | 697/998 [02:11<00:47,  6.40it/s]Decoding:  70%|██████▉   | 698/998 [02:11<00:51,  5.86it/s]Decoding:  70%|███████   | 699/998 [02:11<00:45,  6.54it/s]Decoding:  70%|███████   | 700/998 [02:11<00:54,  5.45it/s]Decoding:  70%|███████   | 701/998 [02:12<00:53,  5.52it/s]Decoding:  70%|███████   | 703/998 [02:12<00:59,  4.96it/s]Decoding:  71%|███████   | 704/998 [02:12<01:04,  4.55it/s]Decoding:  71%|███████   | 706/998 [02:13<01:01,  4.78it/s]Decoding:  71%|███████   | 707/998 [02:13<00:51,  5.60it/s]Decoding:  71%|███████   | 708/998 [02:13<00:50,  5.75it/s]Decoding:  71%|███████   | 710/998 [02:13<00:48,  5.97it/s]Decoding:  71%|███████   | 711/998 [02:14<00:48,  5.94it/s]Decoding:  71%|███████▏  | 713/998 [02:14<00:47,  5.96it/s]Decoding:  72%|███████▏  | 715/998 [02:14<00:39,  7.19it/s]Decoding:  72%|███████▏  | 716/998 [02:14<00:41,  6.87it/s]Decoding:  72%|███████▏  | 718/998 [02:14<00:34,  8.13it/s]Decoding:  72%|███████▏  | 719/998 [02:15<00:45,  6.12it/s]Decoding:  72%|███████▏  | 720/998 [02:15<00:44,  6.28it/s]Decoding:  72%|███████▏  | 721/998 [02:15<00:50,  5.47it/s]Decoding:  72%|███████▏  | 722/998 [02:15<00:46,  5.97it/s]Decoding:  73%|███████▎  | 724/998 [02:15<00:45,  6.02it/s]Decoding:  73%|███████▎  | 725/998 [02:16<00:48,  5.67it/s]Decoding:  73%|███████▎  | 726/998 [02:16<00:46,  5.82it/s]Decoding:  73%|███████▎  | 727/998 [02:16<01:05,  4.11it/s]Decoding:  73%|███████▎  | 729/998 [02:16<00:53,  5.00it/s]Decoding:  73%|███████▎  | 730/998 [02:17<00:57,  4.64it/s]Decoding:  73%|███████▎  | 732/998 [02:17<00:46,  5.69it/s]Decoding:  74%|███████▎  | 734/998 [02:17<00:36,  7.17it/s]Decoding:  74%|███████▎  | 736/998 [02:17<00:31,  8.38it/s]Decoding:  74%|███████▍  | 738/998 [02:18<00:40,  6.42it/s]Decoding:  74%|███████▍  | 739/998 [02:18<00:44,  5.83it/s]Decoding:  74%|███████▍  | 740/998 [02:18<01:06,  3.87it/s]Decoding:  74%|███████▍  | 741/998 [02:18<01:03,  4.06it/s]Decoding:  74%|███████▍  | 742/998 [02:19<00:55,  4.60it/s]Decoding:  74%|███████▍  | 743/998 [02:19<00:49,  5.13it/s]Decoding:  75%|███████▍  | 744/998 [02:19<00:47,  5.32it/s]Decoding:  75%|███████▍  | 745/998 [02:19<01:00,  4.17it/s]Decoding:  75%|███████▍  | 746/998 [02:19<00:50,  5.03it/s]Decoding:  75%|███████▍  | 747/998 [02:20<00:49,  5.03it/s]Decoding:  75%|███████▌  | 749/998 [02:20<00:45,  5.53it/s]Decoding:  75%|███████▌  | 750/998 [02:20<00:56,  4.38it/s]Decoding:  75%|███████▌  | 751/998 [02:20<00:49,  4.95it/s]Decoding:  75%|███████▌  | 753/998 [02:21<00:47,  5.21it/s]Decoding:  76%|███████▌  | 754/998 [02:21<00:40,  6.07it/s]Decoding:  76%|███████▌  | 755/998 [02:21<00:48,  4.97it/s]Decoding:  76%|███████▌  | 757/998 [02:21<00:43,  5.51it/s]Decoding:  76%|███████▌  | 758/998 [02:21<00:41,  5.78it/s]Decoding:  76%|███████▌  | 760/998 [02:22<00:41,  5.71it/s]Decoding:  76%|███████▋  | 761/998 [02:22<00:39,  6.05it/s]Decoding:  76%|███████▋  | 762/998 [02:22<00:38,  6.10it/s]Decoding:  76%|███████▋  | 763/998 [02:22<00:44,  5.25it/s]Decoding:  77%|███████▋  | 764/998 [02:23<00:53,  4.40it/s]Decoding:  77%|███████▋  | 765/998 [02:23<00:50,  4.57it/s]Decoding:  77%|███████▋  | 766/998 [02:23<01:06,  3.51it/s]Decoding:  77%|███████▋  | 767/998 [02:23<00:54,  4.23it/s]Decoding:  77%|███████▋  | 768/998 [02:24<00:45,  5.08it/s]Decoding:  77%|███████▋  | 769/998 [02:24<01:01,  3.71it/s]Decoding:  77%|███████▋  | 770/998 [02:24<00:52,  4.31it/s]Decoding:  77%|███████▋  | 771/998 [02:25<01:08,  3.33it/s]Decoding:  77%|███████▋  | 773/998 [02:25<00:53,  4.23it/s]Decoding:  78%|███████▊  | 775/998 [02:25<00:42,  5.21it/s]Decoding:  78%|███████▊  | 776/998 [02:25<00:52,  4.25it/s]Decoding:  78%|███████▊  | 777/998 [02:26<00:54,  4.03it/s]Decoding:  78%|███████▊  | 778/998 [02:26<00:58,  3.74it/s]Decoding:  78%|███████▊  | 779/998 [02:26<01:07,  3.25it/s]Decoding:  78%|███████▊  | 780/998 [02:27<01:04,  3.39it/s]Decoding:  78%|███████▊  | 781/998 [02:27<00:54,  3.97it/s]Decoding:  78%|███████▊  | 782/998 [02:27<01:04,  3.35it/s]Decoding:  78%|███████▊  | 783/998 [02:27<00:58,  3.67it/s]Decoding:  79%|███████▊  | 784/998 [02:27<00:53,  4.00it/s]Decoding:  79%|███████▊  | 785/998 [02:28<00:50,  4.21it/s]Decoding:  79%|███████▉  | 786/998 [02:28<00:44,  4.75it/s]Decoding:  79%|███████▉  | 788/998 [02:28<00:39,  5.31it/s]Decoding:  79%|███████▉  | 789/998 [02:28<00:34,  6.01it/s]Decoding:  79%|███████▉  | 790/998 [02:28<00:39,  5.33it/s]Decoding:  79%|███████▉  | 791/998 [02:29<00:51,  4.01it/s]Decoding:  79%|███████▉  | 792/998 [02:29<00:59,  3.49it/s]Decoding:  79%|███████▉  | 793/998 [02:29<00:50,  4.06it/s]Decoding:  80%|███████▉  | 794/998 [02:29<00:41,  4.94it/s]Decoding:  80%|███████▉  | 795/998 [02:30<00:44,  4.59it/s]Decoding:  80%|███████▉  | 796/998 [02:30<00:44,  4.58it/s]Decoding:  80%|███████▉  | 798/998 [02:30<00:34,  5.71it/s]Decoding:  80%|████████  | 799/998 [02:30<00:43,  4.61it/s]Decoding:  80%|████████  | 800/998 [02:31<00:50,  3.89it/s]Decoding:  80%|████████  | 801/998 [02:31<00:47,  4.19it/s]Decoding:  80%|████████  | 802/998 [02:31<00:51,  3.77it/s]Decoding:  80%|████████  | 803/998 [02:31<00:44,  4.35it/s]Decoding:  81%|████████  | 804/998 [02:32<00:56,  3.46it/s]Decoding:  81%|████████  | 805/998 [02:32<00:49,  3.87it/s]Decoding:  81%|████████  | 806/998 [02:32<00:44,  4.31it/s]Decoding:  81%|████████  | 807/998 [02:33<00:57,  3.34it/s]Decoding:  81%|████████  | 808/998 [02:33<00:49,  3.83it/s]Decoding:  81%|████████  | 809/998 [02:33<00:41,  4.51it/s]Decoding:  81%|████████  | 810/998 [02:33<00:50,  3.73it/s]Decoding:  81%|████████▏ | 811/998 [02:34<00:46,  4.03it/s]Decoding:  81%|████████▏ | 812/998 [02:34<00:41,  4.44it/s]Decoding:  81%|████████▏ | 813/998 [02:34<00:43,  4.21it/s]Decoding:  82%|████████▏ | 815/998 [02:34<00:37,  4.82it/s]Decoding:  82%|████████▏ | 816/998 [02:35<00:46,  3.88it/s]Decoding:  82%|████████▏ | 817/998 [02:35<00:43,  4.18it/s]Decoding:  82%|████████▏ | 818/998 [02:35<00:54,  3.30it/s]Decoding:  82%|████████▏ | 819/998 [02:36<00:52,  3.40it/s]Decoding:  82%|████████▏ | 821/998 [02:36<00:50,  3.50it/s]Decoding:  82%|████████▏ | 822/998 [02:36<00:41,  4.27it/s]Decoding:  82%|████████▏ | 823/998 [02:36<00:38,  4.55it/s]Decoding:  83%|████████▎ | 825/998 [02:37<00:36,  4.68it/s]Decoding:  83%|████████▎ | 826/998 [02:37<00:41,  4.12it/s]Decoding:  83%|████████▎ | 828/998 [02:37<00:35,  4.73it/s]Decoding:  83%|████████▎ | 829/998 [02:38<00:32,  5.16it/s]Decoding:  83%|████████▎ | 830/998 [02:38<00:42,  3.97it/s]Decoding:  83%|████████▎ | 832/998 [02:38<00:33,  5.02it/s]Decoding:  83%|████████▎ | 833/998 [02:38<00:29,  5.58it/s]Decoding:  84%|████████▎ | 834/998 [02:39<00:41,  3.93it/s]Decoding:  84%|████████▍ | 836/998 [02:39<00:34,  4.76it/s]Decoding:  84%|████████▍ | 837/998 [02:39<00:39,  4.03it/s]Decoding:  84%|████████▍ | 838/998 [02:39<00:34,  4.64it/s]Decoding:  84%|████████▍ | 839/998 [02:40<00:34,  4.59it/s]Decoding:  84%|████████▍ | 840/998 [02:40<00:35,  4.49it/s]Decoding:  84%|████████▍ | 842/998 [02:40<00:31,  5.02it/s]Decoding:  84%|████████▍ | 843/998 [02:40<00:35,  4.38it/s]Decoding:  85%|████████▍ | 845/998 [02:41<00:36,  4.17it/s]Decoding:  85%|████████▍ | 846/998 [02:41<00:31,  4.86it/s]Decoding:  85%|████████▍ | 847/998 [02:41<00:31,  4.87it/s]Decoding:  85%|████████▍ | 848/998 [02:41<00:26,  5.74it/s]Decoding:  85%|████████▌ | 849/998 [02:42<00:32,  4.57it/s]Decoding:  85%|████████▌ | 850/998 [02:42<00:29,  4.97it/s]Decoding:  85%|████████▌ | 851/998 [02:42<00:37,  3.92it/s]Decoding:  85%|████████▌ | 852/998 [02:43<00:44,  3.30it/s]Decoding:  85%|████████▌ | 853/998 [02:43<00:38,  3.79it/s]Decoding:  86%|████████▌ | 854/998 [02:43<00:45,  3.16it/s]Decoding:  86%|████████▌ | 855/998 [02:43<00:39,  3.66it/s]Decoding:  86%|████████▌ | 856/998 [02:44<00:36,  3.91it/s]Decoding:  86%|████████▌ | 857/998 [02:44<00:44,  3.16it/s]Decoding:  86%|████████▌ | 858/998 [02:44<00:43,  3.18it/s]Decoding:  86%|████████▌ | 859/998 [02:45<00:37,  3.66it/s]Decoding:  86%|████████▌ | 860/998 [02:45<00:35,  3.90it/s]Decoding:  86%|████████▋ | 861/998 [02:45<00:32,  4.22it/s]Decoding:  86%|████████▋ | 863/998 [02:45<00:26,  5.12it/s]Decoding:  87%|████████▋ | 865/998 [02:45<00:22,  5.85it/s]Decoding:  87%|████████▋ | 866/998 [02:46<00:21,  6.22it/s]Decoding:  87%|████████▋ | 868/998 [02:46<00:18,  7.08it/s]Decoding:  87%|████████▋ | 869/998 [02:46<00:22,  5.83it/s]Decoding:  87%|████████▋ | 870/998 [02:46<00:19,  6.58it/s]Decoding:  87%|████████▋ | 871/998 [02:46<00:20,  6.24it/s]Decoding:  87%|████████▋ | 872/998 [02:46<00:20,  6.21it/s]Decoding:  88%|████████▊ | 874/998 [02:47<00:18,  6.82it/s]Decoding:  88%|████████▊ | 875/998 [02:47<00:24,  5.11it/s]Decoding:  88%|████████▊ | 876/998 [02:47<00:26,  4.63it/s]Decoding:  88%|████████▊ | 877/998 [02:47<00:28,  4.24it/s]Decoding:  88%|████████▊ | 878/998 [02:48<00:26,  4.51it/s]Decoding:  88%|████████▊ | 880/998 [02:48<00:20,  5.70it/s]Decoding:  88%|████████▊ | 882/998 [02:48<00:16,  7.22it/s]Decoding:  89%|████████▊ | 884/998 [02:48<00:13,  8.33it/s]Decoding:  89%|████████▉ | 886/998 [02:49<00:20,  5.44it/s]Decoding:  89%|████████▉ | 887/998 [02:49<00:21,  5.21it/s]Decoding:  89%|████████▉ | 888/998 [02:49<00:28,  3.89it/s]Decoding:  89%|████████▉ | 890/998 [02:50<00:28,  3.83it/s]Decoding:  89%|████████▉ | 892/998 [02:50<00:22,  4.72it/s]Decoding:  89%|████████▉ | 893/998 [02:50<00:19,  5.49it/s]Decoding:  90%|████████▉ | 895/998 [02:51<00:18,  5.56it/s]Decoding:  90%|████████▉ | 896/998 [02:51<00:24,  4.10it/s]Decoding:  90%|████████▉ | 897/998 [02:51<00:21,  4.64it/s]Decoding:  90%|█████████ | 899/998 [02:51<00:18,  5.31it/s]Decoding:  90%|█████████ | 901/998 [02:52<00:17,  5.59it/s]Decoding:  90%|█████████ | 902/998 [02:52<00:18,  5.29it/s]Decoding:  90%|█████████ | 903/998 [02:52<00:21,  4.47it/s]Decoding:  91%|█████████ | 904/998 [02:53<00:26,  3.56it/s]Decoding:  91%|█████████ | 906/998 [02:53<00:19,  4.60it/s]Decoding:  91%|█████████ | 907/998 [02:53<00:17,  5.20it/s]Decoding:  91%|█████████ | 908/998 [02:53<00:22,  3.95it/s]Decoding:  91%|█████████ | 909/998 [02:53<00:21,  4.19it/s]Decoding:  91%|█████████ | 910/998 [02:54<00:20,  4.33it/s]Decoding:  91%|█████████▏| 912/998 [02:54<00:16,  5.37it/s]Decoding:  91%|█████████▏| 913/998 [02:54<00:18,  4.56it/s]Decoding:  92%|█████████▏| 915/998 [02:55<00:19,  4.30it/s]Decoding:  92%|█████████▏| 916/998 [02:55<00:19,  4.12it/s]Decoding:  92%|█████████▏| 918/998 [02:55<00:16,  4.80it/s]Decoding:  92%|█████████▏| 919/998 [02:55<00:16,  4.71it/s]Decoding:  92%|█████████▏| 920/998 [02:56<00:14,  5.45it/s]Decoding:  92%|█████████▏| 921/998 [02:56<00:12,  6.01it/s]Decoding:  92%|█████████▏| 922/998 [02:56<00:12,  5.89it/s]Decoding:  92%|█████████▏| 923/998 [02:56<00:16,  4.43it/s]Decoding:  93%|█████████▎| 924/998 [02:56<00:15,  4.63it/s]Decoding:  93%|█████████▎| 925/998 [02:57<00:14,  5.15it/s]Decoding:  93%|█████████▎| 927/998 [02:57<00:12,  5.70it/s]Decoding:  93%|█████████▎| 929/998 [02:57<00:09,  7.16it/s]Decoding:  93%|█████████▎| 931/998 [02:57<00:08,  7.49it/s]Decoding:  93%|█████████▎| 933/998 [02:58<00:10,  6.13it/s]Decoding:  94%|█████████▎| 935/998 [02:58<00:08,  7.11it/s]Decoding:  94%|█████████▍| 936/998 [02:58<00:11,  5.44it/s]Decoding:  94%|█████████▍| 937/998 [02:58<00:10,  6.10it/s]Decoding:  94%|█████████▍| 938/998 [02:58<00:12,  4.90it/s]Decoding:  94%|█████████▍| 939/998 [02:59<00:12,  4.71it/s]Decoding:  94%|█████████▍| 940/998 [02:59<00:16,  3.43it/s]Decoding:  94%|█████████▍| 942/998 [02:59<00:13,  4.05it/s]Decoding:  94%|█████████▍| 943/998 [03:00<00:11,  4.69it/s]Decoding:  95%|█████████▍| 944/998 [03:00<00:12,  4.16it/s]Decoding:  95%|█████████▍| 945/998 [03:00<00:15,  3.31it/s]Decoding:  95%|█████████▍| 946/998 [03:01<00:17,  2.90it/s]Decoding:  95%|█████████▍| 947/998 [03:01<00:17,  2.93it/s]Decoding:  95%|█████████▌| 949/998 [03:01<00:13,  3.64it/s]Decoding:  95%|█████████▌| 950/998 [03:02<00:13,  3.63it/s]Decoding:  95%|█████████▌| 952/998 [03:02<00:11,  3.86it/s]Decoding:  95%|█████████▌| 953/998 [03:02<00:13,  3.38it/s]Decoding:  96%|█████████▌| 954/998 [03:03<00:10,  4.18it/s]Decoding:  96%|█████████▌| 956/998 [03:03<00:08,  5.09it/s]Decoding:  96%|█████████▌| 958/998 [03:03<00:06,  6.00it/s]Decoding:  96%|█████████▌| 960/998 [03:03<00:06,  6.17it/s]Decoding:  96%|█████████▋| 961/998 [03:04<00:07,  5.13it/s]Decoding:  96%|█████████▋| 962/998 [03:04<00:07,  4.95it/s]Decoding:  96%|█████████▋| 963/998 [03:04<00:09,  3.63it/s]Decoding:  97%|█████████▋| 964/998 [03:04<00:08,  4.10it/s]Decoding:  97%|█████████▋| 965/998 [03:04<00:06,  4.98it/s]Decoding:  97%|█████████▋| 967/998 [03:05<00:05,  5.95it/s]Decoding:  97%|█████████▋| 968/998 [03:05<00:06,  4.56it/s]Decoding:  97%|█████████▋| 970/998 [03:05<00:05,  5.22it/s]Decoding:  97%|█████████▋| 971/998 [03:06<00:05,  4.81it/s]Decoding:  97%|█████████▋| 972/998 [03:06<00:05,  5.01it/s]Decoding:  98%|█████████▊| 974/998 [03:06<00:04,  5.38it/s]Decoding:  98%|█████████▊| 976/998 [03:06<00:03,  6.00it/s]Decoding:  98%|█████████▊| 977/998 [03:06<00:03,  6.59it/s]Decoding:  98%|█████████▊| 978/998 [03:07<00:03,  6.63it/s]Decoding:  98%|█████████▊| 979/998 [03:07<00:02,  7.35it/s]Decoding:  98%|█████████▊| 981/998 [03:07<00:02,  7.70it/s]Decoding:  98%|█████████▊| 982/998 [03:07<00:02,  5.96it/s]Decoding:  98%|█████████▊| 983/998 [03:07<00:02,  6.73it/s]Decoding:  99%|█████████▊| 985/998 [03:07<00:01,  6.87it/s]Decoding:  99%|█████████▉| 987/998 [03:08<00:01,  6.95it/s]Decoding:  99%|█████████▉| 988/998 [03:08<00:02,  4.63it/s]Decoding:  99%|█████████▉| 989/998 [03:08<00:01,  4.55it/s]Decoding:  99%|█████████▉| 991/998 [03:09<00:01,  5.21it/s]Decoding:  99%|█████████▉| 992/998 [03:09<00:01,  4.71it/s]Decoding:  99%|█████████▉| 993/998 [03:09<00:01,  3.94it/s]Decoding: 100%|█████████▉| 994/998 [03:09<00:00,  4.43it/s]Decoding: 100%|█████████▉| 995/998 [03:10<00:00,  4.94it/s]Decoding: 100%|█████████▉| 996/998 [03:10<00:00,  5.28it/s]Decoding: 100%|█████████▉| 997/998 [03:10<00:00,  5.38it/s]Decoding: 100%|██████████| 998/998 [03:10<00:00,  6.14it/s]
+BLEU = 5.57, 29.3/8.0/3.2/1.3 (BP=1.000, ratio=1.049, hyp_len=22656, ref_len=21604)

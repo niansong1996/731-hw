@@ -1,0 +1,127 @@
+save results to work_dir
+GeForce GTX 1080
+Done loading train data for az-en parallel translation
+Done loading dev data for az-en parallel translation
+Model initializing...
+begin Maximum Likelihood training
+<class 'torch.Tensor'> torch.Size([8, 7])
+<class 'torch.Tensor'> torch.Size([3, 8])
+<class 'torch.Tensor'> torch.Size([3, 8])
+<class 'torch.Tensor'> torch.Size([3, 8])
+<class 'torch.Tensor'> torch.Size([3, 8])
+<class 'torch.Tensor'> torch.Size([526336, 3])
+<class 'torch.Tensor'> torch.Size([526336, 3])
+<class 'torch.Tensor'> torch.Size([2625536, 3])
+<class 'torch.Tensor'> torch.Size([11026432, 3])
+<class 'torch.Tensor'> torch.Size([20000, 256])
+<class 'torch.Tensor'> torch.Size([20000, 256])
+<class 'torch.Tensor'> torch.Size([20000, 256])
+<class 'torch.Tensor'> torch.Size([20000, 256])
+<class 'torch.Tensor'> torch.Size([20000, 256])
+<class 'torch.Tensor'> torch.Size([20000, 256])
+<class 'torch.Tensor'> torch.Size([20000, 256])
+save currently the best model to [work_dir/tune-az-model.bin]
+##########epoch 1, iter 50, avg. loss 41.59, avg. ppl 2.25 cum. examples 1600, speed 6959.71 words/sec, time elapsed 11.77 sec
+##########epoch 1, iter 100, avg. loss 39.60, avg. ppl 2.02 cum. examples 3200, speed 7676.81 words/sec, time elapsed 23.48 sec
+##########epoch 1, iter 150, avg. loss 38.55, avg. ppl 1.99 cum. examples 4770, speed 7561.75 words/sec, time elapsed 35.11 sec
+##########epoch 2, iter 200, avg. loss 34.75, avg. ppl 1.89 cum. examples 6370, speed 7549.25 words/sec, time elapsed 46.64 sec
+##########epoch 2, iter 250, avg. loss 28.93, avg. ppl 1.52 cum. examples 7970, speed 8207.60 words/sec, time elapsed 60.18 sec
+##########epoch 2, iter 300, avg. loss 31.81, avg. ppl 1.61 cum. examples 9540, speed 7958.28 words/sec, time elapsed 73.29 sec
+##########epoch 2, iter 350, avg. loss 27.40, avg. ppl 1.55 cum. examples 11140, speed 8020.97 words/sec, time elapsed 85.76 sec
+##########epoch 3, iter 400, avg. loss 20.46, avg. ppl 1.39 cum. examples 12740, speed 7889.65 words/sec, time elapsed 98.35 sec
+##########epoch 3, iter 450, avg. loss 20.44, avg. ppl 1.34 cum. examples 14340, speed 8250.89 words/sec, time elapsed 111.72 sec
+##########epoch 3, iter 500, avg. loss 25.89, avg. ppl 1.52 cum. examples 15940, speed 7833.29 words/sec, time elapsed 124.42 sec
+##########epoch 4, iter 550, avg. loss 15.46, avg. ppl 1.27 cum. examples 17510, speed 8125.29 words/sec, time elapsed 136.77 sec
+##########epoch 4, iter 600, avg. loss 13.79, avg. ppl 1.24 cum. examples 19080, speed 8126.64 words/sec, time elapsed 149.37 sec
+##########epoch 4, iter 650, avg. loss 15.69, avg. ppl 1.28 cum. examples 20680, speed 8035.85 words/sec, time elapsed 162.03 sec
+##########epoch 4, iter 700, avg. loss 16.66, avg. ppl 1.30 cum. examples 22280, speed 7912.92 words/sec, time elapsed 174.77 sec
+##########epoch 5, iter 750, avg. loss 17.33, avg. ppl 1.27 cum. examples 23880, speed 8258.59 words/sec, time elapsed 188.79 sec
+##########epoch 5, iter 800, avg. loss 13.25, avg. ppl 1.22 cum. examples 25450, speed 7963.53 words/sec, time elapsed 201.74 sec
+##########epoch 5, iter 850, avg. loss 15.74, avg. ppl 1.29 cum. examples 27050, speed 7898.79 words/sec, time elapsed 214.21 sec
+##########epoch 6, iter 900, avg. loss 10.35, avg. ppl 1.18 cum. examples 28650, speed 7953.19 words/sec, time elapsed 226.51 sec
+##########epoch 6, iter 950, avg. loss 10.59, avg. ppl 1.17 cum. examples 30250, speed 8145.22 words/sec, time elapsed 239.65 sec
+##########epoch 6, iter 1000, avg. loss 11.62, avg. ppl 1.21 cum. examples 31820, speed 7827.44 words/sec, time elapsed 251.90 sec
+epoch 6, iter 1000, cum. loss 22.50, cum. ppl 1.43 cum. examples 31820
+begin validation ... size 1
+validation: iter 1000, dev. ppl 6.637443
+save currently the best model to [work_dir/tune-az-model.bin]
+##########epoch 6, iter 1050, avg. loss 13.10, avg. ppl 1.22 cum. examples 1600, speed 6344.43 words/sec, time elapsed 268.60 sec
+##########epoch 7, iter 1100, avg. loss 12.44, avg. ppl 1.21 cum. examples 3200, speed 7916.48 words/sec, time elapsed 281.78 sec
+##########epoch 7, iter 1150, avg. loss 7.94, avg. ppl 1.14 cum. examples 4800, speed 7882.52 words/sec, time elapsed 294.32 sec
+##########epoch 7, iter 1200, avg. loss 10.15, avg. ppl 1.17 cum. examples 6400, speed 7942.02 words/sec, time elapsed 307.02 sec
+##########epoch 8, iter 1250, avg. loss 8.34, avg. ppl 1.13 cum. examples 7970, speed 8192.06 words/sec, time elapsed 319.92 sec
+##########epoch 8, iter 1300, avg. loss 8.88, avg. ppl 1.14 cum. examples 9540, speed 7948.01 words/sec, time elapsed 332.96 sec
+##########epoch 8, iter 1350, avg. loss 5.65, avg. ppl 1.09 cum. examples 11140, speed 8031.00 words/sec, time elapsed 345.36 sec
+##########epoch 8, iter 1400, avg. loss 10.72, avg. ppl 1.17 cum. examples 12740, speed 8075.25 words/sec, time elapsed 358.62 sec
+##########epoch 9, iter 1450, avg. loss 8.61, avg. ppl 1.14 cum. examples 14340, speed 8123.02 words/sec, time elapsed 371.99 sec
+##########epoch 9, iter 1500, avg. loss 6.53, avg. ppl 1.10 cum. examples 15910, speed 8220.72 words/sec, time elapsed 385.37 sec
+##########epoch 9, iter 1550, avg. loss 7.61, avg. ppl 1.14 cum. examples 17510, speed 7649.51 words/sec, time elapsed 397.50 sec
+##########epoch 9, iter 1600, avg. loss 5.82, avg. ppl 1.10 cum. examples 19110, speed 7990.29 words/sec, time elapsed 410.08 sec
+##########epoch 10, iter 1650, avg. loss 6.53, avg. ppl 1.10 cum. examples 20710, speed 7913.47 words/sec, time elapsed 423.34 sec
+##########epoch 10, iter 1700, avg. loss 7.28, avg. ppl 1.12 cum. examples 22280, speed 7890.83 words/sec, time elapsed 436.01 sec
+##########epoch 10, iter 1750, avg. loss 4.14, avg. ppl 1.07 cum. examples 23880, speed 8070.49 words/sec, time elapsed 448.53 sec
+##########epoch 11, iter 1800, avg. loss 5.59, avg. ppl 1.09 cum. examples 25480, speed 8026.17 words/sec, time elapsed 461.41 sec
+##########epoch 11, iter 1850, avg. loss 4.77, avg. ppl 1.07 cum. examples 27050, speed 8115.43 words/sec, time elapsed 474.27 sec
+##########epoch 11, iter 1900, avg. loss 4.62, avg. ppl 1.07 cum. examples 28650, speed 8149.80 words/sec, time elapsed 487.54 sec
+##########epoch 11, iter 1950, avg. loss 5.83, avg. ppl 1.10 cum. examples 30250, speed 7839.09 words/sec, time elapsed 500.11 sec
+##########epoch 12, iter 2000, avg. loss 4.24, avg. ppl 1.06 cum. examples 31850, speed 8221.28 words/sec, time elapsed 513.74 sec
+epoch 12, iter 2000, cum. loss 7.44, cum. ppl 1.12 cum. examples 31850
+begin validation ... size 1
+validation: iter 2000, dev. ppl 10.661236
+hit patience 1
+##########epoch 12, iter 2050, avg. loss 3.62, avg. ppl 1.06 cum. examples 1600, speed 7801.80 words/sec, time elapsed 527.45 sec
+##########epoch 12, iter 2100, avg. loss 3.97, avg. ppl 1.07 cum. examples 3170, speed 7852.57 words/sec, time elapsed 539.59 sec
+##########epoch 13, iter 2150, avg. loss 5.99, avg. ppl 1.10 cum. examples 4770, speed 7793.69 words/sec, time elapsed 551.98 sec
+##########epoch 13, iter 2200, avg. loss 4.47, avg. ppl 1.07 cum. examples 6370, speed 8048.84 words/sec, time elapsed 565.09 sec
+##########epoch 13, iter 2250, avg. loss 3.24, avg. ppl 1.05 cum. examples 7940, speed 8053.24 words/sec, time elapsed 577.70 sec
+##########epoch 13, iter 2300, avg. loss 4.50, avg. ppl 1.07 cum. examples 9540, speed 8093.51 words/sec, time elapsed 590.85 sec
+##########epoch 14, iter 2350, avg. loss 3.42, avg. ppl 1.06 cum. examples 11110, speed 7709.81 words/sec, time elapsed 603.22 sec
+##########epoch 14, iter 2400, avg. loss 3.38, avg. ppl 1.06 cum. examples 12710, speed 7909.02 words/sec, time elapsed 615.76 sec
+##########epoch 14, iter 2450, avg. loss 3.64, avg. ppl 1.06 cum. examples 14310, speed 8167.43 words/sec, time elapsed 628.93 sec
+##########epoch 15, iter 2500, avg. loss 2.90, avg. ppl 1.04 cum. examples 15910, speed 8158.12 words/sec, time elapsed 641.86 sec
+##########epoch 15, iter 2550, avg. loss 4.06, avg. ppl 1.07 cum. examples 17510, speed 7907.86 words/sec, time elapsed 654.55 sec
+##########epoch 15, iter 2600, avg. loss 2.26, avg. ppl 1.04 cum. examples 19110, speed 7935.99 words/sec, time elapsed 666.93 sec
+##########epoch 15, iter 2650, avg. loss 3.85, avg. ppl 1.06 cum. examples 20710, speed 8180.62 words/sec, time elapsed 680.60 sec
+##########epoch 16, iter 2700, avg. loss 2.33, avg. ppl 1.04 cum. examples 22250, speed 8055.21 words/sec, time elapsed 692.99 sec
+##########epoch 16, iter 2750, avg. loss 2.37, avg. ppl 1.04 cum. examples 23850, speed 8087.17 words/sec, time elapsed 705.95 sec
+nmt.py:140: UserWarning: torch.nn.utils.clip_grad_norm is now deprecated in favor of torch.nn.utils.clip_grad_norm_.
+  torch.nn.utils.clip_grad_norm(model.parameters(), clip_grad)
+Traceback (most recent call last):
+  File "nmt.py", line 293, in <module>
+    main()
+  File "nmt.py", line 285, in main
+    train(args)
+  File "nmt.py", line 139, in train
+    loss.backward()
+  File "/home/anthony/anaconda3/envs/pytorch/lib/python3.6/site-packages/torch/tensor.py", line 93, in backward
+    torch.autograd.backward(self, gradient, retain_graph, create_graph)
+  File "/home/anthony/anaconda3/envs/pytorch/lib/python3.6/site-packages/torch/autograd/__init__.py", line 90, in backward
+    allow_unreachable=True)  # allow_unreachable flag
+KeyboardInterrupt
+GeForce GTX 1080
+load model from work_dir/tune-az-model.bin
+Traceback (most recent call last):
+  File "nmt.py", line 293, in <module>
+    main()
+  File "nmt.py", line 287, in main
+    decode(args)
+  File "nmt.py", line 258, in decode
+    model = MultiNMT.load(model_path)
+  File "/home/anthony/Code/731-hw/multilingual/MultiMT.py", line 156, in load
+    return torch.load(model_path)
+  File "/home/anthony/anaconda3/envs/pytorch/lib/python3.6/site-packages/torch/serialization.py", line 358, in load
+    return _load(f, map_location, pickle_module)
+  File "/home/anthony/anaconda3/envs/pytorch/lib/python3.6/site-packages/torch/serialization.py", line 542, in _load
+    result = unpickler.load()
+  File "/home/anthony/anaconda3/envs/pytorch/lib/python3.6/site-packages/torch/serialization.py", line 508, in persistent_load
+    data_type(size), location)
+  File "/home/anthony/anaconda3/envs/pytorch/lib/python3.6/site-packages/torch/serialization.py", line 104, in default_restore_location
+    result = fn(storage, location)
+  File "/home/anthony/anaconda3/envs/pytorch/lib/python3.6/site-packages/torch/serialization.py", line 86, in _cuda_deserialize
+    return obj.cuda(device)
+  File "/home/anthony/anaconda3/envs/pytorch/lib/python3.6/site-packages/torch/_utils.py", line 76, in _cuda
+    return new_type(self.size()).copy_(self, non_blocking)
+  File "/home/anthony/anaconda3/envs/pytorch/lib/python3.6/site-packages/torch/cuda/__init__.py", line 495, in _lazy_new
+    return super(_CudaBase, cls).__new__(cls, *args, **kwargs)
+KeyboardInterrupt
+tune.sh: line 47: work_dir/tune-az-result.txt: No such file or directory
