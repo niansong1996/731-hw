@@ -162,10 +162,10 @@ class MultiNMT(nn.Module):
         for i in range(num_layers):
             params_in_group = []
             input_size = input_size if i == 0 else hidden_size
-            params_in_group.append((4 * hidden_size, input_size))
-            params_in_group.append((4 * hidden_size, hidden_size))
-            params_in_group.append((4 * hidden_size, 1))
-            params_in_group.append((4 * hidden_size, 1))
+            params_in_group.append((input_size, 4 * hidden_size))
+            params_in_group.append((hidden_size, 4 * hidden_size))
+            params_in_group.append((1, 4 * hidden_size))
+            params_in_group.append((1, 4 * hidden_size))
 
             params_in_lstm.append(params_in_group)
 

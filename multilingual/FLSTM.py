@@ -10,16 +10,16 @@ from utils import assert_tensor_size
 def unpack_weight(weight, input_size, hidden_size):
     assert (weight.shape == (4 * hidden_size * (input_size + hidden_size + 1 + 1), 1))
 
-    W_x_shape = (4 * hidden_size, input_size)
-    W_h_shape = (4 * hidden_size, hidden_size)
-    b_x_shape = (4 * hidden_size, 1)
-    b_h_shape = (4 * hidden_size, 1)
+    W_x_shape = (input_size, 4 * hidden_size)
+    W_h_shape = (hidden_size, 4 * hidden_size)
+    b_x_shape = (1, 4 * hidden_size)
+    b_h_shape = (1, 4 * hidden_size)
 
     W_x_0 = 0
     W_x_1 = W_x_shape[0] * W_x_shape[1]
     W_h_1 = W_x_1 + W_h_shape[0] * W_h_shape[1]
-    b_x_1 = W_h_1 + b_x_shape[0]
-    b_h_1 = b_x_1 + b_h_shape[0]
+    b_x_1 = W_h_1 + b_x_shape[0] * b_x_shape[1]
+    b_h_1 = b_x_1 + b_h_shape[0] * b_h_shape[1]
 
     W_x = weight[W_x_0:W_x_1].reshape(W_x_shape)
     W_h = weight[W_x_1:W_h_1].reshape(W_h_shape)
@@ -86,10 +86,10 @@ class FLSTMCell:
         # init the size constants
         self.input_size = input_size
         self.hidden_size = hidden_size
-        W_x_shape = [4 * hidden_size, input_size]
-        W_h_shape = [4 * hidden_size, hidden_size]
-        b_x_shape = [4 * hidden_size, 1]
-        b_h_shape = [4 * hidden_size, 1]
+        W_x_shape = [input_size, 4 * hidden_size]
+        W_h_shape = [hidden_size, 4 * hidden_size]
+        b_x_shape = [1, 4 * hidden_size]
+        b_h_shape = [1, 4 * hidden_size]
         # init the weights BY REFRENCE
         W_x, W_h, b_x, b_h = weights
         assert_tensor_size(W_x, W_x_shape)
@@ -105,24 +105,24 @@ class FLSTMCell:
         """
         Performs a step of LSTM
 
-        :param X: input embedding shape = [batch_size, embed_size]
+        :param X: input embedding shape = [batch_size, input_size]
         :param c_0: cell state shape = [batch_size, hidden_size]
         :param h_0: hidden state shape = [batch_size, hidden_size]
         :param weights: W_x, W_h, b_x, b_h
 
         :return: (h_1, c_1) next cell state and hidden state shape = [batch_size, hidden_size]
         """
-        batch_size = X.shape[0]
         hidden_size = h_0.shape[1]
 
-        # (4*hidden_size, batch_size)  =  (4*hidden_size, input_size) * (batch_size, input_size)^{T}
-        W_x_h_b = torch.mm(self.W_x, X.transpose(0, 1)) + torch.mm(self.W_h, h_0.transpose(0, 1)) + self.b_x + self.b_h
+        # [batch_size, 4*hidden_size]  =  [batch_size, input_size] * [input_size, 4*hidden_size]
+        #                                  + [batch_size, hidden_size] * [hidden_size, 4*hidden_size]
+        W_x_h_b = torch.mm(X, self.W_x) + torch.mm(h_0, self.W_h) + self.b_x + self.b_h
 
         # (batch_size, hidden_size)
-        i = torch.sigmoid(W_x_h_b[0:hidden_size]).transpose(0, 1)
-        f = torch.sigmoid(W_x_h_b[hidden_size:2 * hidden_size]).transpose(0, 1)
-        g = torch.tanh(W_x_h_b[2 * hidden_size:3 * hidden_size]).transpose(0, 1)
-        o = torch.sigmoid(W_x_h_b[3 * hidden_size:4 * hidden_size]).transpose(0, 1)
+        i = torch.sigmoid(W_x_h_b[:, 0:hidden_size])
+        f = torch.sigmoid(W_x_h_b[:, hidden_size:2 * hidden_size])
+        g = torch.tanh(W_x_h_b[:, 2 * hidden_size:3 * hidden_size])
+        o = torch.sigmoid(W_x_h_b[:, 3 * hidden_size:4 * hidden_size])
 
         # (batch_size, hidden_size)
         c_1 = f * c_0 + i * g
