@@ -24,7 +24,7 @@ class Decoder:
         self.Wa, self.Wc, self.Ws = attn_weights[0]
         self.log_softmax = nn.LogSoftmax(dim=1)
         self.softmax = nn.Softmax(dim=2)
-        self.criterion = nn.NLLLoss()
+        self.criterion = nn.NLLLoss(ignore_index=Vocab.PAD_ID)
         self.tanh = nn.Tanh()
         self.dropout_rate = dropout_rate
         self.dropout = nn.Dropout(p=self.dropout_rate)
