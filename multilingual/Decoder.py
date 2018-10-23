@@ -75,8 +75,6 @@ class Decoder:
         h_t, c_t, attn = self.init_decoder_step_input(decoder_init_state)
         # dim = (batch_size, sent_len, embed_size)
         tgt_sent_embed = self.embedding(tgt_sent_idx)
-        # cumulative count of pads
-        cum_mask = torch.zeros(self.batch_size, device=device)
         top_subwords = [[] for _ in range(self.batch_size)]
         # skip the '<s>' in the tgt_sents since the output starts from the word after '<s>'
         for i in range(1, tgt_sent_idx.shape[1]):
@@ -88,10 +86,8 @@ class Decoder:
             # dim = (batch_size)
             target_word_indices = tgt_sent_idx[:, i].reshape(self.batch_size)
             score_delta = self.criterion(softmax_output, target_word_indices)
-            # flag <pad> as 1 and add it to cumulative masks
-            cum_mask += torch.where((target_word_indices == Vocab.EOS_ID), one_mask, zero_mask)
-            # mask the </s> after the first one, which are used like <pad>
-            pad_mask = torch.where((cum_mask > 1), zero_mask, one_mask)
+            # mask the <pad> with zero
+            pad_mask = torch.where((target_word_indices == Vocab.PAD_ID), zero_mask, one_mask)
             masked_score_delta = score_delta * pad_mask
             # update scores
             scores = scores + masked_score_delta
