@@ -81,6 +81,12 @@ def decode_corpus_ids(lang_name: str, sents: List[List[int]]) -> List[List[str]]
     return decoded_sents
 
 
+def decode_sent_ids(lang_name: str, sent: List[int]) -> List[str]:
+    sp = spm.SentencePieceProcessor()
+    sp.Load('subword_files/%s.model' % lang_name)
+    return sp.DecodeIds(sent)
+
+
 if __name__ == '__main__':
     args = docopt(__doc__)
 

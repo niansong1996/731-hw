@@ -9,6 +9,7 @@ import numpy as np
 import io
 import torch.tensor as Tensor
 
+from config import LANG_NAMES
 from vocab import Vocab
 
 LangPair = namedtuple('LangPair', ['src', 'tgt'])
@@ -37,6 +38,22 @@ def read_corpus(file_path, source):
         sent = line.strip().split(' ')
         # only append <s> and </s> to the target sentence
         if source == 'tgt':
+            sent = ['<s>'] + sent + ['</s>']
+        data.append(sent)
+
+    return data
+
+
+def read_corpus(src_lang_idx: int, tgt_lang_idx: int, data_type: str, is_tgt: bool):
+    src_lang = LANG_NAMES[src_lang_idx]
+    tgt_lang = LANG_NAMES[tgt_lang_idx]
+    lang = tgt_lang if is_tgt else src_lang
+    file_path = 'data/%s.%s-%s.%s.txt' % (data_type, tgt_lang, src_lang, lang)
+    data = []
+    for line in open(file_path, encoding="utf-8"):
+        sent = line.strip().split(' ')
+        # only append <s> and </s> to the target sentence
+        if is_tgt:
             sent = ['<s>'] + sent + ['</s>']
         data.append(sent)
 

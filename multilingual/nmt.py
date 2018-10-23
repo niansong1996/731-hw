@@ -48,8 +48,8 @@ from tqdm import tqdm
 
 from MultiMT import Hypothesis, MultiNMT
 from config import device, LANG_INDICES
-from subword import get_corpus_pairs, get_corpus_ids, decode_corpus_ids
-from utils import batch_iter, PairedData, LangPair
+from subword import get_corpus_pairs, get_corpus_ids, decode_corpus_ids, decode_sent_ids
+from utils import batch_iter, PairedData, LangPair, read_corpus
 
 
 def compute_corpus_level_bleu_score(references: List[List[str]], hypotheses: List[Hypothesis]) -> float:
@@ -179,6 +179,14 @@ def train(args: Dict[str, str]):
                     model.eval()
                     # compute dev. ppl and bleu
                     dev_ppl = model.evaluate_ppl(dev_data, batch_size=128)  # dev batch size can be a bit larger
+                    dev_data_src, _ = get_corpus_ids(src_lang, tgt_lang, data_type='dev', is_tgt=False, is_train=False)
+                    hypotheses = beam_search(model, dev_data_src, src_lang, tgt_lang,
+                                             beam_size=1, max_decoding_time_step=int(args['--max-decoding-time-step']))
+
+                    top_hypotheses = [Hypothesis(decode_sent_ids(hyps[0].value), hyps[0].score) for hyps in hypotheses]
+                    dev_target_text = read_corpus(src_lang, tgt_lang, 'dev', True)
+                    bleu_score = compute_corpus_level_bleu_score(dev_target_text, top_hypotheses)
+                    print(f'################ Corpus BLEU: {bleu_score} ###########################')
                     # set model back to training mode
                     model.train()
                     valid_metric = -dev_ppl
@@ -233,6 +241,26 @@ def beam_search(model: MultiNMT, test_data_src: List[List[int]], src_lang: int, 
         hypotheses.append(example_hyps)
 
     return hypotheses
+
+
+def compute_corpus_level_bleu_score(references: List[List[str]], hypotheses: List[Hypothesis]) -> float:
+    """
+    Given decoding results and reference sentences, compute corpus-level BLEU score
+
+    Args:
+        references: a list of gold-standard reference target sentences
+        hypotheses: a list of hypotheses, one for each reference
+
+    Returns:
+        bleu_score: corpus-level BLEU score
+    """
+    if references[0][0] == '<s>':
+        references = [ref[1:-1] for ref in references]
+
+    bleu_score = corpus_bleu([[ref] for ref in references],
+                             [hyp.value for hyp in hypotheses])
+
+    return bleu_score
 
 
 def decode(args: Dict[str, str]):

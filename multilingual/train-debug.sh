@@ -9,7 +9,8 @@ decode=${name_prefix}"-result.txt"
 test_tgt="data/test.en-az.en.txt"
 mkdir -p ${work_dir}
 echo save results to ${work_dir}
-
+git log -1
+git diff
 python nmt.py \
     train \
     --langs 'az-en,be-en'\
