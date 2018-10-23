@@ -69,7 +69,7 @@ def get_corpus_ids(src_lang_idx: int, tgt_lang_idx: int, data_type: str, is_tgt:
     return sents, long_sent_in_src
 
 
-def decode_corpus_ids(lang_name: str, sents: List[List[int]]) -> List[List[str]]:
+def decode_corpus_ids(lang_name: str, sents: List[List[int]]) -> List[str]:
     sp = spm.SentencePieceProcessor()
     sp.Load('subword_files/%s.model' % lang_name)
 
@@ -81,7 +81,7 @@ def decode_corpus_ids(lang_name: str, sents: List[List[int]]) -> List[List[str]]
     return decoded_sents
 
 
-def decode_sent_ids(lang_name: str, sent: List[int]) -> List[str]:
+def decode_sent_ids(lang_name: str, sent: List[int]) -> str:
     sp = spm.SentencePieceProcessor()
     sp.Load('subword_files/%s.model' % lang_name)
     return sp.DecodeIds(sent)

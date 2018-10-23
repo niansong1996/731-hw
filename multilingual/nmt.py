@@ -47,7 +47,7 @@ from nltk.translate.bleu_score import corpus_bleu
 from tqdm import tqdm
 
 from MultiMT import Hypothesis, MultiNMT
-from config import device, LANG_INDICES
+from config import device, LANG_INDICES, LANG_NAMES
 from subword import get_corpus_pairs, get_corpus_ids, decode_corpus_ids, decode_sent_ids
 from utils import batch_iter, PairedData, LangPair, read_corpus
 
@@ -183,7 +183,8 @@ def train(args: Dict[str, str]):
                     hypotheses = beam_search(model, dev_data_src, src_lang, tgt_lang,
                                              beam_size=1, max_decoding_time_step=int(args['--max-decoding-time-step']))
 
-                    top_hypotheses = [Hypothesis(decode_sent_ids(hyps[0].value), hyps[0].score) for hyps in hypotheses]
+                    top_hypotheses = [Hypothesis(decode_sent_ids(LANG_NAMES[tgt_lang], hyps[0].value).split(' '),
+                                                 hyps[0].score) for hyps in hypotheses]
                     dev_target_text = read_corpus(src_lang, tgt_lang, 'dev', True)
                     bleu_score = compute_corpus_level_bleu_score(dev_target_text, top_hypotheses)
                     print(f'################ Corpus BLEU: {bleu_score} ###########################')
