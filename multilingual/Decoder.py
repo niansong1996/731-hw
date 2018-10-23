@@ -11,7 +11,7 @@ from vocab import Vocab
 
 
 class Decoder:
-    def __init__(self, batch_size, embed_size, hidden_size, num_layers,
+    def __init__(self, vocab_size, batch_size, embed_size, hidden_size, num_layers,
                  embedding: nn.Embedding, lstm_weights: List[List[Tensor]], attn_weights: List[List[Tensor]],
                  dropout_rate=0):
         self.embedding = embedding
@@ -24,7 +24,9 @@ class Decoder:
         self.Wa, self.Wc, self.Ws = attn_weights[0]
         self.log_softmax = nn.LogSoftmax(dim=1)
         self.softmax = nn.Softmax(dim=2)
-        self.criterion = nn.NLLLoss()
+        weights = torch.ones(vocab_size)
+        weights[Vocab.PAD_ID] = 0
+        self.criterion = nn.NLLLoss(weight=weights)
         self.tanh = nn.Tanh()
         self.dropout_rate = dropout_rate
         self.dropout = nn.Dropout(p=self.dropout_rate)
@@ -70,8 +72,6 @@ class Decoder:
         # dim = (batch_size, embed_size)
         decoder_input = self.init_input
         scores = torch.zeros(self.batch_size, device=device)
-        zero_mask = torch.zeros(self.batch_size, device=device)
-        one_mask = torch.ones(self.batch_size, device=device)
         h_t, c_t, attn = self.init_decoder_step_input(decoder_init_state)
         # dim = (batch_size, sent_len, embed_size)
         tgt_sent_embed = self.embedding(tgt_sent_idx)
@@ -86,11 +86,8 @@ class Decoder:
             # dim = (batch_size)
             target_word_indices = tgt_sent_idx[:, i].reshape(self.batch_size)
             score_delta = self.criterion(softmax_output, target_word_indices)
-            # mask the <pad> with zero
-            pad_mask = torch.where((target_word_indices == Vocab.PAD_ID), zero_mask, one_mask)
-            masked_score_delta = score_delta * pad_mask
             # update scores
-            scores = scores + masked_score_delta
+            scores = scores + score_delta
             # dim = (batch_size, embed_size)
             decoder_input = tgt_sent_embed[:, i, :]
         return scores, top_subwords

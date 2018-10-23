@@ -48,8 +48,7 @@ class MultiNMT(nn.Module):
         # init CPG
         self.cpg = CPG(self.param_shapes, args)
 
-    def forward(self, src_lang: int, tgt_lang: int, src_sents: List[List[int]], tgt_sents: List[List[int]]) \
-            -> Tensor:
+    def forward(self, src_lang: int, tgt_lang: int, src_sents: List[List[int]], tgt_sents: List[List[int]]) -> Tensor:
         """
         Takes in a batch of paired src and tgt sentences with lang tags, return the loss
 
@@ -92,10 +91,11 @@ class MultiNMT(nn.Module):
                           enc_weights, num_layer=self.num_layers)
         return encoder(src_sent_idx)
 
-    def get_decoder(self, tgt_lang: int, batch_size: int, grouped_params: List[List[Tensor]]) -> Decoder:
+    def get_decoder(self, tgt_lang: int, batch_size: int, grouped_params: List[List[Tensor]])\
+            -> Decoder:
         dec_lstm_weights = grouped_params[self.enc_shapes_len:self.enc_shapes_len + self.dec_lstm_shapes_len]
         attn_weights = grouped_params[self.enc_shapes_len + self.dec_lstm_shapes_len:]
-        return Decoder(batch_size, self.embed_size, self.decoder_hidden_size, self.num_layers,
+        return Decoder(self.vocab_size, batch_size, self.embed_size, self.decoder_hidden_size, self.num_layers,
                        self.cpg.get_embedding(tgt_lang), dec_lstm_weights, attn_weights)
 
     def beam_search(self, src_sent: List[int], src_lang: int, tgt_lang: int, beam_size: int=5,
