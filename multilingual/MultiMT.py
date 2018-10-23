@@ -48,13 +48,6 @@ class MultiNMT(nn.Module):
         # init CPG
         self.cpg = CPG(self.param_shapes, args)
 
-        # load subword models
-        self.sps = []
-        for i in range(len(LANG_INDICES)):
-            sp = spm.SentencePieceProcessor()
-            sp.Load('subword_files/%s.model' % LANG_INDICES[i])
-            self.sps.append(sp)
-
     def forward(self, src_lang: int, tgt_lang: int, src_sents: List[List[int]], tgt_sents: List[List[int]]) \
             -> Tensor:
         """
@@ -155,10 +148,6 @@ class MultiNMT(nn.Module):
                     break
             return [c[0] for c in hypotheses_cand]
 
-    def decode_sent_ids(lang_name: str, sent: List[int]) -> str:
-        sp = self.sps[LANG_NAMES[lang_name]] 
-        return sp.DecodeIds(sent)
-
     def save(self, path: str):
         torch.save(self, path)
 
@@ -195,13 +184,17 @@ class MultiNMT(nn.Module):
         """
         cum_loss = 0.
         cum_tgt_words = 0.
+        output = []
+        all_tgt_sents = []
         with torch.no_grad():
             for src_lang, tgt_lang, src_sents, tgt_sents in batch_iter(dev_data, batch_size):
-                loss = self(src_lang, tgt_lang, src_sents, tgt_sents).sum()
-                cum_loss += loss
+                loss, best_sents = self(src_lang, tgt_lang, src_sents, tgt_sents)
+                output += best_sents
+                all_tgt_sents += tgt_sents
+                cum_loss += loss.sum()
                 tgt_word_num_to_predict = sum(len(s[1:]) for s in tgt_sents)  # omitting the leading `<s>`
                 cum_tgt_words += tgt_word_num_to_predict
 
             ppl = np.exp(cum_loss / cum_tgt_words)
 
-            return ppl
+            return ppl, output, all_tgt_sents

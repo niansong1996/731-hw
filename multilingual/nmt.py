@@ -45,6 +45,7 @@ import torch
 from docopt import docopt
 from nltk.translate.bleu_score import corpus_bleu
 from tqdm import tqdm
+import sentencepiece as spm
 
 from MultiMT import Hypothesis, MultiNMT
 from config import device, LANG_INDICES, LANG_NAMES
@@ -118,7 +119,11 @@ def train(args: Dict[str, str]):
     # TODO: [remove this] temporaily save inited model for testing
     model.save(model_save_path)
     print('save currently the best model to [%s]' % model_save_path)
-
+    sps = []
+    sp = spm.SentencePieceProcessor()
+    for i in range(len(LANG_NAMES)):
+        sp.Load('subword_files/%s.model' % LANG_NAMES[i])
+        sps.append(sp)
 
     while True:
         epoch += 1
@@ -133,7 +138,7 @@ def train(args: Dict[str, str]):
             # start training routine
             #torch.cuda.empty_cache()
             optimizer.zero_grad()
-            loss_v = model(src_lang, tgt_lang, src_sents, tgt_sents)
+            loss_v, _ = model(src_lang, tgt_lang, src_sents, tgt_sents)
             loss = torch.sum(loss_v)
             loss.backward()
             torch.nn.utils.clip_grad_norm(model.parameters(), clip_grad)
@@ -178,15 +183,14 @@ def train(args: Dict[str, str]):
                     # set model to evaluate mode
                     model.eval()
                     # compute dev. ppl and bleu
-                    dev_ppl = model.evaluate_ppl(dev_data, batch_size=128)  # dev batch size can be a bit larger
+                    # dev batch size can be a bit larger
+                    dev_ppl, output, tgt_sents = model.evaluate_ppl(dev_data, batch_size=128)
                     dev_data_src, _ = get_corpus_ids(src_lang, tgt_lang, data_type='dev', is_tgt=False, is_train=False)
-                    hypotheses = beam_search(model, dev_data_src, src_lang, tgt_lang,
-                                             beam_size=1, max_decoding_time_step=int(args['--max-decoding-time-step']))
-
-                    top_hypotheses = [Hypothesis(decode_sent_ids(LANG_NAMES[tgt_lang], hyps[0].value).split(' '),
-                                                 hyps[0].score) for hyps in hypotheses]
-                    dev_target_text = read_corpus(src_lang, tgt_lang, 'dev', True)
-                    bleu_score = compute_corpus_level_bleu_score(dev_target_text, top_hypotheses)
+                    top_hypotheses = [Hypothesis(sps[tgt_lang].DecodeIds(sent).split(' '), 1)
+                                      for sent in output]
+                    bleu_score = \
+                        compute_corpus_level_bleu_score([sps[tgt_lang].DecodeIds(sent).split(' ')
+                                                         for sent in tgt_sents], top_hypotheses)
                     print(f'################ Corpus BLEU: {bleu_score} ###########################')
                     # set model back to training mode
                     model.train()

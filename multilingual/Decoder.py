@@ -77,10 +77,14 @@ class Decoder:
         tgt_sent_embed = self.embedding(tgt_sent_idx)
         # cumulative count of pads
         cum_mask = torch.zeros(self.batch_size, device=device)
+        top_subwords = [[] for _ in range(self.batch_size)]
         # skip the '<s>' in the tgt_sents since the output starts from the word after '<s>'
         for i in range(1, tgt_sent_idx.shape[1]):
             decoder_input = self.dropout(decoder_input)
             h_t, c_t, softmax_output, attn = self.decoder_step(src_encodings, decoder_input, h_t, c_t, attn)
+            _, top_id = torch.topk(softmax_output, 1, dim=1)
+            for j in range(self.batch_size):
+                top_subwords[j].append(int(top_id[j]))
             # dim = (batch_size)
             target_word_indices = tgt_sent_idx[:, i].reshape(self.batch_size)
             score_delta = self.criterion(softmax_output, target_word_indices)
@@ -93,7 +97,7 @@ class Decoder:
             scores = scores + masked_score_delta
             # dim = (batch_size, embed_size)
             decoder_input = tgt_sent_embed[:, i, :]
-        return scores
+        return scores, top_subwords
 
     def decoder_step(self, src_encodings: Tensor, decoder_input: Tensor, h_t: Tensor, c_t: Tensor, attn: Tensor)\
             -> (Tensor, Tensor, Tensor, Tensor):
