@@ -27,7 +27,7 @@ python nmt.py \
     --valid-niter 1200 \
     --lr 0.001 \
     --log-every 50 \
-    --batch-size 128 \
+    --batch-size 64 \
     --hidden-size 512 \
     --max-epoch 100 \
     --embed-size 300 \

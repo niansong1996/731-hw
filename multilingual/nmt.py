@@ -105,7 +105,8 @@ def train(args: Dict[str, str]):
     num_trial = 0
     train_iter = patience = cum_loss = report_loss = cumulative_tgt_words = report_tgt_words = 0
     cumulative_examples = report_examples = epoch = valid_num = 0
-    hist_valid_scores = []
+    # hist_valid_scores = []
+    hist_bleu = []
     train_time = begin_time = time.time()
     print('begin Maximum Likelihood training')
 
@@ -194,12 +195,13 @@ def train(args: Dict[str, str]):
                     print(f'################ Corpus BLEU: {bleu_score} ###########################')
                     # set model back to training mode
                     model.train()
-                    valid_metric = -dev_ppl
+                    # valid_metric = -dev_ppl
 
                     print('validation: iter %d, dev. ppl %f' % (train_iter, dev_ppl))
 
-                    is_better = len(hist_valid_scores) == 0 or valid_metric > max(hist_valid_scores)
-                    hist_valid_scores.append(valid_metric)
+                    # is_better = len(hist_valid_scores) == 0 or valid_metric > max(hist_valid_scores)
+                    is_better = len(hist_bleu) == 0 or bleu_score > max(hist_bleu)
+                    hist_bleu.append(bleu_score)
 
                     if is_better:
                         patience = 0
