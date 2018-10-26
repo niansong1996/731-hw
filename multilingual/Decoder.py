@@ -24,11 +24,11 @@ class Decoder:
         self.Wa, self.Wc, self.Ws = attn_weights[0]
         self.log_softmax = nn.LogSoftmax(dim=1)
         self.softmax = nn.Softmax(dim=2)
-        self.criterion = nn.NLLLoss()
+        
+        self.criterion = nn.NLLLoss(ignore_index=3, reduce=False)
         self.tanh = nn.Tanh()
         self.dropout_rate = dropout_rate
         self.dropout = nn.Dropout(p=self.dropout_rate)
-        self.DECODER_PAD_IDX = decoder_pad_idx
         sos_batch = torch.tensor([Vocab.SOS_ID for _ in range(batch_size)], dtype=torch.long).to(device)
         self.init_input = embedding(sos_batch)
 
@@ -83,11 +83,10 @@ class Decoder:
             # dim = (batch_size)
             target_word_indices = tgt_sent_idx[:, i].reshape(self.batch_size)
             score_delta = self.criterion(softmax_output, target_word_indices)
+            assert score_delta.shape[0] == self.batch_size
             # mask '<pad>' with 0
-            pad_mask = torch.where((target_word_indices == self.DECODER_PAD_IDX), zero_mask, one_mask)
-            masked_score_delta = score_delta * pad_mask
             # update scores
-            scores = scores + masked_score_delta
+            scores = scores + score_delta
             # dim = (batch_size, embed_size)
             decoder_input = tgt_sent_embed[:, i, :]
         return scores

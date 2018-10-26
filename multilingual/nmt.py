@@ -9,6 +9,8 @@ Usage:
 
 Options:
     -h --help                               show this screen.
+    --tune                                  load the model and begin tuning
+    --pretrain-model=<file>                 the directory of the pretrained model
     --langs=<src-tgt,...>                   comma separated language pairs <src-tgt>
     --cuda                                  use GPU
     --vocab-size=<int>                      vocab size [default: 20000]
@@ -100,6 +102,8 @@ def train(args: Dict[str, str]):
     # initialize the model
     print('Model initializing...')
     model = MultiNMT(args).to(device)
+    if args['--tune']:
+        model = model.load(args['--pretrain-model'])
 
     num_trial = 0
     train_iter = patience = cum_loss = report_loss = cumulative_tgt_words = report_tgt_words = 0

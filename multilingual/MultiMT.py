@@ -153,7 +153,10 @@ class MultiNMT(nn.Module):
 
     @staticmethod
     def load(model_path: str):
-        return torch.load(model_path)
+        loaded_model = torch.load(model_path)
+        #for param in loaded_model.cpg.word_embeddings.parameters():
+        #    param.requires_grad = False
+        return loaded_model
 
     @staticmethod
     def get_shapes_flstm(input_size, hidden_size, num_layers):
