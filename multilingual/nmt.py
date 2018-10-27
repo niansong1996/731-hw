@@ -140,7 +140,7 @@ def train(args: Dict[str, str]):
             loss_v = model(src_lang, tgt_lang, src_sents, tgt_sents)
             loss = torch.sum(loss_v)
             loss.backward()
-            torch.nn.utils.clip_grad_norm(model.parameters(), clip_grad)
+            torch.nn.utils.clip_grad_norm_(model.parameters(), clip_grad)
             optimizer.step()
 
             report_loss += float(loss)
