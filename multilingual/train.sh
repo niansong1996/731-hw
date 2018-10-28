@@ -17,7 +17,7 @@ python nmt.py \
     --langs 'az-en,be-en,gl-en,tr-en,ru-en,pt-en'\
     --lang-embed-size 8\
     --cuda \
-    --vocab-size 25000 \
+    --vocab-size 10000 \
     --save-to ${work_dir}/${model_name} \
     --save-opt ${work_dir}/optimizer.bin \
     --valid-niter 1000 \
