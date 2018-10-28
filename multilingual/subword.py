@@ -48,7 +48,7 @@ def get_corpus_ids(src_lang_idx: int, tgt_lang_idx: int, data_type: str, is_tgt:
     sp.Load('subword_files/%s.model' % lang)
 
     # read corpus for corpus
-    file_path = 'data/%s.%s-%s.%s.txt' % (data_type, tgt_lang, src_lang, lang)
+    file_path = 'data/%s.%s-%s.%s.txt' % (data_type, src_lang, tgt_lang, lang)
     line_count = 0
     long_sent_in_src = set()
     for line in open(file_path, encoding="utf-8"):

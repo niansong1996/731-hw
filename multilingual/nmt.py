@@ -90,7 +90,7 @@ def train(args: Dict[str, str]):
     lang_pairs = args['--langs']
     langs = [p.split('-') for p in lang_pairs.split(',')]
     train_data = get_data_pairs(langs, 'train')
-    dev_data = get_data_pairs(langs, 'dev')
+    dev_data = get_data_pairs(langs[0:3], 'dev')
 
     train_batch_size = int(args['--batch-size'])
     clip_grad = float(args['--clip-grad'])
