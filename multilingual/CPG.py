@@ -46,7 +46,7 @@ class CPG(nn.Module):
 
     def create_embed_layer(self, lang_idx, non_trainable=False):
         lang = LANG_NAMES[lang_idx]
-        fin = io.open('embed/%s.wiki.bpe.op25000.d300.w2v.txt' % lang, 'r', encoding='utf-8', newline='\n',
+        fin = io.open('embed/%s.wiki.bpe.op10000.d300.w2v.txt' % lang, 'r', encoding='utf-8', newline='\n',
                       errors='ignore')
         n, d = map(int, fin.readline().split())
         weights_matrix = np.zeros((n, d))

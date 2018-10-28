@@ -53,8 +53,8 @@ if __name__ == '__main__':
     lang_pairs = sys.argv[1].split(",")
     for pair in lang_pairs:
         lang1, lang2 = pair.split("-")
-        lang1_dictionary = FastVector(vector_file='embed/%s.wiki.bpe.op25000.d300.w2v.txt' % lang1)
-        lang2_dictionary = FastVector(vector_file='embed/%s.wiki.bpe.op25000.d300.w2v.txt' % lang2)
+        lang1_dictionary = FastVector(vector_file='embed/%s.wiki.bpe.op10000.d300.w2v.txt' % lang1)
+        lang2_dictionary = FastVector(vector_file='embed/%s.wiki.bpe.op10000.d300.w2v.txt' % lang2)
 
         lang1_words = set(lang2_dictionary.word2id.keys())
         lang2_words = set(lang1_dictionary.word2id.keys())
@@ -68,5 +68,5 @@ if __name__ == '__main__':
         # learn and apply the transformation
         transform = learn_transformation(source_matrix, target_matrix)
         lang1_dictionary.apply_transform(transform)
-        lang1_dictionary.export('embed/%s.wiki.bpe.op25000.d300.w2v.txt' % lang1)
+        lang1_dictionary.export('embed/%s.wiki.bpe.op10000.d300.w2v.txt' % lang1)
 
