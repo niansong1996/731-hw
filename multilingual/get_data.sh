@@ -18,6 +18,7 @@ cat data/train.en-az.en.txt \
     data/train.en-ru.en.txt \
     data/train.en-pt.en.txt > data/en_mono.txt
 cat data/train.en-az.az.txt data/az.wiki.txt > data/az_mono.txt
+cat data/train.en-az.az.txt data/train.en-tr.tr.txt > data/train.en-az.az.txt
 cat data/train.en-be.be.txt data/be.wiki.txt > data/be_mono.txt
 cat data/train.en-gl.gl.txt data/gl.wiki.txt > data/gl_mono.txt
 cat data/train.en-tr.tr.txt > data/tr_mono.txt

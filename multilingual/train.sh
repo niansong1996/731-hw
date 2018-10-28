@@ -12,7 +12,7 @@ echo save results to ${work_dir}
 
 python nmt.py \
     train \
-    --langs 'az-en,be-en,gl-en,tr-en,ru-en,pt-en'\
+    --langs 'az-en,be-en,gl-en,ru-en,pt-en'\
     --lang-embed-size 8\
     --cuda \
     --vocab-size 20000 \
