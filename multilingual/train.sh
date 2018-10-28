@@ -1,21 +1,23 @@
 #!/bin/sh
 
-vocab="data/vocab.bin"
+bash get_data.sh
 
 work_dir="work_dir"
-name_prefix="multi-lang"
+name_prefix="embed"
 model_name=${name_prefix}"-model.bin"
 decode=${name_prefix}"-result.txt"
 test_tgt="data/test.en-az.en.txt"
 mkdir -p ${work_dir}
 echo save results to ${work_dir}
 
+python align_vec.py 'az-tr,be-ru,gl-pt'
+
 python nmt.py \
     train \
     --langs 'az-en,be-en,gl-en,tr-en,ru-en,pt-en'\
     --lang-embed-size 8\
     --cuda \
-    --vocab-size 20000 \
+    --vocab-size 25000 \
     --save-to ${work_dir}/${model_name} \
     --save-opt ${work_dir}/optimizer.bin \
     --valid-niter 1000 \
@@ -26,13 +28,16 @@ python nmt.py \
     --low-rank 3 \
     --num-layers 1 \
     --max-epoch 100 \
-    --embed-size 256 \
+    --embed-size 300 \
     --uniform-init 0.1 \
     --dropout 0.2 \
     --clip-grad 5.0 \
     --lr-decay 0.5 \
     --patience 3
 # 2>${work_dir}/err.log
+
+src="az"
+tgt="en"
 
 python nmt.py \
     decode \
@@ -42,6 +47,6 @@ python nmt.py \
     ${work_dir}/${model_name} \
     az \
     en \
-    ${work_dir}/${decode}
+    ${work_dir}/${src}"-"${tgt}"-"${decode}
 
 perl multi-bleu.perl ${test_tgt} < ${work_dir}/${decode}

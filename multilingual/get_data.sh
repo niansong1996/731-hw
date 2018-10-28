@@ -5,32 +5,48 @@ if [ ! -d "./data" ]; then
     wget http://phontron.com/class/mtandseq2seq2018/assets/data/cs11731-assignment2-v1.zip
     unzip cs11731-assignment2-v1.zip
     unzip assignment-2/data.zip
-    unzip assignment-2/wikis.zip
-    cp wikis/* data/
+    # clean up
+    rm -rf wikis
+    rm -rf assignment-2
+    rm cs11731-assignment2-v1.zip
 fi
 
-
-# combine monolingual sentences
-cat data/train.en-az.en.txt \
-    data/train.en-be.en.txt \
-    data/train.en-gl.en.txt \
-    data/train.en-tr.en.txt \
-    data/train.en-ru.en.txt \
-    data/train.en-pt.en.txt > data/en_mono.txt
-cat data/train.en-az.az.txt data/az.wiki.txt > data/az_mono.txt
-cat data/train.en-be.be.txt data/be.wiki.txt > data/be_mono.txt
-cat data/train.en-gl.gl.txt data/gl.wiki.txt > data/gl_mono.txt
-cat data/train.en-tr.tr.txt > data/tr_mono.txt
-cat data/train.en-ru.ru.txt > data/ru_mono.txt
-cat data/train.en-pt.pt.txt > data/pt_mono.txt
-
-# clean up
-rm -rf wikis
-rm -rf assignment-2
-rm cs11731-assignment2-v1.zip
-
-
-
-
-
-
+if [ ! -d "./embed" ]; then
+    mkdir embed
+    cd embed
+    wget http://cosyne.h-its.org/bpemb/data/az/az.wiki.bpe.op25000.model
+    wget http://cosyne.h-its.org/bpemb/data/az/az.wiki.bpe.op25000.d300.w2v.txt.tar.gz
+    tar -xvzf az.wiki.bpe.op25000.d300.w2v.txt.tar.gz
+    rm az.wiki.bpe.op25000.d300.w2v.txt.tar.gz
+    
+    wget http://cosyne.h-its.org/bpemb/data/be/be.wiki.bpe.op25000.model
+    wget http://cosyne.h-its.org/bpemb/data/be/be.wiki.bpe.op25000.d300.w2v.txt.tar.gz
+    tar -xvzf be.wiki.bpe.op25000.d300.w2v.txt.tar.gz
+    rm be.wiki.bpe.op25000.d300.w2v.txt.tar.gz
+    
+    wget http://cosyne.h-its.org/bpemb/data/gl/gl.wiki.bpe.op25000.model
+    wget http://cosyne.h-its.org/bpemb/data/gl/gl.wiki.bpe.op25000.d300.w2v.txt.tar.gz
+    tar -xvzf gl.wiki.bpe.op25000.d300.w2v.txt.tar.gz
+    rm gl.wiki.bpe.op25000.d300.w2v.txt.tar.gz
+    
+    wget http://cosyne.h-its.org/bpemb/data/tr/tr.wiki.bpe.op25000.model
+    wget http://cosyne.h-its.org/bpemb/data/tr/tr.wiki.bpe.op25000.d300.w2v.txt.tar.gz
+    tar -xvzf tr.wiki.bpe.op25000.d300.w2v.txt.tar.gz
+    rm tr.wiki.bpe.op25000.d300.w2v.txt.tar.gz
+    
+    wget http://cosyne.h-its.org/bpemb/data/ru/ru.wiki.bpe.op25000.model
+    wget http://cosyne.h-its.org/bpemb/data/ru/ru.wiki.bpe.op25000.d300.w2v.txt.tar.gz
+    tar -xvzf ru.wiki.bpe.op25000.d300.w2v.txt.tar.gz
+    rm ru.wiki.bpe.op25000.d300.w2v.txt.tar.gz
+    
+    wget http://cosyne.h-its.org/bpemb/data/pt/pt.wiki.bpe.op25000.model
+    wget http://cosyne.h-its.org/bpemb/data/pt/pt.wiki.bpe.op25000.d300.w2v.txt.tar.gz
+    tar -xvzf pt.wiki.bpe.op25000.d300.w2v.txt.tar.gz
+    rm pt.wiki.bpe.op25000.d300.w2v.txt.tar.gz
+    
+    wget http://cosyne.h-its.org/bpemb/data/en/en.wiki.bpe.op25000.model
+    wget http://cosyne.h-its.org/bpemb/data/en/en.wiki.bpe.op25000.d300.w2v.txt.tar.gz
+    tar -xvzf en.wiki.bpe.op25000.d300.w2v.txt.tar.gz
+    rm en.wiki.bpe.op25000.d300.w2v.txt.tar.gz
+    cd ../
+fi

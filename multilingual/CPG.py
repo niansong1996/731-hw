@@ -7,6 +7,8 @@ from functools import reduce
 from config import device
 
 from config import LANG_NAMES
+import numpy as np
+import io
 
 
 class CPG(nn.Module):
@@ -36,12 +38,26 @@ class CPG(nn.Module):
         self.Ws = nn.ModuleList([nn.Linear(self.low_rank, self.group_param_sizes[i], bias=False) for i in range(self.group_num)])
 
         # init language embeddings
-        self.word_embeddings = nn.ModuleList([nn.Embedding(self.vocab_size, self.word_embed_size)
-                                              for _ in range(num_lang)])
+        self.word_embeddings = nn.ModuleList([self.create_embed_layer(i) for i in range(num_lang)])
 
         # initialize the parameters using uniform distribution
         for param in self.parameters():
             nn.init.uniform_(param.data, a=-0.1, b=0.1)
+
+    def create_embed_layer(self, lang_idx, non_trainable=False):
+        lang = LANG_NAMES[lang_idx]
+        fin = io.open('embed/%s.wiki.bpe.op25000.d300.w2v.txt' % lang, 'r', encoding='utf-8', newline='\n',
+                      errors='ignore')
+        n, d = map(int, fin.readline().split())
+        weights_matrix = np.zeros((n, d))
+        for i, line in enumerate(fin):
+            tokens = line.rstrip().split(' ')
+            weights_matrix[i] = np.array(tokens[1:]).astype(np.float)
+        emb_layer = nn.Embedding(n, self.word_embed_size)
+        emb_layer.weight = nn.Parameter(torch.from_numpy(weights_matrix).float())
+        if non_trainable:
+            emb_layer.weight.requires_grad = False
+        return emb_layer
 
     @staticmethod
     def get_param_meta(shapes: List[List[Tuple[int]]]):

@@ -117,5 +117,6 @@ work_dir/
 
 # data
 multilingual/data
+multilingual/embed
 nmt/data
 nmt/tutorial/data

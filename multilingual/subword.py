@@ -45,7 +45,7 @@ def get_corpus_ids(src_lang_idx: int, tgt_lang_idx: int, data_type: str, is_tgt:
 
     # load the subword models for encoding these sents to indices
     sp = spm.SentencePieceProcessor()
-    sp.Load('subword_files/%s.model' % lang)
+    sp.Load('embed/%s.wiki.bpe.op25000.model' % lang)
 
     # read corpus for corpus
     file_path = 'data/%s.%s-%s.%s.txt' % (data_type, tgt_lang, src_lang, lang)
@@ -71,7 +71,7 @@ def get_corpus_ids(src_lang_idx: int, tgt_lang_idx: int, data_type: str, is_tgt:
 
 def decode_corpus_ids(lang_name: str, sents: List[List[int]]) -> List[List[str]]:
     sp = spm.SentencePieceProcessor()
-    sp.Load('subword_files/%s.model' % lang_name)
+    sp.Load('embed/%s.wiki.bpe.op25000.model' % lang_name)
 
     decoded_sents = []
     for line in sents:
