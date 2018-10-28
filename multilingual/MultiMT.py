@@ -9,7 +9,7 @@ import torch.tensor as Tensor
 from CPG import CPG
 from Decoder import Decoder
 from Encoder import Encoder
-from config import device
+from config import device, LANG_PAIRS
 from utils import batch_iter, PairedData, sents_to_tensor, assert_tensor_size
 from vocab import Vocab
 
@@ -74,7 +74,7 @@ class MultiNMT(nn.Module):
 
     def get_grouped_params(self, src_lang: int, tgt_lang: int) -> List[List[Tensor]]:
         # create a list of language indices corresponding each param group
-        langs = [src_lang for _ in range(self.enc_shapes_len)] + [tgt_lang for _ in range(self.dec_shapes_len)]
+        langs = [LANG_PAIRS[src_lang] for _ in range(self.enc_shapes_len)] + [tgt_lang for _ in range(self.dec_shapes_len)]
         return self.cpg.get_params(langs)
 
     def encode(self, batch_size: int, src_sent_idx: Tensor, src_lang: int, grouped_params: List[List[Tensor]]) \

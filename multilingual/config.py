@@ -12,4 +12,9 @@ LANG_NAMES = {0: 'en',
               2: 'be', 5: 'ru',
               3: 'gl', 6: 'pt'}
 
+LANG_PAIRS = {0: 0,
+              1: 1, 4: 1,
+              2: 2, 5: 2,
+              3: 3, 6: 3}
+
 LANG_INDICES = {v: k for k, v in LANG_NAMES.items()}
