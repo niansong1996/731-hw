@@ -6,7 +6,9 @@ work_dir="work_dir"
 name_prefix="embed"
 model_name=${name_prefix}"-model.bin"
 decode=${name_prefix}"-result.txt"
-test_tgt="data/test.en-az.en.txt"
+src="az"
+tgt="en"
+test_tgt="data/test.en-${src}.en.txt"
 mkdir -p ${work_dir}
 echo save results to ${work_dir}
 
@@ -36,8 +38,6 @@ python nmt.py \
     --patience 3
 # 2>${work_dir}/err.log
 
-src="az"
-tgt="en"
 
 python nmt.py \
     decode \
@@ -45,8 +45,8 @@ python nmt.py \
     --beam-size 5 \
     --max-decoding-time-step 100 \
     ${work_dir}/${model_name} \
-    az \
-    en \
+    ${src} \
+    ${tgt} \
     ${work_dir}/${src}"-"${tgt}"-"${decode}
 
-perl multi-bleu.perl ${test_tgt} < ${work_dir}/${decode}
+perl multi-bleu.perl ${test_tgt} < ${work_dir}/${src}"-"${tgt}"-"${decode}
