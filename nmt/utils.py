@@ -20,7 +20,7 @@ def input_transpose(sents, pad_token):
     return sents_t
 
 
-def read_corpus(file_path, source, skip_long=True, long_sent=None):
+def read_corpus(file_path, source, skip_long=True, long_sent=set()):
     data = []
     line_count = 0
     long_sent_in_src = set()

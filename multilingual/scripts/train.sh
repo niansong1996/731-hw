@@ -1,6 +1,5 @@
 #!/bin/sh
 
-vocab="data/vocab.bin"
 train_src="data/train.de-en.de.wmixerprep"
 train_tgt="data/train.de-en.en.wmixerprep"
 dev_src="data/valid.de-en.de"
