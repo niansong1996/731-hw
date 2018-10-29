@@ -162,14 +162,15 @@ class NMT(nn.Module):
         padded_embedding = self.dropout(self.encoder_embed(sent_indices_padded))
         packed_seqs = pack_padded_sequence(padded_embedding, sent_length)
 
+        batch_size = len(src_sents)
         # h_n_.shape = c_n_.shape =  [num_layers * num_directions, batch_size, hidden_size]
         output, (h_n_, c_n_) = self.encoder_lstm(packed_seqs)
-        h_n_ = h_n_.view(self.NUM_LAYER, 2, -1, self.hidden_size)
-        c_n_ = c_n_.view(self.NUM_LAYER, 2, -1, self.hidden_size)
+        h_n_ = h_n_.view(self.NUM_LAYER, 2, batch_size, self.hidden_size)
+        c_n_ = c_n_.view(self.NUM_LAYER, 2, batch_size, self.hidden_size)
 
         # h_n.shape = c_n.shape =  [num_layers, batch_size, num_directions * hidden_size]
-        h_n = torch.cat((h_n_[:][0], h_n_[:][1]), dim=-1)
-        c_n = torch.cat((c_n_[:][0], c_n_[:][1]), dim=-1)
+        h_n = torch.cat((h_n_[0][0], h_n_[0][1]), dim=-1).unsqueeze(0)
+        c_n = torch.cat((c_n_[0][0], c_n_[0][1]), dim=-1).unsqueeze(0)
 
         # unpack the source encodings, src_encodings.shape = [max_src_len, batch_size, num_directions * hidden_size]
         src_encodings = pad_packed_sequence(output)[0]
@@ -594,7 +595,7 @@ def decode(args: Dict[str, str]):
     print(f"load model from {args['MODEL_PATH']}")
     model = NMT.load(args['MODEL_PATH'])
 
-    vocab = pickle.load(open('data/vocab.bin', 'rb'))
+    vocab = pickle.load(open('vocab.bin', 'rb'))
     model.vocab = vocab
     # set model to evaluate mode
     model.eval()
