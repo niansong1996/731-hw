@@ -86,7 +86,7 @@ class NMT(nn.Module):
         # could also change the units to GRU
         # src_weights_matrix = load_matrix("data/cc.400k.de.300.vec", self.vocab.src.word2id.keys(), self.embed_size)
         self.encoder_embed = nn.Embedding(self.src_vocab_size, self.embed_size)
-        self.NUM_LAYER = 2
+        self.NUM_LAYER = 1
         self.NUM_DIR = 2
         self.BIDIR = self.NUM_DIR == 2
 

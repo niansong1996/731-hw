@@ -30,9 +30,9 @@ python nmt.py \
     --lr 0.001 \
     --log-every 50 \
     --batch-size 128 \
-    --hidden-size 512 \
+    --hidden-size 256 \
     --max-epoch 100 \
-    --embed-size 300 \
+    --embed-size 256 \
     --uniform-init 0.1 \
     --dropout 0.2 \
     --clip-grad 5.0 \
