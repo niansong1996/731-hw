@@ -20,16 +20,24 @@ def input_transpose(sents, pad_token):
     return sents_t
 
 
-def read_corpus(file_path, source):
+def read_corpus(file_path, source, skip_long=True, long_sent=None):
     data = []
+    line_count = 0
+    long_sent_in_src = set()
     for line in open(file_path, encoding="utf-8"):
         sent = line.strip().split(' ')
+        line_count += 1
         # only append <s> and </s> to the target sentence
         if source == 'tgt':
+            if line_count in long_sent:
+                continue
             sent = ['<s>'] + sent + ['</s>']
+        else:
+            if skip_long and len(sent) > 50:
+                long_sent_in_src.add(line_count)
+                continue
         data.append(sent)
-
-    return data
+    return data, long_sent_in_src
 
 
 def batch_iter(data, batch_size, shuffle=True):
