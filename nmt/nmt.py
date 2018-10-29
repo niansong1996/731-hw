@@ -420,11 +420,11 @@ def compute_corpus_level_bleu_score(references: List[List[str]], hypotheses: Lis
 
 
 def train(args: Dict[str, str]):
-    train_data_src = read_corpus(args['--train-src'], source='src')
-    train_data_tgt = read_corpus(args['--train-tgt'], source='tgt')
+    train_data_src, train_long_sent = read_corpus(args['--train-src'], source='src')
+    train_data_tgt, _ = read_corpus(args['--train-tgt'], source='tgt', long_sent=train_long_sent)
 
-    dev_data_src = read_corpus(args['--dev-src'], source='src')
-    dev_data_tgt = read_corpus(args['--dev-tgt'], source='tgt')
+    dev_data_src, dev_long_sent = read_corpus(args['--dev-src'], source='src')
+    dev_data_tgt, _ = read_corpus(args['--dev-tgt'], source='tgt', long_sent=dev_long_sent)
 
     train_data = list(zip(train_data_src, train_data_tgt))
     dev_data = list(zip(dev_data_src, dev_data_tgt))
@@ -588,9 +588,9 @@ def decode(args: Dict[str, str]):
     If the target gold-standard sentences are given, the function also computes
     corpus-level BLEU score.
     """
-    test_data_src = read_corpus(args['TEST_SOURCE_FILE'], source='src')
+    test_data_src, _ = read_corpus(args['TEST_SOURCE_FILE'], source='src', skip_long=False)
     if args['TEST_TARGET_FILE']:
-        test_data_tgt = read_corpus(args['TEST_TARGET_FILE'], source='tgt')
+        test_data_tgt, _ = read_corpus(args['TEST_TARGET_FILE'], source='tgt', skip_long=False)
 
     print(f"load model from {args['MODEL_PATH']}")
     model = NMT.load(args['MODEL_PATH'])

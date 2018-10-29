@@ -125,8 +125,8 @@ if __name__ == '__main__':
     print('read in source sentences: %s' % args['--train-src'])
     print('read in target sentences: %s' % args['--train-tgt'])
 
-    src_sents = read_corpus(args['--train-src'], source='src')
-    tgt_sents = read_corpus(args['--train-tgt'], source='tgt')
+    src_sents, _ = read_corpus(args['--train-src'], source='src', skip_long=False)
+    tgt_sents, _ = read_corpus(args['--train-tgt'], source='tgt', skip_long=False)
 
     vocab = Vocab(src_sents, tgt_sents, int(args['--size']), int(args['--freq-cutoff']))
     print('generated vocabulary, source %d words, target %d words, decoder_dict %d items' \
