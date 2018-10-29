@@ -1,16 +1,18 @@
 #!/bin/sh
 
-vocab="data/vocab.bin"
-train_src="data/train.de-en.de.wmixerprep"
-train_tgt="data/train.de-en.en.wmixerprep"
-dev_src="data/valid.de-en.de"
-dev_tgt="data/valid.de-en.en"
-test_src="data/test.de-en.de"
-test_tgt="data/test.de-en.en"
+vocab="vocab.bin"
+train_src="train.en-az.az.txt"
+train_tgt="train.en-az.en.txt"
+dev_src="../multilingual/data/dev.en-az.az.txt"
+dev_tgt="../multilingual/data/dev.en-az.en.txt"
+test_src="../multilingual/data/test.en-az.az.txt"
+test_tgt="../multilingual/data/test.en-az.en.txt"
 
 work_dir="work_dir"
-model_name="model-drop-embed-dict-hidden.bin"
-decode="drop-embed-dict-hidden.txt"
+name_prefix="embed"
+model_name=${name_prefix}"-model.bin"
+decode=${name_prefix}"-result.txt"
+test_tgt="data/test.en-az.en.txt"
 mkdir -p ${work_dir}
 echo save results to ${work_dir}
 

@@ -77,22 +77,23 @@ class NMT(nn.Module):
         self.hidden_size = hidden_size
         self.dropout_rate = dropout_rate
         self.vocab = vocab
-        src_vocab_size = len(vocab.src)
+        self.src_vocab_size = len(vocab.src)
         self.tgt_vocab_size = len(vocab.tgt)
         self.DECODER_PAD_IDX = self.vocab.tgt.word2id['<pad>']
 
         # initialize neural network layers...
         # could add drop-out and bidirectional arguments
         # could also change the units to GRU
-        src_weights_matrix = load_matrix("data/cc.400k.de.300.vec", self.vocab.src.word2id.keys(), self.embed_size)
-        self.encoder_embed = self.create_emb_layer(src_vocab_size, src_weights_matrix)
+        # src_weights_matrix = load_matrix("data/cc.400k.de.300.vec", self.vocab.src.word2id.keys(), self.embed_size)
+        self.encoder_embed = nn.Embedding(self.src_vocab_size, self.embed_size)
         self.NUM_LAYER = 2
         self.NUM_DIR = 2
         self.BIDIR = self.NUM_DIR == 2
 
         self.encoder_lstm = nn.LSTM(embed_size, hidden_size, num_layers=self.NUM_LAYER, bidirectional=self.BIDIR)
-        tgt_weights_matrix = load_matrix("data/cc.400k.en.300.vec", self.vocab.tgt.word2id.keys(), self.embed_size)
-        self.decoder_embed = self.create_emb_layer(self.tgt_vocab_size, tgt_weights_matrix)
+        # tgt_weights_matrix = load_matrix("data/cc.400k.en.300.vec", self.vocab.tgt.word2id.keys(), self.embed_size)
+        self.decoder_embed = nn.Embedding(self.tgt_vocab_size, self.embed_size)
+
         decoder_hidden_size = self.NUM_DIR * hidden_size
         self.decoder_lstm = nn.LSTM(decoder_hidden_size + embed_size, decoder_hidden_size, num_layers=self.NUM_LAYER)
         # W_a for attention
