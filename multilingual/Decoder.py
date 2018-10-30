@@ -84,7 +84,6 @@ class Decoder:
             target_word_indices = tgt_sent_idx[:, i].reshape(self.batch_size)
             score_delta = self.criterion(softmax_output, target_word_indices)
             assert score_delta.shape[0] == self.batch_size
-            # mask '<pad>' with 0
             # update scores
             scores = scores + score_delta
             # dim = (batch_size, embed_size)
