@@ -61,9 +61,9 @@ python nmt.py \
     ${work_dir}/${model_name} \
     gl \
     en \
-    decode-pl.txt
+    decode-gl.txt
 
 
-perl multi-bleu.perl data/test.en-az.en.txt < decode-az.txt
-perl multi-bleu.perl data/test.en-be.en.txt < decode-be.txt
-perl multi-bleu.perl data/test.en-gl.en.txt < decode-gl.txt
+perl multi-bleu.perl data/test.az-en.en.txt < decode-az.txt
+perl multi-bleu.perl data/test.be-en.en.txt < decode-be.txt
+perl multi-bleu.perl data/test.gl-en.en.txt < decode-gl.txt
