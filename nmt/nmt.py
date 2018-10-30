@@ -4,9 +4,9 @@
 A very basic implementation of neural machine translation
 
 Usage:
-    nmt.py train --train-src=<file> --train-tgt=<file> --dev-src=<file> --dev-tgt=<file> --vocab=<file> [options]
-    nmt.py decode --vocab=<file> [options] MODEL_PATH TEST_SOURCE_FILE OUTPUT_FILE
-    nmt.py decode --vocab=<file> [options] MODEL_PATH TEST_SOURCE_FILE TEST_TARGET_FILE OUTPUT_FILE
+    nmt.py train --train-src=<file> --train-tgt=<file> --dev-src=<file> --dev-tgt=<file> [options]
+    nmt.py decode [options] MODEL_PATH TEST_SOURCE_FILE OUTPUT_FILE
+    nmt.py decode [options] MODEL_PATH TEST_SOURCE_FILE TEST_TARGET_FILE OUTPUT_FILE
 
 Options:
     -h --help                               show this screen.
@@ -15,7 +15,7 @@ Options:
     --train-tgt=<file>                      train target file
     --dev-src=<file>                        dev source file
     --dev-tgt=<file>                        dev target file
-    --vocab=<file>                          vocab file
+    --vocab-size=<int>                      vocab size
     --seed=<int>                            seed [default: 0]
     --batch-size=<int>                      batch size [default: 32]
     --embed-size=<int>                      embedding size [default: 256]
@@ -48,8 +48,8 @@ from docopt import docopt
 from tqdm import tqdm
 from nltk.translate.bleu_score import corpus_bleu, sentence_bleu, SmoothingFunction
 
+from subword import get_corpus_ids, decode_corpus_ids
 from utils import read_corpus, batch_iter, load_matrix
-from vocab import Vocab, VocabEntry
 from embed import corpus_to_indices, indices_to_corpus
 
 import torch
@@ -67,32 +67,33 @@ if torch.cuda.is_available():
 
 Hypothesis = namedtuple('Hypothesis', ['value', 'score'])
 
+UNK_ID = 0
+SOS_ID = 1
+EOS_ID = 2
+PAD_ID = 3
 
 class NMT(nn.Module):
 
-    def __init__(self, embed_size, hidden_size, vocab, dropout_rate=0.2):
+    def __init__(self, embed_size, vocab_size, hidden_size, dropout_rate=0.2):
         super(NMT, self).__init__()
 
         self.embed_size = embed_size
         self.hidden_size = hidden_size
+        self.vocab_size = vocab_size
         self.dropout_rate = dropout_rate
-        self.vocab = vocab
-        self.src_vocab_size = len(vocab.src)
-        self.tgt_vocab_size = len(vocab.tgt)
-        self.DECODER_PAD_IDX = self.vocab.tgt.word2id['<pad>']
 
         # initialize neural network layers...
         # could add drop-out and bidirectional arguments
         # could also change the units to GRU
         # src_weights_matrix = load_matrix("data/cc.400k.de.300.vec", self.vocab.src.word2id.keys(), self.embed_size)
-        self.encoder_embed = nn.Embedding(self.src_vocab_size, self.embed_size)
+        self.encoder_embed = nn.Embedding(self.vocab_size, self.embed_size)
         self.NUM_LAYER = 1
         self.NUM_DIR = 2
         self.BIDIR = self.NUM_DIR == 2
 
         self.encoder_lstm = nn.LSTM(embed_size, hidden_size, num_layers=self.NUM_LAYER, bidirectional=self.BIDIR)
         # tgt_weights_matrix = load_matrix("data/cc.400k.en.300.vec", self.vocab.tgt.word2id.keys(), self.embed_size)
-        self.decoder_embed = nn.Embedding(self.tgt_vocab_size, self.embed_size)
+        self.decoder_embed = nn.Embedding(self.vocab_size, self.embed_size)
 
         decoder_hidden_size = self.NUM_DIR * hidden_size
         self.decoder_lstm = nn.LSTM(decoder_hidden_size + embed_size, decoder_hidden_size, num_layers=self.NUM_LAYER)
@@ -104,12 +105,9 @@ class NMT(nn.Module):
         self.decoder_softmax = nn.Softmax(dim=2)
         self.dropout = nn.Dropout(p=self.dropout_rate)
         self.tanh = nn.Tanh()
-
-        weights = torch.ones(self.tgt_vocab_size)
-        weights[0] = 0
-        self.criterion = nn.NLLLoss(weight=weights)
+        self.criterion = nn.NLLLoss(ignore_index=PAD_ID, size_average=False)
         # W_s for attention
-        self.decoder_W_s = nn.Linear(decoder_hidden_size, self.tgt_vocab_size, bias=False)
+        self.decoder_W_s = nn.Linear(decoder_hidden_size, self.vocab_size, bias=False)
 
         # initialize the parameters using uniform distribution
         for param in self.parameters():
@@ -141,7 +139,7 @@ class NMT(nn.Module):
 
         return scores
 
-    def encode(self, src_sents: List[List[str]]) -> Tuple[Tensor, Any]:
+    def encode(self, src_sents: List[List[int]]) -> Tuple[Tensor, Any]:
         """
         Use a GRU/LSTM to encode source sentences into hidden states
 
@@ -156,7 +154,7 @@ class NMT(nn.Module):
         """
         # first the the vecotrized representation of the batch; dim = (batch_size, max_src_len)
         sent_length = torch.tensor([len(sent) for sent in src_sents]).to(device)
-        sent_indices = self.vocab.src.words2indices(src_sents)
+        sent_indices = pad_sents(src_sents)
         sent_indices_padded = pad_sequence([torch.tensor(sent) for sent in sent_indices]).to(device)
         # embed padded seq
         padded_embedding = self.dropout(self.encoder_embed(sent_indices_padded))
@@ -176,7 +174,7 @@ class NMT(nn.Module):
         src_encodings = pad_packed_sequence(output)[0]
         return src_encodings, (h_n, c_n)
 
-    def decode(self, src_encodings: Tensor, decoder_init_state: Tensor, tgt_sents: List[List[str]]) -> Tensor:
+    def decode(self, src_encodings: Tensor, decoder_init_state: Tensor, tgt_sents: List[List[int]]) -> Tensor:
         """
         Given source encodings, compute the log-likelihood of predicting the gold-standard target
         sentence tokens
@@ -195,7 +193,7 @@ class NMT(nn.Module):
                 for beam search
         """
         batch_size = len(tgt_sents)
-        input = corpus_to_indices(self.vocab.tgt, [["<s>"] for _ in range(batch_size)]).to(device)
+        input = torch.tensor([[SOS_ID] for _ in range(batch_size)]).to(device)
         # dim = (batch_size, 1 (sent_len), embed_size)
         embedded = self.decoder_embed(input)
         # dim = (1 (single_word), batch_size, embed_size)
@@ -204,10 +202,8 @@ class NMT(nn.Module):
         # [num_layers, batch_size, num_directions * hidden_size]
         h_t = decoder_init_state[0]
         c_t = decoder_init_state[1]
-        zero_mask = torch.zeros(batch_size, device=device)
-        one_mask = torch.ones(batch_size, device=device)
         # convert the target sentences to indices, dim = (batch_size, max_tgt_len)
-        target_output = corpus_to_indices(self.vocab.tgt, tgt_sents).to(device)
+        target_output = torch.tensor(pad_sents(tgt_sents), device=device)
         # [1, batch_size, num_directions * hidden_size]
         attn = torch.zeros(torch.Size([1])+h_t.shape[1:], device=device)
         # skip the '<s>' in the tgt_sents since the output starts from the word after '<s>'
@@ -217,11 +213,8 @@ class NMT(nn.Module):
             # dim = (batch_size)
             target_word_indices = target_output[:, i].reshape(batch_size)
             score_delta = self.criterion(softmax_output, target_word_indices)
-            # mask '<pad>' with 0
-            pad_mask = torch.where((target_word_indices == self.DECODER_PAD_IDX), zero_mask, one_mask)
-            masked_score_delta = score_delta * pad_mask
             # update scores
-            scores = scores + masked_score_delta
+            scores = scores + score_delta
             # get the input for the next layer from the embed of the target words
             embedded = self.decoder_embed(target_word_indices.view(-1, 1))
             decoder_input = embedded.transpose(0, 1)
@@ -289,7 +282,7 @@ class NMT(nn.Module):
         W_a_h_s = W_a_h_s.transpose(1, 2)
         return torch.bmm(h_t_top, W_a_h_s)
 
-    def beam_search(self, src_sent: List[str], beam_size: int=5, max_decoding_time_step: int=70) -> List[Hypothesis]:
+    def beam_search(self, src_sent: List[int], beam_size: int=5, max_decoding_time_step: int=70) -> List[Hypothesis]:
         """
         Given a single source sentence, perform beam search
 
@@ -311,18 +304,18 @@ class NMT(nn.Module):
             c_t_0 = c_n
             attn = torch.zeros(torch.Size([1]) + h_t_0.shape[1:], device=device)
             # candidates for best hypotheses
-            hypotheses_cand = [(Hypothesis(['<s>'], 0), h_t_0, c_t_0, attn)]
+            hypotheses_cand = [(Hypothesis([SOS_ID], 0), h_t_0, c_t_0, attn)]
             for i in range(max_decoding_time_step):
                 new_hypotheses_cand = []
                 for (sent, log_likelihood), h_t, c_t, attn in hypotheses_cand:
                     input_word = sent[-1]
                     # skip ended sentence
-                    if input_word == '</s>':
+                    if input_word == EOS_ID:
                         # directly add ended sentence to new candidates
                         new_hypotheses_cand.append((Hypothesis(sent, log_likelihood), h_t, c_t, attn))
                         continue
                     # dim = (1, 1 (single_word), embed_size)
-                    embeded = self.decoder_embed(corpus_to_indices(self.vocab.tgt, [[input_word]]).to(device))
+                    embeded = self.decoder_embed(torch.tensor([[input_word]]).to(device))
                     # dim = (1 (single_word), 1, embed_size)
                     decoder_input = embeded.transpose(0, 1)
                     # softmax_output.shape = [vocab_size]
@@ -331,22 +324,13 @@ class NMT(nn.Module):
                     top_v, top_i = torch.topk(softmax_output.unsqueeze(0), beam_size, dim=1)
                     for word_idx_tensor in top_i[0]:
                         word_idx = word_idx_tensor.item()
-                        hyp_word = self.vocab.tgt.id2word[word_idx]
-
-                        # deal with unknown word
-                        if hyp_word == '<unk>':
-                            _, src_word_pos = torch.topk(a_t.squeeze(), 1)
-                            src_word = src_sent[src_word_pos]
-                            # use dictionary if possible, else use src_word
-                            hyp_word = self.vocab.decoder_dict.get(src_word, src_word)
-
-                        new_hyp = Hypothesis(sent + [hyp_word],
+                        new_hyp = Hypothesis(sent + [word_idx],
                                              log_likelihood + softmax_output[word_idx])
                         new_hypotheses_cand.append((new_hyp, h_t, c_t, attn))
                 # combine ended sentences with new candidates to form new hypotheses
                 hypotheses_cand = sorted(new_hypotheses_cand, key=lambda x: x[0].score, reverse=True)[:beam_size]
                 # break if all sentences have ended
-                if all(c[0].value[-1] == '</s>' for c in hypotheses_cand):
+                if all(c[0].value[-1] == EOS_ID for c in hypotheses_cand):
                     break
             return [c[0] for c in hypotheses_cand]
 
@@ -419,12 +403,21 @@ def compute_corpus_level_bleu_score(references: List[List[str]], hypotheses: Lis
     return bleu_score
 
 
-def train(args: Dict[str, str]):
-    train_data_src, train_long_sent = read_corpus(args['--train-src'], source='src')
-    train_data_tgt, _ = read_corpus(args['--train-tgt'], source='tgt', long_sent=train_long_sent)
+def pad_sents(sents: List[List[int]]) -> List[List[int]]:
+    max_sent_len = max(map((lambda x: len(x)), sents))
+    # indices are initialized with the index of '<pad>'
+    for sent in sents:
+        while len(sent) < max_sent_len:
+            sent.append(PAD_ID)
+    return sents
 
-    dev_data_src, dev_long_sent = read_corpus(args['--dev-src'], source='src')
-    dev_data_tgt, _ = read_corpus(args['--dev-tgt'], source='tgt', long_sent=dev_long_sent)
+
+def train(args: Dict[str, str]):
+    train_data_src, train_long_sent = get_corpus_ids(args['--train-src'], 'gl', is_tgt=False)
+    train_data_tgt, _ = get_corpus_ids(args['--train-tgt'], 'en', is_tgt=True, long_sent=train_long_sent)
+
+    dev_data_src, dev_long_sent = get_corpus_ids(args['--dev-src'], 'gl', is_tgt=False)
+    dev_data_tgt, _ = get_corpus_ids(args['--dev-tgt'], 'en', is_tgt=True, long_sent=dev_long_sent)
 
     train_data = list(zip(train_data_src, train_data_tgt))
     dev_data = list(zip(dev_data_src, dev_data_tgt))
@@ -436,12 +429,11 @@ def train(args: Dict[str, str]):
     model_save_path = args['--save-to']
     optimizer_save_path = args['--save-opt']
 
-    vocab = pickle.load(open(args['--vocab'], 'rb'))
 
     model = NMT(embed_size=int(args['--embed-size']),
+                vocab_size=20000,
                 hidden_size=int(args['--hidden-size']),
-                dropout_rate=float(args['--dropout']),
-                vocab=vocab).to(device)
+                dropout_rate=float(args['--dropout'])).to(device)
 
     num_trial = 0
     train_iter = patience = cum_loss = report_loss = cumulative_tgt_words = report_tgt_words = 0
@@ -570,7 +562,7 @@ def train(args: Dict[str, str]):
                     exit(0)
 
 
-def beam_search(model: NMT, test_data_src: List[List[str]], beam_size: int, max_decoding_time_step: int) \
+def beam_search(model: NMT, test_data_src: List[List[int]], beam_size: int, max_decoding_time_step: int) \
         -> List[List[Hypothesis]]:
     hypotheses = []
     for src_sent in tqdm(test_data_src, desc='Decoding', file=sys.stdout):
@@ -588,15 +580,12 @@ def decode(args: Dict[str, str]):
     If the target gold-standard sentences are given, the function also computes
     corpus-level BLEU score.
     """
-    test_data_src, _ = read_corpus(args['TEST_SOURCE_FILE'], source='src', skip_long=False)
+    test_data_src, _ = get_corpus_ids(args['TEST_SOURCE_FILE'], 'gl', is_tgt=False, skip_long=False)
     if args['TEST_TARGET_FILE']:
-        test_data_tgt, _ = read_corpus(args['TEST_TARGET_FILE'], source='tgt', skip_long=False)
+        test_data_tgt, _ = read_corpus(args['TEST_TARGET_FILE'], 'en', is_tgt=True, skip_long=False)
 
     print(f"load model from {args['MODEL_PATH']}")
     model = NMT.load(args['MODEL_PATH'])
-
-    vocab = pickle.load(open(args['--vocab'], 'rb'))
-    model.vocab = vocab
     # set model to evaluate mode
     model.eval()
 
@@ -604,16 +593,12 @@ def decode(args: Dict[str, str]):
                              beam_size=int(args['--beam-size']),
                              max_decoding_time_step=int(args['--max-decoding-time-step']))
 
-    if args['TEST_TARGET_FILE']:
-        top_hypotheses = [hyps[0] for hyps in hypotheses]
-        bleu_score = compute_corpus_level_bleu_score(test_data_tgt, top_hypotheses)
-        print(f'Corpus BLEU: {bleu_score}')
+    top_hypotheses = [hyps[0].value for hyps in hypotheses]
+    translated_text = decode_corpus_ids(lang_name='en', sents=top_hypotheses)
 
     with open(args['OUTPUT_FILE'], 'w') as f:
-        for src_sent, hyps in zip(test_data_src, hypotheses):
-            top_hyp = hyps[0]
-            hyp_sent = ' '.join(top_hyp.value)
-            f.write(hyp_sent + '\n')
+        for sent in translated_text:
+            f.write(sent + '\n')
 
 
 def main():
