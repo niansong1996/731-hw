@@ -105,7 +105,9 @@ class NMT(nn.Module):
         self.decoder_softmax = nn.Softmax(dim=2)
         self.dropout = nn.Dropout(p=self.dropout_rate)
         self.tanh = nn.Tanh()
-        self.criterion = nn.NLLLoss(ignore_index=PAD_ID, reduction='sum')
+        weights = torch.ones(vocab_size)
+        weights[0] = PAD_ID
+        self.criterion = nn.NLLLoss(weight=weights)
         # W_s for attention
         self.decoder_W_s = nn.Linear(decoder_hidden_size, self.vocab_size, bias=False)
 
@@ -216,7 +218,7 @@ class NMT(nn.Module):
             # get the input for the next layer from the embed of the target words
             embedded = self.decoder_embed(target_word_indices.view(-1, 1))
             decoder_input = embedded.transpose(0, 1)
-        return scores / batch_size
+        return scores
 
     def decoder_step(self, src_encodings: Tensor, decoder_input: Tensor, h_t: Tensor, c_t: Tensor, attn: Tensor):
         """
