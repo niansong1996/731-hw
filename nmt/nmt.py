@@ -105,7 +105,7 @@ class NMT(nn.Module):
         self.decoder_softmax = nn.Softmax(dim=2)
         self.dropout = nn.Dropout(p=self.dropout_rate)
         self.tanh = nn.Tanh()
-        self.criterion = nn.NLLLoss(ignore_index=PAD_ID, size_average=False)
+        self.criterion = nn.NLLLoss(ignore_index=PAD_ID, reduction='sum')
         # W_s for attention
         self.decoder_W_s = nn.Linear(decoder_hidden_size, self.vocab_size, bias=False)
 
@@ -198,7 +198,7 @@ class NMT(nn.Module):
         embedded = self.decoder_embed(input)
         # dim = (1 (single_word), batch_size, embed_size)
         decoder_input = embedded.transpose(0, 1)
-        scores = torch.zeros(batch_size, device=device)
+        scores = torch.zeros(1, device=device)
         # [num_layers, batch_size, num_directions * hidden_size]
         h_t = decoder_init_state[0]
         c_t = decoder_init_state[1]
@@ -212,13 +212,11 @@ class NMT(nn.Module):
             h_t, c_t, softmax_output, attn, _ = self.decoder_step(src_encodings, decoder_input, h_t, c_t, attn)
             # dim = (batch_size)
             target_word_indices = target_output[:, i].reshape(batch_size)
-            score_delta = self.criterion(softmax_output, target_word_indices) / batch_size
-            # update scores
-            scores = scores + score_delta
+            scores += self.criterion(softmax_output, target_word_indices)
             # get the input for the next layer from the embed of the target words
             embedded = self.decoder_embed(target_word_indices.view(-1, 1))
             decoder_input = embedded.transpose(0, 1)
-        return scores
+        return scores / batch_size
 
     def decoder_step(self, src_encodings: Tensor, decoder_input: Tensor, h_t: Tensor, c_t: Tensor, attn: Tensor):
         """
