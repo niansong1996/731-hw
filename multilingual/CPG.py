@@ -41,7 +41,7 @@ class CPG(nn.Module):
 
         # initialize the parameters using uniform distribution
         for param in self.parameters():
-            nn.init.uniform_(param.data, a=-0.1, b=0.1)
+            nn.init.uniform_(param.data, a=-0.4, b=0.4)
 
     @staticmethod
     def get_param_meta(shapes: List[List[Tuple[int]]]):

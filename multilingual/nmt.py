@@ -49,7 +49,7 @@ from nltk.translate.bleu_score import corpus_bleu
 from tqdm import tqdm
 
 from MultiMT import Hypothesis, MultiNMT
-from config import device, LANG_INDICES
+from config import device, LANG_INDICES, LANG_NAMES
 from subword import get_corpus_pairs, get_corpus_ids, decode_corpus_ids
 from utils import batch_iter, PairedData, LangPair
 
@@ -137,7 +137,7 @@ def train(args: Dict[str, str]):
             # start training routine
             #torch.cuda.empty_cache()
             optimizer.zero_grad()
-            loss_v = model(src_lang, tgt_lang, src_sents, tgt_sents)
+            loss_v, _ = model(src_lang, tgt_lang, src_sents, tgt_sents)
             loss = torch.sum(loss_v)
             loss.backward()
             torch.nn.utils.clip_grad_norm_(model.parameters(), clip_grad)
@@ -182,12 +182,15 @@ def train(args: Dict[str, str]):
                     # set model to evaluate mode
                     model.eval()
                     # compute dev. ppl and bleu
-                    dev_ppl = model.evaluate_ppl(dev_data, batch_size=128)  # dev batch size can be a bit larger
+                    dev_ppl, decodes = model.evaluate_ppl(dev_data, batch_size=128)  # dev batch size can be a bit larger
+                    reference_sents = decode_corpus_ids(lang_name=LANG_NAMES[tgt_lang], sents=decodes[0])
+                    decoded_sents = decode_corpus_ids(lang_name=LANG_NAMES[tgt_lang], sents=decodes[1])
+                    dev_bleu = compute_corpus_level_bleu_score(reference_sents, decoded_sents)
                     # set model back to training mode
                     model.train()
-                    valid_metric = -dev_ppl
+                    valid_metric = dev_bleu
 
-                    print('validation: iter %d, dev. ppl %f' % (train_iter, dev_ppl))
+                    print('validation: iter %d, dev. ppl %f, dev. bleu %f' % (train_iter, dev_ppl, dev_bleu))
 
                     is_better = len(hist_valid_scores) == 0 or valid_metric > max(hist_valid_scores)
                     hist_valid_scores.append(valid_metric)
@@ -226,6 +229,27 @@ def train(args: Dict[str, str]):
                         print('reached maximum number of epochs!')
                         exit(0)
 
+def compute_corpus_level_bleu_score(references: List[str], hypotheses: List[str]) -> float:
+    """
+    Given decoding results and reference sentences, compute corpus-level BLEU score
+
+    Args:
+        references: a list of gold-standard reference target sentences
+        hypotheses: a list of hypotheses, one for each reference
+
+    Returns:
+        bleu_score: corpus-level BLEU score
+    """
+    references = [ref.split(' ') for ref in references]
+    hypotheses = [hyp.split(' ') for hyp in hypotheses]
+
+    if references[0][0] == '<s>':
+        references = [ref[1:-1] for ref in references]
+
+    bleu_score = corpus_bleu([[ref] for ref in references],
+                             [hyp for hyp in hypotheses])
+
+    return bleu_score
 
 def beam_search(model: MultiNMT, test_data_src: List[List[int]], src_lang: int, tgt_lang: int, \
                 beam_size: int, max_decoding_time_step: int) -> List[List[Hypothesis]]:
@@ -255,7 +279,7 @@ def decode(args: Dict[str, str]):
     output_file = args['OUTPUT_FILE']
 
     test_data_src, _ = get_corpus_ids(src_lang_idx, tgt_lang_idx, data_type='test', is_tgt=False, is_train=False)
-    # test_data_tgt = get_corpus_ids(src_lang_idx, tgt_lang_idx, data_type='test', is_tgt=True)
+    #test_data_tgt, _ = get_corpus_ids(src_lang_idx, tgt_lang_idx, data_type='test', is_tgt=True, is_train=False)
 
     print(f"load model from {model_path}")
     model = MultiNMT.load(model_path)
