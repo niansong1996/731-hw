@@ -212,7 +212,7 @@ class NMT(nn.Module):
             h_t, c_t, softmax_output, attn, _ = self.decoder_step(src_encodings, decoder_input, h_t, c_t, attn)
             # dim = (batch_size)
             target_word_indices = target_output[:, i].reshape(batch_size)
-            score_delta = self.criterion(softmax_output, target_word_indices)
+            score_delta = self.criterion(softmax_output, target_word_indices) / batch_size
             # update scores
             scores = scores + score_delta
             # get the input for the next layer from the embed of the target words
