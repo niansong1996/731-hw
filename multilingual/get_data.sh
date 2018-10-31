@@ -20,12 +20,20 @@ cat data/train.az-en.en.txt \
     data/train.tr-en.en.txt \
     data/train.ru-en.en.txt \
     data/train.pt-en.en.txt > data/en_mono.txt
-cat data/train.az-en.az.txt data/az.wiki.txt > data/az_mono.txt
-cat data/train.be-en.be.txt data/be.wiki.txt > data/be_mono.txt
-cat data/train.gl-en.gl.txt data/gl.wiki.txt > data/gl_mono.txt
-cat data/train.tr-en.tr.txt > data/tr_mono.txt
-cat data/train.ru-en.ru.txt > data/ru_mono.txt
-cat data/train.pt-en.pt.txt > data/pt_mono.txt
+cat data/train.az-en.az.txt data/train.tr-en.tr.txt > data/aztr_mono.txt
+cat data/train.be-en.be.txt data/train.ru-en.ru.txt > data/beru_mono.txt
+cat data/train.gl-en.gl.txt data/train.pt-en.pt.txt > data/glpt_mono.txt
+
+# concat the low-high resource data
+for set_type in "train" "test" "dev"
+do
+cat data/${set_type}.az-en.az.txt data/${set_type}.tr-en.tr.txt > data/${set_type}.aztr-en.aztr.txt
+cat data/${set_type}.az-en.en.txt data/${set_type}.tr-en.en.txt > data/${set_type}.aztr-en.en.txt
+cat data/${set_type}.be-en.be.txt data/${set_type}.ru-en.ru.txt > data/${set_type}.beru-en.beru.txt
+cat data/${set_type}.be-en.en.txt data/${set_type}.ru-en.en.txt > data/${set_type}.beru-en.en.txt
+cat data/${set_type}.gl-en.gl.txt data/${set_type}.pt-en.pt.txt > data/${set_type}.glpt-en.glpt.txt
+cat data/${set_type}.gl-en.en.txt data/${set_type}.pt-en.en.txt > data/${set_type}.glpt-en.en.txt
+done
 
 # clean up
 rm all_talks_train.tsv

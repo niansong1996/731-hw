@@ -9,7 +9,7 @@ echo save results to ${work_dir}
 
 python nmt.py \
     train \
-    --langs 'az-en,be-en,gl-en,tr-en,ru-en,pt-en'\
+    --langs 'aztr-en,beru-en,glpt-en'\
     --lang-embed-size 8\
     --cuda \
     --vocab-size 20000 \
@@ -31,7 +31,7 @@ python nmt.py \
     --patience 3
 # 2>${work_dir}/err.log
 
-for lang in {az, be, gl, tr, ru, pt}
+for lang in {aztr, beru, glpt}
 do
 python nmt.py decode --cuda --beam-size 5 --max-decoding-time-step 100 \
     ${work_dir}/${model_name} $lang en ${work_dir}/decode-$lang.txt
