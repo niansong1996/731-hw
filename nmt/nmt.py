@@ -137,9 +137,9 @@ class NMT(nn.Module):
                 each example in the input batch
         """
         src_encodings, decoder_init_state = self.encode(src_sents)
-        scores = self.decode(src_encodings, decoder_init_state, tgt_sents)
+        scores, top_words = self.decode(src_encodings, decoder_init_state, tgt_sents)
 
-        return scores
+        return scores, top_words
 
     def encode(self, src_sents: List[List[int]]) -> Tuple[Tensor, Any]:
         """
@@ -208,6 +208,8 @@ class NMT(nn.Module):
         target_output = torch.tensor(pad_sents(tgt_sents), device=device)
         # [1, batch_size, num_directions * hidden_size]
         attn = torch.zeros(torch.Size([1])+h_t.shape[1:], device=device)
+        # save top words for computing bleu score
+        top_subwords = torch.ones((target_output.shape[1], batch_size))
         # skip the '<s>' in the tgt_sents since the output starts from the word after '<s>'
         for i in range(1, target_output.shape[1]):
             decoder_input = self.dropout(decoder_input)
@@ -215,10 +217,12 @@ class NMT(nn.Module):
             # dim = (batch_size)
             target_word_indices = target_output[:, i].reshape(batch_size)
             scores += self.criterion(softmax_output, target_word_indices)
+            # extract the top words of each sents from this batch
+            top_subwords[i] = torch.argmax(softmax_output, dim=1)
             # get the input for the next layer from the embed of the target words
             embedded = self.decoder_embed(target_word_indices.view(-1, 1))
             decoder_input = embedded.transpose(0, 1)
-        return scores
+        return scores, top_subwords.transpose(0,1)
 
     def decoder_step(self, src_encodings: Tensor, decoder_input: Tensor, h_t: Tensor, c_t: Tensor, attn: Tensor):
         """
@@ -348,21 +352,26 @@ class NMT(nn.Module):
 
         cum_loss = 0.
         cum_tgt_words = 0.
-
+        decoded_sents = []
+        reference_sents = []
         # you may want to wrap the following code using a context manager provided
         # by the NN library to signal the backend to not to keep gradient information
         # e.g., `torch.no_grad()`
         with torch.no_grad():
             for src_sents, tgt_sents in batch_iter(dev_data, batch_size):
-                loss = self(src_sents, tgt_sents).sum()
+                loss, sents = self(src_sents, tgt_sents)
+                loss = loss.sum()
 
                 cum_loss += loss
                 tgt_word_num_to_predict = sum(len(s[1:]) for s in tgt_sents)  # omitting the leading `<s>`
                 cum_tgt_words += tgt_word_num_to_predict
+                # formulate the decoded sent
+                decoded_sents += [list(map(int, sent.numpy().tolist())) for sent in sents]
+                reference_sents += tgt_sents
 
             ppl = np.exp(cum_loss / cum_tgt_words)
 
-            return ppl
+            return ppl, (reference_sents, decoded_sents)
 
     @staticmethod
     def load(model_path: str):
@@ -383,22 +392,23 @@ class NMT(nn.Module):
 
 
 
-def compute_corpus_level_bleu_score(references: List[List[str]], hypotheses: List[Hypothesis]) -> float:
+def compute_corpus_level_bleu_score(references: List[str], hypotheses: List[str]) -> float:
     """
     Given decoding results and reference sentences, compute corpus-level BLEU score
-
-    Args:
+     Args:
         references: a list of gold-standard reference target sentences
         hypotheses: a list of hypotheses, one for each reference
-
-    Returns:
+     Returns:
         bleu_score: corpus-level BLEU score
     """
+    references = [ref.split(' ') for ref in references]
+    hypotheses = [hyp.split(' ') for hyp in hypotheses]
+
     if references[0][0] == '<s>':
         references = [ref[1:-1] for ref in references]
 
     bleu_score = corpus_bleu([[ref] for ref in references],
-                             [hyp.value for hyp in hypotheses])
+                             [hyp for hyp in hypotheses])
 
     return bleu_score
 
@@ -461,7 +471,7 @@ def train(args: Dict[str, str]):
 
             # start training routine
             optimizer.zero_grad()
-            loss_v = model(src_sents, tgt_sents)
+            loss_v, _ = model(src_sents, tgt_sents)
             loss = torch.sum(loss_v)
             loss.backward()
             torch.nn.utils.clip_grad_norm(model.parameters(), clip_grad)
@@ -508,21 +518,16 @@ def train(args: Dict[str, str]):
                 # set model to evaluate mode
                 model.eval()
                 # compute dev. ppl and bleu
-                dev_ppl = model.evaluate_ppl(dev_data, batch_size=128)   # dev batch size can be a bit larger
+                dev_ppl, (src_sents, tgt_sents) = model.evaluate_ppl(dev_data, batch_size=128)   # dev batch size can be a bit larger
+                reference_sents = decode_corpus_ids(lang_name='tr', sents=src_sents)
+                decoded_sents = decode_corpus_ids(lang_name='az', sents=tgt_sents)
+                dev_bleu = compute_corpus_level_bleu_score(reference_sents, decoded_sents)
+
                 # set model back to training mode
                 model.train()
-                '''
-                print("dev. ppl %f" % dev_ppl)
-                dev_hyps = []
-                for dev_src_sent in dev_data_src:
-                    print(".", end="", flush=True)
-                    dev_hyp_sent = model.beam_search(dev_src_sent)
-                    dev_hyps.append(dev_hyp_sent[0])
-                dev_bleu = compute_corpus_level_bleu_score(dev_data_tgt, dev_hyps)
-                '''
-                valid_metric = -dev_ppl
+                valid_metric = dev_bleu
 
-                print('validation: iter %d, dev. ppl %f' % (train_iter, dev_ppl))
+                print('validation: iter %d, dev. ppl %f, bleu %f' % (train_iter, dev_ppl, dev_bleu))
 
                 is_better = len(hist_valid_scores) == 0 or valid_metric > max(hist_valid_scores)
                 hist_valid_scores.append(valid_metric)
