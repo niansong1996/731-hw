@@ -199,9 +199,15 @@ class MultiNMT(nn.Module):
                 cum_tgt_words += tgt_word_num_to_predict
 
                 # formulate the decoded sent
-                decoded_sents += [list(map(int, sent.numpy().tolist())) for sent in sents]
+                decoded_sents += [sent.numpy() for sent in sents]
                 reference_sents += tgt_sents
 
             ppl = np.exp(cum_loss / cum_tgt_words)
+
+            for i in range(len(decoded_sents)):
+                eos = np.argmax(decoded_sents[i]==Vocab.EOS_ID)
+                if not eos == 0:
+                    decoded_sents[i] = decoded_sents[i][:eos+1]
+                decoded_sents[i] = list(map(int, decoded_sents[i].tolist()))
 
             return ppl, (reference_sents, decoded_sents)

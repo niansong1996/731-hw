@@ -31,7 +31,7 @@ python nmt.py \
     --patience 3
 # 2>${work_dir}/err.log
 
-for lang in az, be, gl, tr, ru, pt
+for lang in az be gl tr ru pt
 do
 python nmt.py decode --cuda --beam-size 5 --max-decoding-time-step 100 \
     ${work_dir}/${model_name} ${lang} en ${work_dir}/decode-${lang}.txt
