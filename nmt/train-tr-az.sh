@@ -23,12 +23,12 @@ python nmt.py \
     --dev-tgt ${dev_tgt} \
     --save-to ${work_dir}/${model_name} \
     --save-opt ${work_dir}/optimizer.bin \
-    --valid-niter 16 \
+    --valid-niter 1000 \
     --lr 0.001 \
     --log-every 50 \
     --batch-size 8 \
     --vocab-size 1000 \
-    --hidden-size 64 \
+    --hidden-size 128 \
     --max-epoch 100 \
     --embed-size 16 \
     --uniform-init 0.1 \
