@@ -95,7 +95,7 @@ class MultiNMT(nn.Module):
     def get_decoder(self, tgt_lang: int, batch_size: int, grouped_params: List[List[Tensor]]) -> Decoder:
         dec_lstm_weights = grouped_params[self.enc_shapes_len:self.enc_shapes_len + self.dec_lstm_shapes_len]
         attn_weights = grouped_params[self.enc_shapes_len + self.dec_lstm_shapes_len:]
-        return Decoder(batch_size, self.embed_size, self.decoder_hidden_size, self.num_layers,
+        return Decoder(self.vocab_size, batch_size, self.embed_size, self.decoder_hidden_size, self.num_layers,
                        self.cpg.get_embedding(tgt_lang), dec_lstm_weights, attn_weights)
 
     def beam_search(self, src_sent: List[int], src_lang: int, tgt_lang: int, beam_size: int=5,
@@ -187,13 +187,27 @@ class MultiNMT(nn.Module):
         """
         cum_loss = 0.
         cum_tgt_words = 0.
+        decoded_sents = []
+        reference_sents = []
         with torch.no_grad():
-            for src_lang, tgt_lang, src_sents, tgt_sents in batch_iter(dev_data, batch_size):
-                loss = self(src_lang, tgt_lang, src_sents, tgt_sents).sum()
+            for src_lang, tgt_lang, src_sents, tgt_sents in batch_iter(dev_data, batch_size, shuffle=False):
+                loss, sents = self(src_lang, tgt_lang, src_sents, tgt_sents)
+                loss = loss.sum()
+                # calculate the ppl.
                 cum_loss += loss
                 tgt_word_num_to_predict = sum(len(s[1:]) for s in tgt_sents)  # omitting the leading `<s>`
                 cum_tgt_words += tgt_word_num_to_predict
 
+                # formulate the decoded sent
+                decoded_sents += [sent.numpy() for sent in sents]
+                reference_sents += tgt_sents
+
             ppl = np.exp(cum_loss / cum_tgt_words)
 
-            return ppl
+            for i in range(len(decoded_sents)):
+                eos = np.argmax(decoded_sents[i]==Vocab.EOS_ID)
+                if not eos == 0:
+                    decoded_sents[i] = decoded_sents[i][:eos+1]
+                decoded_sents[i] = list(map(int, decoded_sents[i].tolist()))
+
+            return ppl, (reference_sents, decoded_sents)

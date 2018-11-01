@@ -11,9 +11,9 @@ from vocab import Vocab
 
 
 class Decoder:
-    def __init__(self, batch_size, embed_size, hidden_size, num_layers,
+    def __init__(self, vocab_size, batch_size, embed_size, hidden_size, num_layers,
                  embedding: nn.Embedding, lstm_weights: List[List[Tensor]], attn_weights: List[List[Tensor]],
-                 dropout_rate=0, decoder_pad_idx=0):
+                 dropout_rate=0):
         self.embedding = embedding
         self.dec_embed_size = embed_size
         self.dec_hidden_size = hidden_size
@@ -71,15 +71,17 @@ class Decoder:
         # dim = (batch_size, embed_size)
         decoder_input = self.init_input
         scores = torch.zeros(self.batch_size, device=device)
-        zero_mask = torch.zeros(self.batch_size, device=device)
-        one_mask = torch.ones(self.batch_size, device=device)
         h_t, c_t, attn = self.init_decoder_step_input(decoder_init_state)
         # dim = (batch_size, sent_len, embed_size)
         tgt_sent_embed = self.embedding(tgt_sent_idx)
+        # save top words for computing bleu score
+        top_subwords = torch.ones((tgt_sent_idx.shape[1], self.batch_size))
         # skip the '<s>' in the tgt_sents since the output starts from the word after '<s>'
         for i in range(1, tgt_sent_idx.shape[1]):
             decoder_input = self.dropout(decoder_input)
             h_t, c_t, softmax_output, attn = self.decoder_step(src_encodings, decoder_input, h_t, c_t, attn)
+            # extract the top words of each sents from this batch
+            top_subwords[i] = torch.argmax(softmax_output, dim=1)
             # dim = (batch_size)
             target_word_indices = tgt_sent_idx[:, i].reshape(self.batch_size)
             score_delta = self.criterion(softmax_output, target_word_indices)
@@ -89,7 +91,7 @@ class Decoder:
             scores = scores + score_delta
             # dim = (batch_size, embed_size)
             decoder_input = tgt_sent_embed[:, i, :]
-        return scores
+        return scores, top_subwords.transpose(0,1)
 
     def decoder_step(self, src_encodings: Tensor, decoder_input: Tensor, h_t: Tensor, c_t: Tensor, attn: Tensor)\
             -> (Tensor, Tensor, Tensor, Tensor):
