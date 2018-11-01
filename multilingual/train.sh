@@ -18,7 +18,7 @@ python nmt.py \
     --valid-niter 1000 \
     --lr 0.001 \
     --log-every 50 \
-    --batch-size 32 \
+    --batch-size 64 \
     --hidden-size 256 \
     --low-rank 3 \
     --num-layers 1 \
@@ -28,8 +28,8 @@ python nmt.py \
     --dropout 0.2 \
     --clip-grad 5.0 \
     --lr-decay 0.5 \
-    --patience 3
-# 2>${work_dir}/err.log
+    --patience 10 \
+    --max-num-trial 3
 
 for lang in az be gl tr ru pt
 do

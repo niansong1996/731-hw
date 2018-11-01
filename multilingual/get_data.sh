@@ -28,9 +28,9 @@ cat data/train.ru-en.ru.txt > data/ru_mono.txt
 cat data/train.pt-en.pt.txt > data/pt_mono.txt
 
 # create auto-encode data for semi-supervised learning
-head -200000 data/az.wiki.txt > data/train.az-az.az.txt
-head -200000 data/be.wiki.txt > data/train.be-be.be.txt
-head -200000 data/gl.wiki.txt > data/train.gl-gl.gl.txt
+cat data/az.wiki.txt > data/train.az-az.az.txt
+cat data/be.wiki.txt > data/train.be-be.be.txt
+cat data/gl.wiki.txt > data/train.gl-gl.gl.txt
 cat data/en_mono.txt > data/train.en-en.en.txt
 #cat data/en.wiki.txt > data/train.en-en.en.txt
 

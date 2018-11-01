@@ -30,8 +30,16 @@ def get_corpus_pairs(src_lang_idx: int, tgt_lang_idx: int, data_type: str) \
     src_sents, long_sent = get_corpus_ids(src_lang_idx, tgt_lang_idx, data_type, False)
     tgt_sents, _ = get_corpus_ids(src_lang_idx, tgt_lang_idx, data_type, True, long_sent=long_sent)
 
+    # ditch over-lengthy sents
+    short_src_sents = []
+    short_tgt_sents = []
+    for i in range(len(src_sents)):
+        if len(src_sents[i]) < 100 or len(tgt_sents[i]) < 100:
+            short_src_sents.append(src_sents[i])
+            short_tgt_sents.append(tgt_sents[i])
+
     # pair those corresponding sents together
-    src_tgt_sent_pairs = list(zip(src_sents, tgt_sents))
+    src_tgt_sent_pairs = list(zip(short_src_sents, short_tgt_sents))
 
     return src_tgt_sent_pairs
 
