@@ -413,11 +413,11 @@ def pad_sents(sents: List[List[int]]) -> List[List[int]]:
 
 
 def train(args: Dict[str, str]):
-    train_data_src, train_long_sent = get_corpus_ids(args['--train-src'], 'gl', is_tgt=False)
-    train_data_tgt, _ = get_corpus_ids(args['--train-tgt'], 'en', is_tgt=True, long_sent=train_long_sent)
+    train_data_src, train_long_sent = get_corpus_ids(args['--train-src'], 'tr', is_tgt=False)
+    train_data_tgt, _ = get_corpus_ids(args['--train-tgt'], 'az', is_tgt=True, long_sent=train_long_sent)
 
-    dev_data_src, dev_long_sent = get_corpus_ids(args['--dev-src'], 'gl', is_tgt=False)
-    dev_data_tgt, _ = get_corpus_ids(args['--dev-tgt'], 'en', is_tgt=True, long_sent=dev_long_sent)
+    dev_data_src, dev_long_sent = get_corpus_ids(args['--dev-src'], 'tr', is_tgt=False)
+    dev_data_tgt, _ = get_corpus_ids(args['--dev-tgt'], 'az', is_tgt=True, long_sent=dev_long_sent)
 
     train_data = list(zip(train_data_src, train_data_tgt))
     dev_data = list(zip(dev_data_src, dev_data_tgt))
@@ -431,7 +431,7 @@ def train(args: Dict[str, str]):
 
 
     model = NMT(embed_size=int(args['--embed-size']),
-                vocab_size=20000,
+                vocab_size=int(args['--vocab-size']),
                 hidden_size=int(args['--hidden-size']),
                 dropout_rate=float(args['--dropout'])).to(device)
 
@@ -580,9 +580,9 @@ def decode(args: Dict[str, str]):
     If the target gold-standard sentences are given, the function also computes
     corpus-level BLEU score.
     """
-    test_data_src, _ = get_corpus_ids(args['TEST_SOURCE_FILE'], 'gl', is_tgt=False, skip_long=False)
+    test_data_src, _ = get_corpus_ids(args['TEST_SOURCE_FILE'], 'tr', is_tgt=False, skip_long=False)
     if args['TEST_TARGET_FILE']:
-        test_data_tgt, _ = read_corpus(args['TEST_TARGET_FILE'], 'en', is_tgt=True, skip_long=False)
+        test_data_tgt, _ = read_corpus(args['TEST_TARGET_FILE'], 'az', is_tgt=True, skip_long=False)
 
     print(f"load model from {args['MODEL_PATH']}")
     model = NMT.load(args['MODEL_PATH'])
@@ -594,7 +594,7 @@ def decode(args: Dict[str, str]):
                              max_decoding_time_step=int(args['--max-decoding-time-step']))
 
     top_hypotheses = [hyps[0].value for hyps in hypotheses]
-    translated_text = decode_corpus_ids(lang_name='en', sents=top_hypotheses)
+    translated_text = decode_corpus_ids(lang_name='az', sents=top_hypotheses)
 
     with open(args['OUTPUT_FILE'], 'w') as f:
         for sent in translated_text:
