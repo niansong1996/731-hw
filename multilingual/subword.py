@@ -14,6 +14,7 @@ Options:
 from typing import List, Tuple, Set
 
 import sentencepiece as spm
+import os.path
 from docopt import docopt
 from config import LANG_NAMES
 
@@ -47,8 +48,12 @@ def get_corpus_ids(src_lang_idx: int, tgt_lang_idx: int, data_type: str, is_tgt:
     sp = spm.SentencePieceProcessor()
     sp.Load('subword_files/%s.model' % lang)
 
-    # read corpus for corpus
+    # find parallel corpus file
     file_path = 'data/%s.%s-%s.%s.txt' % (data_type, src_lang, tgt_lang, lang)
+    if not os.path.isfile(file_path):
+        file_path = 'data/%s.%s-%s.%s.txt' % (data_type, tgt_lang, src_lang, lang)
+        
+    # read corpus for corpus
     line_count = 0
     long_sent_in_src = set()
     for line in open(file_path, encoding="utf-8"):
