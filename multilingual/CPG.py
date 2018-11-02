@@ -10,7 +10,7 @@ from config import LANG_NAMES
 
 
 class CPG(nn.Module):
-    def __init__(self, shapes: List[List[Tuple[int]]], args: Dict[str, str]):
+    def __init__(self, shapes: List[List[Tuple[int]]], args: Dict[str, str], encoder_group: int):
         """
         Args:
             shapes: List[List[tuples]] a list of groups, where each tuple the
@@ -32,8 +32,8 @@ class CPG(nn.Module):
 
         # init every layer of CPG for different groups
         self.L = nn.Linear(num_lang, self.lang_embed_size, bias=False)
-        self.Ps = nn.ModuleList([nn.Linear(self.lang_embed_size, self.low_rank if i<2 else 1, bias=False) for i in range(self.group_num)])
-        self.Ws = nn.ModuleList([nn.Linear(self.low_rank if i<2 else 1, self.group_param_sizes[i], bias=False) for i in range(self.group_num)])
+        self.Ps = nn.ModuleList([nn.Linear(self.lang_embed_size, self.low_rank if i<encoder_group else 1, bias=False) for i in range(self.group_num)])
+        self.Ws = nn.ModuleList([nn.Linear(self.low_rank if i<encoder_group else 1, self.group_param_sizes[i], bias=False) for i in range(self.group_num)])
 
         # init language embeddings
         self.word_embeddings = nn.ModuleList([nn.Embedding(self.vocab_size, self.word_embed_size)

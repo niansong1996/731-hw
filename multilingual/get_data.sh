@@ -25,7 +25,7 @@ cat data/train.be-en.be.txt data/be.wiki.txt data/train.ru-en.ru.txt > data/beru
 cat data/train.gl-en.gl.txt data/gl.wiki.txt data/train.pt-en.pt.txt > data/glpt_mono.txt
 
 # concat the low-high resource data
-for set_type in "train" "dev"
+for set_type in "train"
 do
 cat data/${set_type}.az-en.az.txt data/${set_type}.tr-en.tr.txt > data/${set_type}.aztr-en.aztr.txt
 cat data/${set_type}.az-en.en.txt data/${set_type}.tr-en.en.txt > data/${set_type}.aztr-en.en.txt
@@ -34,6 +34,14 @@ cat data/${set_type}.be-en.en.txt data/${set_type}.ru-en.en.txt > data/${set_typ
 cat data/${set_type}.gl-en.gl.txt data/${set_type}.pt-en.pt.txt > data/${set_type}.glpt-en.glpt.txt
 cat data/${set_type}.gl-en.en.txt data/${set_type}.pt-en.en.txt > data/${set_type}.glpt-en.en.txt
 done
+
+# get test set using only az be gl
+cat data/dev.az-en.en.txt > data/dev.aztr-en.en.txt
+cat data/dev.az-en.az.txt > data/dev.aztr-en.aztr.txt
+cat data/dev.be-en.en.txt > data/dev.beru-en.en.txt
+cat data/dev.be-en.be.txt > data/dev.beru-en.beru.txt
+cat data/dev.gl-en.en.txt > data/dev.glpt-en.en.txt
+cat data/dev.gl-en.gl.txt > data/dev.glpt-en.glpt.txt
 
 # get test set using only az be gl
 cat data/test.az-en.en.txt > data/test.aztr-en.en.txt

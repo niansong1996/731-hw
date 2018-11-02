@@ -46,7 +46,7 @@ class MultiNMT(nn.Module):
         # combine enc and dec param shapes
         self.param_shapes = self.enc_shapes + self.dec_shapes
         # init CPG
-        self.cpg = CPG(self.param_shapes, args)
+        self.cpg = CPG(self.param_shapes, args, self.enc_shapes_len)
 
     def forward(self, src_lang: int, tgt_lang: int, src_sents: List[List[int]], tgt_sents: List[List[int]]) \
             -> Tensor:
