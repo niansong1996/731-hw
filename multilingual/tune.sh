@@ -11,13 +11,13 @@ python nmt.py \
     train \
     --tune \
     --pretrain-model ${work_dir}/multi-lang-model.bin \
-    --langs 'aztr-en'\
+    --langs 'glpt-en'\
     --lang-embed-size 8\
     --cuda \
     --vocab-size 20000 \
     --save-to ${work_dir}/${model_name} \
     --save-opt ${work_dir}/optimizer.bin \
-    --valid-niter 1000 \
+    --valid-niter 500 \
     --lr 0.001 \
     --log-every 50 \
     --batch-size 32 \
@@ -30,10 +30,10 @@ python nmt.py \
     --dropout 0.2 \
     --clip-grad 5.0 \
     --lr-decay 0.5 \
-    --patience 3
+    --patience 10
 # 2>${work_dir}/err.log
 
-for lang in aztr
+for lang in glpt
 do
 python nmt.py decode --cuda --beam-size 5 --max-decoding-time-step 100 \
     ${work_dir}/${model_name} ${lang} en ${work_dir}/decode-${lang}.txt
