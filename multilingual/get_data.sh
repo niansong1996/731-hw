@@ -8,15 +8,6 @@ if [ ! -d "./data" ]; then
     mkdir data
     cp wikis/* data/
 
-    # get raw wikipedia data
-    cp assignment-2/wikipedia.sh ./
-    wget https://github.com/attardi/wikiextractor/archive/master.zip
-    unzip master.zip
-    rm master.zip
-    wget https://github.com/moses-smt/mosesdecoder/archive/master.zip
-    unzip master.zip
-    rm master.zip
-
     # get raw ted data
     wget http://phontron.com/data/ted_talks.tar.gz
     tar xvf ted_talks.tar.gz
