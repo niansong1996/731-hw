@@ -9,7 +9,7 @@ echo save results to ${work_dir}
 
 python nmt.py \
     train \
-    --langs 'aztr-en,beru-en,glpt-en,en-en'\
+    --langs 'en-en'\
     --lang-embed-size 8\
     --cuda \
     --vocab-size 20000 \
