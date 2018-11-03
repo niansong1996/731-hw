@@ -34,6 +34,7 @@ Options:
     --save-opt=<file>                       optimizer state save path
     --valid-niter=<int>                     perform validation after how many iterations [default: 2000]
     --dropout=<float>                       dropout [default: 0]
+    --denoising=<float>                     percentage of noise in denoising autoencode training [default: 0.2]
     --max-decoding-time-step=<int>          maximum number of decoding time steps [default: 70]
 """
 
@@ -41,6 +42,8 @@ import math
 import sys
 import time
 from typing import *
+import pickle
+import os.path
 
 import numpy as np
 import torch
@@ -68,9 +71,28 @@ def get_data_pairs(langs: List[List[str]], data_type: str):
 
 def train(args: Dict[str, str]):
     lang_pairs = args['--langs']
+
+    # identify translation and autoencode tasks
     langs = [p.split('-') for p in lang_pairs.split(',')]
-    train_data = get_data_pairs(langs, 'train')
-    dev_datasets = [get_data_pairs([lang], 'dev') for lang in langs]
+    trans_pair = autoenc_pair = 0
+    for pair in langs:
+        if pair[0] == pair[1]:
+            autoenc_pair += 1
+        else:
+            trans_pair += 1
+
+    # load data from prev dump
+    train_file = 'data/train.%s.dump' % lang_pairs
+    dev_file = 'data/dev.%s.dump' % lang_pairs
+    if os.path.isfile(train_file) and os.path.isfile(dev_file):
+        train_data = pickle.load(open(train_file, 'rb'))
+        dev_datasets = pickle.load(open(dev_file, 'rb'))
+        print("Done reading from dump")
+    else:
+        train_data = get_data_pairs(langs, 'train')
+        dev_datasets = [get_data_pairs([lang], 'dev') for lang in langs[:trans_pair]]
+        pickle.dump(train_data, open(train_file, 'wb'))
+        pickle.dump(dev_datasets, open(dev_file, 'wb'))
 
     train_batch_size = int(args['--batch-size'])
     clip_grad = float(args['--clip-grad'])
