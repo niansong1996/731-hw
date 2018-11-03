@@ -90,7 +90,7 @@ def train(args: Dict[str, str]):
         print("Done reading from dump")
     else:
         train_data = get_data_pairs(langs, 'train')
-        dev_datasets = [get_data_pairs([lang], 'dev') for lang in langs[:trans_pair]]
+        dev_datasets = [get_data_pairs([lang], 'dev') for lang in langs]
         pickle.dump(train_data, open(train_file, 'wb'))
         pickle.dump(dev_datasets, open(dev_file, 'wb'))
 
@@ -119,7 +119,7 @@ def train(args: Dict[str, str]):
     model_params = model.named_parameters()
     for param in model_params:
         print(param[0], param[1].size())
-        if args['--tune']:
+        if args['--tune'] and False:
             if param[0] == 'cpg.word_embeddings.0.weight' or param[0] == 'cpg.L.weight':
                 param[1].requires_grad = False
                 print("freezing %s" % param[0])

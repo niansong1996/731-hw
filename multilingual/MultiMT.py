@@ -63,9 +63,7 @@ class MultiNMT(nn.Module):
         # apply noise to src side when this batch is autoencoding
         if src_lang == tgt_lang:
             for src_sent in src_sents:
-                for i in range(len(src_sent)):
-                    if np.random.sample() < self.denoising_rate:
-                        src_sent[i] = Vocab.UNK_ID
+                np.random.shuffle(src_sent)
 
         # [batch_size, sent_len]
         src_sents_tensor = sents_to_tensor(src_sents, device)

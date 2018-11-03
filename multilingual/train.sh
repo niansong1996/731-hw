@@ -9,7 +9,9 @@ echo save results to ${work_dir}
 
 python nmt.py \
     train \
-    --langs 'en-en'\
+    --tune \
+    --pretrain-model ${work_dir}/autoencode-model.bin \
+    --langs 'aztr-en,beru-en,glpt-en'\
     --lang-embed-size 8\
     --cuda \
     --vocab-size 20000 \
@@ -18,7 +20,7 @@ python nmt.py \
     --valid-niter 1000 \
     --lr 0.001 \
     --log-every 50 \
-    --batch-size 32 \
+    --batch-size 64 \
     --hidden-size 256 \
     --low-rank 3 \
     --num-layers 2 \
@@ -30,7 +32,7 @@ python nmt.py \
     --clip-grad 5.0 \
     --lr-decay 0.5 \
     --patience 8 \
-    --max-num-trial 3
+    --max-num-trial 100
 # 2>${work_dir}/err.log
 
 for lang in aztr beru glpt
