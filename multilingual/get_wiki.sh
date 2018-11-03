@@ -18,3 +18,9 @@ cat data/train.gl-en.gl.txt data/gl.wiki.txt.prep > data/gl_mono.txt
 cat data/train.tr-en.tr.txt > data/tr_mono.txt
 cat data/train.ru-en.ru.txt > data/ru_mono.txt
 cat data/train.pt-en.pt.txt > data/pt_mono.txt
+
+# create autoencode data
+cp data/en.wiki.txt.prep data/train.en-en.en.txt
+cp data/az.wiki.txt.prep data/train.az-az.az.txt
+cp data/be.wiki.txt.prep data/train.be-be.be.txt
+cp data/gl.wiki.txt.prep data/train.gl-gl.gl.txt

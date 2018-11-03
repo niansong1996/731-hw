@@ -8,8 +8,8 @@ Usage:
 
 Options:
     -h --help                  Show this screen.
-    --freq-size=<int>          vocab size for calculation non-unk words [default: 100000]
-    --unk-size=<int>           vocab size for most frequent words [default: 5000]
+    --freq-size=<int>          vocab size for calculation non-unk words [default: 5000]
+    --unk-size=<int>           vocab size for most frequent words [default: 50000]
     --freq-cutoff=<int>        frequency cutoff [default: 2]
 """
 
