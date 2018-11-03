@@ -34,6 +34,7 @@ Options:
     --save-opt=<file>                       optimizer state save path
     --valid-niter=<int>                     perform validation after how many iterations [default: 2000]
     --dropout=<float>                       dropout [default: 0]
+    --denoising=<float>                     percentage of noise in denoising autoencode training [default: 0.2]
     --max-decoding-time-step=<int>          maximum number of decoding time steps [default: 70]
 """
 

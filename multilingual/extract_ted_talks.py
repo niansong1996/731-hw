@@ -50,6 +50,3 @@ get_language_pairs("pt","en")
 get_language_pairs("tr","en")
 get_language_pairs("ru","en")
 
-get_language_pairs("gl","pt")
-get_language_pairs("az","tr")
-get_language_pairs("be","ru")

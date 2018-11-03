@@ -25,6 +25,7 @@ class MultiNMT(nn.Module):
         self.vocab_size = int(args['--vocab-size'])
         self.num_layers = int(args['--num-layers'])
         self.dropout_rate = float(args['--dropout'])
+        self.denoising_rate = float(args['--denoising'])
         self.NUM_DIR = 2
         # init encoder param shapes
         self.enc_in_lstm_shapes = MultiNMT.get_shapes_flstm(self.embed_size, self.hidden_size, self.num_layers)
@@ -59,6 +60,13 @@ class MultiNMT(nn.Module):
         :param tgt_sents: batch_size of sentences
         :return: scores with shape = [batch_size]
         """
+        # apply noise to src side when this batch is autoencoding
+        if src_lang == tgt_lang:
+            for src_sent in src_sents:
+                for i in range(len(src_sent)):
+                    if np.random.sample() < self.denoising_rate:
+                        src_sent[i] = Vocab.UNK_ID
+
         # [batch_size, sent_len]
         src_sents_tensor = sents_to_tensor(src_sents, device)
         # [batch_size, sent_len]
