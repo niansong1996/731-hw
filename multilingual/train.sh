@@ -9,8 +9,6 @@ echo save results to ${work_dir}
 
 python nmt.py \
     train \
-    --tune \
-    --pretrain-model ${work_dir}/autoencode-model.bin \
     --langs 'aztr-en,beru-en,glpt-en'\
     --lang-embed-size 8\
     --cuda \
@@ -20,7 +18,7 @@ python nmt.py \
     --valid-niter 1000 \
     --lr 0.001 \
     --log-every 50 \
-    --batch-size 64 \
+    --batch-size 32 \
     --hidden-size 256 \
     --low-rank 3 \
     --num-layers 2 \
