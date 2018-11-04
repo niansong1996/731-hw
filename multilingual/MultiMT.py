@@ -47,7 +47,7 @@ class MultiNMT(nn.Module):
         # combine enc and dec param shapes
         self.param_shapes = self.enc_shapes + self.dec_shapes
         # init CPG
-        self.cpg = CPG(self.param_shapes, args)
+        self.cpg = CPG(self.param_shapes, args, self.enc_shapes_len)
 
     def forward(self, src_lang: int, tgt_lang: int, src_sents: List[List[int]], tgt_sents: List[List[int]]) \
             -> Tensor:
@@ -63,9 +63,7 @@ class MultiNMT(nn.Module):
         # apply noise to src side when this batch is autoencoding
         if src_lang == tgt_lang:
             for src_sent in src_sents:
-                for i in range(len(src_sent)):
-                    if np.random.sample() < self.denoising_rate:
-                        src_sent[i] = Vocab.UNK_ID
+                np.random.shuffle(src_sent)
 
         # [batch_size, sent_len]
         src_sents_tensor = sents_to_tensor(src_sents, device)
@@ -82,7 +80,7 @@ class MultiNMT(nn.Module):
 
     def get_grouped_params(self, src_lang: int, tgt_lang: int) -> List[List[Tensor]]:
         # create a list of language indices corresponding each param group
-        langs = [src_lang for _ in range(self.enc_shapes_len)] + [tgt_lang for _ in range(self.dec_shapes_len)]
+        langs = [src_lang for _ in range(self.enc_shapes_len)] + [src_lang for _ in range(self.dec_shapes_len)]
         return self.cpg.get_params(langs)
 
     def encode(self, batch_size: int, src_sent_idx: Tensor, src_lang: int, grouped_params: List[List[Tensor]]) \
