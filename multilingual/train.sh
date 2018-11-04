@@ -18,10 +18,10 @@ python nmt.py \
     --valid-niter 1000 \
     --lr 0.001 \
     --log-every 50 \
-    --batch-size 32 \
+    --batch-size 64 \
     --hidden-size 256 \
     --low-rank 3 \
-    --num-layers 2 \
+    --num-layers 1 \
     --max-epoch 100 \
     --embed-size 256 \
     --uniform-init 0.1 \
