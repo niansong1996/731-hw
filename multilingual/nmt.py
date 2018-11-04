@@ -75,11 +75,6 @@ def train(args: Dict[str, str]):
     # identify translation and autoencode tasks
     langs = [p.split('-') for p in lang_pairs.split(',')]
     trans_pair = autoenc_pair = 0
-    for pair in langs:
-        if pair[0] == pair[1]:
-            autoenc_pair += 1
-        else:
-            trans_pair += 1
 
     # load data from prev dump
     train_file = 'data/train.%s.dump' % lang_pairs
@@ -90,7 +85,7 @@ def train(args: Dict[str, str]):
         print("Done reading from dump")
     else:
         train_data = get_data_pairs(langs, 'train')
-        dev_datasets = [get_data_pairs([lang], 'dev') for lang in langs[:trans_pair]]
+        dev_datasets = [get_data_pairs([lang], 'dev') for lang in langs]
         pickle.dump(train_data, open(train_file, 'wb'))
         pickle.dump(dev_datasets, open(dev_file, 'wb'))
 
