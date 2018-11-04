@@ -25,11 +25,11 @@ python nmt.py \
     --max-epoch 100 \
     --embed-size 256 \
     --uniform-init 0.1 \
-    --dropout 0.2 \
+    --dropout 0.5 \
     --denoising 0.2 \
     --clip-grad 5.0 \
     --lr-decay 0.5 \
-    --patience 8 \
+    --patience 100 \
     --max-num-trial 100
 # 2>${work_dir}/err.log
 
