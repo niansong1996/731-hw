@@ -63,10 +63,10 @@ if __name__ == '__main__':
     # lines = translate('multilingual/data/test.tr-az.tr.txt', 'test.result.tr-az.az.txt', d)
     # print(lines)
 
-    src_vocab = get_vocab("cleaned-pt-gl.pt")
-    tgt_vocab = get_vocab("cleaned-pt-gl.gl")
+    src_vocab = get_vocab("cleaned-es-gl.es")
+    tgt_vocab = get_vocab("cleaned-es-gl.gl")
     d = read_dict('lex.pt2gl.sorted', src_vocab, tgt_vocab)
-    lines = translate('multilingual/data/train.pt-en.pt.txt', 'train.result.gl-en.gl.txt', d)
+    lines = translate('multilingual/data/train.es-gl.es.txt', 'train.result.es-gl.gl.txt', d)
     print(lines)
     
     # src_vocab = get_vocab("cleaned-ru-be.ru")

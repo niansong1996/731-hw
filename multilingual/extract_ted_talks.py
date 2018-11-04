@@ -53,4 +53,14 @@ def get_language_pairs(src, tgt):
 # get_language_pairs("gl","pt")
 # get_language_pairs("az","tr")
 # get_language_pairs("be","ru")
-get_language_pairs("tr", "az")
+# get_language_pairs("tr", "az")
+# get_language_pairs("pt", "gl")
+# get_language_pairs("ru", "be")
+# get_language_pairs("uk", "en")
+# get_language_pairs("uk", "be")
+
+# get_language_pairs("pl", "en")
+# get_language_pairs("pl", "be")
+
+get_language_pairs("es", "gl")
+

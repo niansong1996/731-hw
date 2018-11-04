@@ -26,5 +26,7 @@ if __name__ == "__main__":
     #       "cleaned-ru-be.ru", "cleaned-ru-be.be")
     # clean("multilingual/data/train.uk-be.uk.txt", "multilingual/data/train.uk-be.be.txt",
     #       "cleaned-uk-be.uk", "cleaned-uk-be.be")
-    clean("multilingual/data/train.pt-gl.pt.txt", "multilingual/data/train.pt-gl.gl.txt",
-          "cleaned-pt-gl.pt", "cleaned-pt-gl.gl")
+    # clean("multilingual/data/train.pt-gl.pt.txt", "multilingual/data/train.pt-gl.gl.txt",
+    #       "cleaned-pt-gl.pt", "cleaned-pt-gl.gl")
+    clean("multilingual/data/train.es-gl.es.txt", "multilingual/data/train.es-gl.gl.txt",
+          "cleaned-es-gl.es", "cleaned-es-gl.gl")
