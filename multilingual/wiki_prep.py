@@ -103,7 +103,7 @@ def preprocess_wiki(sents, min_length, max_length, max_size, vocab):
             if sent[i] == '.' and not i == (len(sent) - 1):
                 sent[i] = '.\n'
         
-        if unk_num < 0.2 * len(sent):
+        if unk_num < 0.4 * len(sent):
             processed_sents.append(sent)
 
         # when max sents num is reached
@@ -124,7 +124,7 @@ if __name__ == '__main__':
     
     src_sents = read_corpus(corpus_file)
     vocab = VocabEntry.from_corpus(src_sents, vocab_file, freq_size, unk_size, freq_cutoff)
-    processed_wiki = preprocess_wiki(src_sents, 5, 40, 500000, vocab)
+    processed_wiki = preprocess_wiki(src_sents, 5, 50, 500000, vocab)
 
     # save the processed wiki 
     file_name = corpus_file + '.prep'
