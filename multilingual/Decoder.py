@@ -11,9 +11,9 @@ from vocab import Vocab
 
 
 class Decoder:
-    def __init__(self, vocab_size, batch_size, embed_size, hidden_size, num_layers,
+    def __init__(self, batch_size, embed_size, hidden_size, num_layers,
                  embedding: nn.Embedding, lstm_weights: List[List[Tensor]], attn_weights: List[List[Tensor]],
-                 dropout_rate=0):
+                 training, dropout_rate):
         self.embedding = embedding
         self.dec_embed_size = embed_size
         self.dec_hidden_size = hidden_size
@@ -27,8 +27,8 @@ class Decoder:
         
         self.criterion = nn.NLLLoss(ignore_index=Vocab.PAD_ID, reduction='none')
         self.tanh = nn.Tanh()
+        self.training = training
         self.dropout_rate = dropout_rate
-        self.dropout = nn.Dropout(p=self.dropout_rate)
         sos_batch = torch.tensor([Vocab.SOS_ID for _ in range(batch_size)], dtype=torch.long).to(device)
         self.init_input = embedding(sos_batch)
 
@@ -78,7 +78,7 @@ class Decoder:
         top_subwords = torch.ones((tgt_sent_idx.shape[1], self.batch_size))
         # skip the '<s>' in the tgt_sents since the output starts from the word after '<s>'
         for i in range(1, tgt_sent_idx.shape[1]):
-            decoder_input = self.dropout(decoder_input)
+            decoder_input = F.dropout(decoder_input, p=self.dropout_rate, training=self.training)
             h_t, c_t, softmax_output, attn = self.decoder_step(src_encodings, decoder_input, h_t, c_t, attn)
             # extract the top words of each sents from this batch
             top_subwords[i] = torch.argmax(softmax_output, dim=1)
