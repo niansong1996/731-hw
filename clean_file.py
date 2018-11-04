@@ -22,5 +22,9 @@ def clean(src_file, tgt_file, src_output, tgt_output):
 
 
 if __name__ == "__main__":
-    clean("multilingual/data/train.ru-be.ru.txt", "multilingual/data/train.ru-be.be.txt",
-          "cleaned-ru-be.ru", "cleaned-ru-be.be")
+    # clean("multilingual/data/train.ru-be.ru.txt", "multilingual/data/train.ru-be.be.txt",
+    #       "cleaned-ru-be.ru", "cleaned-ru-be.be")
+    # clean("multilingual/data/train.uk-be.uk.txt", "multilingual/data/train.uk-be.be.txt",
+    #       "cleaned-uk-be.uk", "cleaned-uk-be.be")
+    clean("multilingual/data/train.pt-gl.pt.txt", "multilingual/data/train.pt-gl.gl.txt",
+          "cleaned-pt-gl.pt", "cleaned-pt-gl.gl")
