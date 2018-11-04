@@ -10,7 +10,7 @@ from config import LANG_NAMES
 
 
 class CPG(nn.Module):
-    def __init__(self, shapes: List[List[Tuple[int]]], args: Dict[str, str]):
+    def __init__(self, shapes: List[List[Tuple[int]]], args: Dict[str, str], enc_param_group):
         """
         Args:
             shapes: List[List[tuples]] a list of groups, where each tuple the
