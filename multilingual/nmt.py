@@ -208,7 +208,7 @@ def train(args: Dict[str, str]):
                                 task_hist_valid_scores[i] = dev_bleu
                                 task_model_save_path = model_save_path + ('.%s' % src_lang_name)
                                 more_info = '(saved to [%s])' % task_model_save_path
-                                model.save(model_save_path)
+                                model.save(task_model_save_path)
 
                         print("lang pair %s: dev. ppl %.3f; dev. bleu %.3f %s" % (pair_name, float(dev_ppl), dev_bleu, more_info))
 
