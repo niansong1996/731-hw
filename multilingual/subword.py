@@ -14,6 +14,7 @@ Options:
 from typing import List, Tuple, Set
 
 import sentencepiece as spm
+import numpy as np
 from docopt import docopt
 from config import LANG_NAMES
 
@@ -61,10 +62,19 @@ def get_corpus_ids(src_lang_idx: int, tgt_lang_idx: int, data_type: str, is_tgt:
             if is_train and len(sent.split(' ')) > 50:
                 long_sent_in_src.add(line_count)
                 continue
+
+        if src_lang_idx == tgt_lang_idx and not is_tgt:
+            # denoising autoencoder
+            sent_words = sent.split(' ')
+            np.random.shuffle(sent_words)
+            sent = ' '.join(sent_words)
+
+        # convert to subword ids
         sent_encode = sp.EncodeAsIds(sent)
         if is_tgt:
             # add <s> and </s> to the tgt sents
             sent_encode = [sp.bos_id()] + sent_encode + [sp.eos_id()]
+
         sents.append(sent_encode)
     return sents, long_sent_in_src
 

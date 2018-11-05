@@ -33,6 +33,7 @@ Options:
     --save-to=<file>                        model save path
     --save-opt=<file>                       optimizer state save path
     --valid-niter=<int>                     perform validation after how many iterations [default: 2000]
+    --autoencode-epoch=<int>                using autoencode in the first few epochs [default: 5]
     --dropout=<float>                       dropout [default: 0]
     --denoising=<float>                     percentage of noise in denoising autoencode training [default: 0.2]
     --max-decoding-time-step=<int>          maximum number of decoding time steps [default: 70]
@@ -74,12 +75,6 @@ def train(args: Dict[str, str]):
 
     # identify translation and autoencode tasks
     langs = [p.split('-') for p in lang_pairs.split(',')]
-    trans_pair = autoenc_pair = 0
-    for pair in langs:
-        if pair[0] == pair[1]:
-            autoenc_pair += 1
-        else:
-            trans_pair += 1
 
     # load data from prev dump
     train_file = 'data/train.%s.dump' % lang_pairs
@@ -95,6 +90,7 @@ def train(args: Dict[str, str]):
         pickle.dump(dev_datasets, open(dev_file, 'wb'))
 
     train_batch_size = int(args['--batch-size'])
+    autoencode_epoch = int(args['--autoencode-epoch'])
     clip_grad = float(args['--clip-grad'])
     valid_niter = int(args['--valid-niter'])
     log_every = int(args['--log-every'])
@@ -111,6 +107,7 @@ def train(args: Dict[str, str]):
     num_trial = 0
     train_iter = patience = cum_loss = report_loss = cumulative_tgt_words = report_tgt_words = 0
     cumulative_examples = report_examples = epoch = valid_num = 0
+    task_hist_valid_scores = [-1e10 for _ in range(len(dev_datasets))]
     hist_valid_scores = []
     train_time = begin_time = time.time()
     print('begin Maximum Likelihood training')
@@ -124,15 +121,15 @@ def train(args: Dict[str, str]):
             if param[0] == 'cpg.word_embeddings.0.weight' or param[0] == 'cpg.L.weight':
                 param[1].requires_grad = False
                 print("freezing %s" % param[0])
+        
     optimizer = torch.optim.Adam(model.parameters(), lr=lr, amsgrad=True)
-
-    # TODO: [remove this] temporaily save inited model for testing
-    model.save(model_save_path)
-    print('save currently the best model to [%s]' % model_save_path)
-
 
     while True:
         epoch += 1
+        # remove autoencode training after this point
+        if epoch == autoencode_epoch:
+            train_data = list(filter(lambda x: x.langs.src != x.langs.tgt, train_data))
+            print('Stop autoencoding, now training set size -> (%d)' % len(train_data))
 
         for src_lang, tgt_lang, src_sents, tgt_sents in batch_iter(train_data, batch_size=train_batch_size):
             train_iter += 1
@@ -189,26 +186,38 @@ def train(args: Dict[str, str]):
                     # set model to evaluate mode
                     model.eval()
                     # compute dev. ppl and bleu
-                    dev_ppls = dict()
-                    dev_bleus = dict()
-                    for dev_data in dev_datasets:
-                        pair_name = ("%s-%s" % (LANG_NAMES[dev_data[0].langs.src], LANG_NAMES[dev_data[0].langs.tgt]))
+                    dev_ppls = []
+                    dev_bleus = []
+                    for i in range(len(dev_datasets)):
+                        dev_data = dev_datasets[i]
+                        src_lang_name = LANG_NAMES[dev_data[0].langs.src]
+
+                        pair_name = ("%s-%s" % (src_lang_name, LANG_NAMES[dev_data[0].langs.tgt]))
                         dev_ppl, decodes = model.evaluate_ppl(dev_data, batch_size=128)  # dev batch size can be a bit larger
                         reference_sents = decode_corpus_ids(lang_name=LANG_NAMES[tgt_lang], sents=decodes[0])
                         decoded_sents = decode_corpus_ids(lang_name=LANG_NAMES[tgt_lang], sents=decodes[1])
                         assert len(reference_sents) == len(decoded_sents)
                         dev_bleu = compute_corpus_level_bleu_score(reference_sents, decoded_sents)
 
-                        dev_ppls[pair_name] = float(dev_ppl)
-                        dev_bleus[pair_name] = dev_bleu
+                        # only save and evaluate for non-autoencode pairs
+                        more_info = ''
+                        if not dev_data[0].langs.src == dev_data[0].langs.tgt:
+                            dev_ppls.append(float(dev_ppl))
+                            dev_bleus.append(dev_bleu)
+                            # save best model for specific lang
+                            if dev_bleu > task_hist_valid_scores[i]:
+                                task_hist_valid_scores[i] = dev_bleu
+                                task_model_save_path = model_save_path + ('.%s' % src_lang_name)
+                                more_info = '(saved to [%s])' % task_model_save_path
+                                model.save(task_model_save_path)
+
+                        print("lang pair %s: dev. ppl %.3f; dev. bleu %.3f %s" % (pair_name, float(dev_ppl), dev_bleu, more_info))
 
                     # set model back to training mode
                     model.train()
-                    for lang_key in dev_ppls.keys():
-                        print("lang pair %s: dev. ppl %.3f; dev. bleu %.3f" % (lang_key, dev_ppls[lang_key], dev_bleus[lang_key]))
 
-                    dev_bleu = np.mean([float(v) for v in dev_bleus.values()])
-                    dev_ppl = np.mean([float(v) for v in dev_ppls.values()])
+                    dev_bleu = np.mean([float(v) for v in dev_bleus])
+                    dev_ppl = np.mean([float(v) for v in dev_ppls])
                     print('validation: iter %d, avg. dev. ppl %f, avg. dev. bleu %f' % (train_iter, dev_ppl, dev_bleu))
 
                     valid_metric = dev_bleu
