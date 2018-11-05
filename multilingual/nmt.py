@@ -127,7 +127,7 @@ def train(args: Dict[str, str]):
         epoch += 1
         # remove autoencode training after this point
         if epoch == autoencode_epoch:
-            train_data = filter(lambda x: x.langs.src != x.langs.tgt)
+            train_data = list(filter(lambda x: x.langs.src != x.langs.tgt, train_data))
             print('Stop autoencoding, now training set size -> (%d)' % len(train_data))
 
         for src_lang, tgt_lang, src_sents, tgt_sents in batch_iter(train_data, batch_size=train_batch_size):
