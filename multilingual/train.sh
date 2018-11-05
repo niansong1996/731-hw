@@ -9,7 +9,7 @@ echo save results to ${work_dir}
 
 python nmt.py \
     train \
-    --langs 'aztr-en,beru-en,glpt-en'\
+    --langs 'aztr-en,beru-en,glpt-en,en-en'\
     --lang-embed-size 8\
     --cuda \
     --vocab-size 20000 \
@@ -28,9 +28,10 @@ python nmt.py \
     --dropout 0.5 \
     --denoising 0.2 \
     --clip-grad 5.0 \
+    --autoencode-epoch 5 \
     --lr-decay 0.5 \
     --patience 100 \
-    --max-num-trial 100
+    --max-num-trial 1
 # 2>${work_dir}/err.log
 
 for lang in aztr beru glpt
