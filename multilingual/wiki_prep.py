@@ -22,11 +22,28 @@ import pickle
 import re
 
 def read_corpus(file_path):
+    en_corpus = file_path.startswith('en')
+    if en_corpus:
+        print('##### Enable first char lower case for English #####')
+
     data = []
     for line in open(file_path, encoding="utf-8"):
         sub_sents = line.strip().split('.')
         for sub_sent in sub_sents:
-            data.append(sub_sent.strip().split(' ') + ['.'])
+            if sub_sent[0].islower():
+                if len(data) != 0:
+                    data[-1] += sub_sent
+                    continue
+            else:
+                if en_corpus:
+                    # lower the case of the first word only when first char is only char that upper
+                    first_word = sub_sent.split[' '][0]
+                    first_word[0] = first_word[0].lower()
+                    if first_word.islower():
+                        sub_sent[0] = sub_sent[0].lower()
+                else:
+                    sub_sent = sub_sent.lower()
+                data.append(sub_sent.strip().split(' ') + ['.'])
 
     return data
 
