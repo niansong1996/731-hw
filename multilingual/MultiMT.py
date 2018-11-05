@@ -60,11 +60,6 @@ class MultiNMT(nn.Module):
         :param tgt_sents: batch_size of sentences
         :return: scores with shape = [batch_size]
         """
-        # apply noise to src side when this batch is autoencoding
-        if src_lang == tgt_lang:
-            for src_sent in src_sents:
-                np.random.shuffle(src_sent)
-
         # [batch_size, sent_len]
         src_sents_tensor = sents_to_tensor(src_sents, device)
         # [batch_size, sent_len]
