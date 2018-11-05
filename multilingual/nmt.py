@@ -113,9 +113,14 @@ def train(args: Dict[str, str]):
 
     # set the optimizers
     lr = float(args['--lr'])
-    model_params = model.parameters()
+    model_params = model.named_parameters()
     for param in model_params:
-        print(type(param.data), param.size())
+        print(param[0], param[1].size())
+        if args['--tune'] and False:
+            if param[0] == 'cpg.word_embeddings.0.weight' or param[0] == 'cpg.L.weight':
+                param[1].requires_grad = False
+                print("freezing %s" % param[0])
+        
     optimizer = torch.optim.Adam(model.parameters(), lr=lr, amsgrad=True)
 
     while True:
@@ -193,7 +198,7 @@ def train(args: Dict[str, str]):
                         assert len(reference_sents) == len(decoded_sents)
                         dev_bleu = compute_corpus_level_bleu_score(reference_sents, decoded_sents)
 
-                        # only save for non-autoencode pairs
+                        # only save and evaluate for non-autoencode pairs
                         more_info = ''
                         if not dev_data[0].langs.src == dev_data[0].langs.tgt:
                             dev_ppls.append(float(dev_ppl))
@@ -205,7 +210,7 @@ def train(args: Dict[str, str]):
                                 more_info = '(saved to [%s])' % task_model_save_path
                                 model.save(model_save_path)
 
-                        print("lang pair %s: dev. ppl %.3f; dev. bleu %.3f %s" % (pair_name, float(dev_ppl), dev_bleus, more_info))
+                        print("lang pair %s: dev. ppl %.3f; dev. bleu %.3f %s" % (pair_name, float(dev_ppl), dev_bleu, more_info))
 
                     # set model back to training mode
                     model.train()
