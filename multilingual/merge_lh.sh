@@ -1,7 +1,7 @@
 # concat the low-high mono lingual data for subword training
-cat data/az_mono.txt data/tr_mono.txt > data/aztr_mono.txt
-cat data/be_mono.txt data/ru_mono.txt > data/beru_mono.txt
-cat data/gl_mono.txt data/pt_mono.txt > data/glpt_mono.txt
+cat data/train.az-en.az.txt data/tr_mono.txt > data/aztr_mono.txt
+cat data/train.be-en.be.txt data/ru_mono.txt > data/beru_mono.txt
+cat data/train.gl-en.gl.txt data/pt_mono.txt > data/glpt_mono.txt
 
 # concat the low-high resource data
 for set_type in "train"

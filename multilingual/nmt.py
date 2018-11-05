@@ -105,6 +105,7 @@ def train(args: Dict[str, str]):
     print('Model initializing...')
     model = MultiNMT(args).to(device)
     if args['--tune']:
+        print('tuning mode... load model from %s' % args['--pretrain-model'])
         model = model.load(args['--pretrain-model'])
 
     num_trial = 0
