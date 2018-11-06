@@ -94,6 +94,8 @@ class MultiNMT(nn.Module):
         return decoder(src_encodings, decoder_init_state, tgt_sents_tensor)
 
     def get_grouped_params(self, src_lang: int, tgt_lang: int) -> List[List[Tensor]]:
+        if src_lang > 3:
+            src_lang -= 3
         # create a list of language indices corresponding each param group
         langs = [src_lang for _ in range(self.enc_shapes_len)] + [src_lang for _ in range(self.dec_shapes_len)]
         return self.cpg.get_params(langs)

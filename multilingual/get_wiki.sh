@@ -24,3 +24,8 @@ cp data/en.wiki.txt.prep data/train.en-en.en.txt
 cp data/az.wiki.txt.prep data/train.az-az.az.txt
 cp data/be.wiki.txt.prep data/train.be-be.be.txt
 cp data/gl.wiki.txt.prep data/train.gl-gl.gl.txt
+
+cp data/test.az-en.az.txt data/dev.az-az.az.txt
+cp data/test.be-en.be.txt data/dev.be-be.be.txt
+cp data/test.gl-en.gl.txt data/dev.gl-gl.gl.txt
+cp data/test.pt-en.en.txt data/dev.en-en.en.txt

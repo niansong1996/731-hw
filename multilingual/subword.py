@@ -62,9 +62,9 @@ def get_corpus_ids(vocabs, src_lang_idx: int, tgt_lang_idx: int, data_type: str,
             if is_train and len(sent.split(' ')) > 50:
                 long_sent_in_src.add(line_count)
                 continue
-        # denoising autoencoder
         sent_words = sent.split(' ')
         if src_lang_idx == tgt_lang_idx and not is_tgt:
+            # denoising autoencoder
             np.random.shuffle(sent_words)
 
         # convert to subword ids

@@ -104,6 +104,12 @@ def train(args: Dict[str, str]):
     model_save_path = args['--save-to']
     optimizer_save_path = args['--save-opt']
 
+    # initialize the model
+    print('Model initializing...')
+    model = MultiNMT(args).to(device)
+    if args['--tune']:
+        print('tuning mode... load model from %s' % args['--pretrain-model'])
+        model = model.load(args['--pretrain-model'])
     num_trial = 0
     train_iter = patience = cum_loss = report_loss = cumulative_tgt_words = report_tgt_words = 0
     cumulative_examples = report_examples = epoch = valid_num = 0
@@ -128,7 +134,7 @@ def train(args: Dict[str, str]):
         epoch += 1
         # remove autoencode training after this point
         if epoch == autoencode_epoch:
-            train_data = filter(lambda x: x.langs.src != x.langs.tgt)
+            train_data = list(filter(lambda x: x.langs.src != x.langs.tgt, train_data))
             print('Stop autoencoding, now training set size -> (%d)' % len(train_data))
 
         for src_lang, tgt_lang, src_sents, tgt_sents in batch_iter(train_data, batch_size=train_batch_size):
@@ -211,8 +217,7 @@ def train(args: Dict[str, str]):
                                 task_hist_valid_scores[i] = dev_bleu
                                 task_model_save_path = model_save_path + ('.%s' % src_lang_name)
                                 more_info = '(saved to [%s])' % task_model_save_path
-                                model.save(model_save_path)
-
+                                model.save(task_model_save_path)
                         print("lang pair %s: dev. ppl %.3f; dev. bleu %.3f %s" % (pair_name, float(dev_ppl), dev_bleu, more_info))
 
                     # set model back to training mode
@@ -230,7 +235,7 @@ def train(args: Dict[str, str]):
                         patience = 0
                         print('save currently the best model to [%s]' % model_save_path)
                         model.save(model_save_path)
-                        torch.save(optimizer, optimizer_save_path)
+                        torch.save(optimizer.state_dict(), optimizer_save_path)
 
                     elif patience < int(args['--patience']):
                         patience += 1
@@ -245,7 +250,8 @@ def train(args: Dict[str, str]):
 
                             # load model
                             model = model.load(model_save_path)
-                            optimizer = torch.load(optimizer_save_path)
+                            optimizer = torch.optim.Adam(model.parameters(), lr=lr, amsgrad=True)
+                            optimizer.load_state_dict(torch.load(optimizer_save_path))
 
                             # decay learning rate, and restore from previously best checkpoint
                             lr = lr * float(args['--lr-decay'])
