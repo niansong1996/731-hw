@@ -227,7 +227,7 @@ def train(args: Dict[str, str]):
                         patience = 0
                         print('save currently the best model to [%s]' % model_save_path)
                         model.save(model_save_path)
-                        torch.save(optimizer, optimizer_save_path)
+                        torch.save(optimizer.state_dict(), optimizer_save_path)
 
                     elif patience < int(args['--patience']):
                         patience += 1
@@ -242,7 +242,8 @@ def train(args: Dict[str, str]):
 
                             # load model
                             model = model.load(model_save_path)
-                            optimizer = torch.load(optimizer_save_path)
+                            optimizer = torch.optim.Adam(model.parameters(), lr=lr, amsgrad=True)
+                            optimizer.load_state_dict(torch.load(optimizer_save_path))
 
                             # decay learning rate, and restore from previously best checkpoint
                             lr = lr * float(args['--lr-decay'])
