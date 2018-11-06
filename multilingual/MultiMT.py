@@ -82,7 +82,7 @@ class MultiNMT(nn.Module):
 
     def get_grouped_params(self, src_lang: int, tgt_lang: int) -> List[List[Tensor]]:
         # create a list of language indices corresponding each param group
-        langs = [src_lang for _ in range(self.enc_shapes_len)] + [src_lang for _ in range(self.dec_shapes_len)]
+        langs = [tgt_lang for _ in range(self.enc_shapes_len)] + [tgt_lang for _ in range(self.dec_shapes_len)]
         return self.cpg.get_params(langs)
 
     def encode(self, batch_size: int, src_sent_idx: Tensor, src_lang: int, src_embedding, enc_lstm_weights: List[List[Tensor]]) \

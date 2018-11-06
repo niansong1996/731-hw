@@ -128,8 +128,11 @@ class Decoder:
         h_t_top = h_t[-1]
         # dim = (batch_size, src_len, num_direction * enc_hidden_size)
         h_s_ = h_s.transpose(0, 1)
-        # dim = (batch_size, 1, src_len)
-        score = self.general_score(h_s_, h_t_top, attn_weights)
+        try:
+            # dim = (batch_size, 1, src_len)
+            score = self.general_score(h_s_, h_t_top, attn_weights)
+        except:
+            print('shape %s seq length %d' % (h_s_.shape, h_s_.shape[1]))
         # dim = (batch_size, 1, src_len)
         a_t = self.softmax(score)
         # a_t = self.dropout(a_t)
@@ -148,7 +151,7 @@ class Decoder:
         :return: a score of size (batch_size, 1, src_len)
         """
         # dim = (batch_size, src_len, num_direction * enc_hidden_size)
-        W_a_h_s = F.linear(h_s_, attn_weights[0][1])
+        W_a_h_s = F.linear(h_s_, attn_weights[0][0])
         # dim = (batch_size, num_direction * enc_hidden_size, src_len)
         W_a_h_s = W_a_h_s.transpose(1, 2)
         return torch.bmm(h_t_top.unsqueeze(1), W_a_h_s)

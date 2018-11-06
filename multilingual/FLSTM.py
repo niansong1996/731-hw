@@ -31,8 +31,6 @@ def unpack_weight(weight, input_size, hidden_size):
 
 class Stack_FLSTMCell:
     def __init__(self, input_size, hidden_size, num_layers=1):
-        assert (len(weights) == num_layers)
-
         # init the size constants
         self.input_size = input_size
         self.hidden_size = hidden_size
