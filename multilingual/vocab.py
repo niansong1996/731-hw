@@ -21,13 +21,14 @@ import pickle
 
 
 class VocabEntry(object):
-    def __init__(self):
+    def __init__(self, vocab_size):
         self.word2id = dict()
         self.unk_id = 3
         self.word2id[Vocab.PAD] = Vocab.PAD_ID
         self.word2id[Vocab.SOS] = Vocab.SOS_ID
         self.word2id[Vocab.EOS] = Vocab.EOS_ID
         self.word2id[Vocab.UNK] = Vocab.UNK_ID
+        self.vocab_size = vocab_size
 
         self.id2word = {v: k for k, v in self.word2id.items()}
 
@@ -50,6 +51,8 @@ class VocabEntry(object):
         return self.id2word[wid]
 
     def add(self, word):
+        if len(self) >= self.vocab_size:
+            return -1
         if word not in self:
             wid = self.word2id[word] = len(self)
             self.id2word[wid] = word
@@ -64,14 +67,14 @@ class VocabEntry(object):
             return [self[w] for w in sents]
 
     @staticmethod
-    def from_corpus(corpus, size, freq_cutoff=2):
-        vocab_entry = VocabEntry()
+    def from_corpus(corpus, vocab_size, freq_cutoff=2):
+        vocab_entry = VocabEntry(vocab_size)
 
         word_freq = Counter(chain(*corpus))
         valid_words = [w for w, v in word_freq.items() if v >= freq_cutoff]
         print(f'number of word types: {len(word_freq)}, number of word types w/ frequency >= {freq_cutoff}: {len(valid_words)}')
 
-        top_k_words = sorted(valid_words, key=lambda w: word_freq[w], reverse=True)[:size]
+        top_k_words = sorted(valid_words, key=lambda w: word_freq[w], reverse=True)[:vocab_size]
         for word in top_k_words:
             vocab_entry.add(word)
 
