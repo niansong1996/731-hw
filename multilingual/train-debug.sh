@@ -12,7 +12,7 @@ echo save results to ${work_dir}
 
 python nmt.py \
     train \
-    --langs 'az-en,tr-en'\
+    --langs 'tr-en'\
     --lang-embed-size 8\
     --cuda \
     --vocab-size 20000 \
@@ -26,7 +26,7 @@ python nmt.py \
     --low-rank 2 \
     --num-layers 1 \
     --max-epoch 100 \
-    --embed-size 200 \
+    --embed-size 300 \
     --uniform-init 0.1 \
     --dropout 0.2 \
     --clip-grad 5.0 \
