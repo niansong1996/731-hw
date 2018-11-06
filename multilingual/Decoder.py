@@ -12,16 +12,13 @@ from vocab import Vocab
 
 class Decoder:
     def __init__(self, batch_size, embed_size, hidden_size, num_layers,
-                 embedding: nn.Embedding, lstm_weights: List[List[Tensor]], attn_weights: List[List[Tensor]],
-                 training, dropout_rate):
-        self.embedding = embedding
+                 embedding, training, dropout_rate):
         self.dec_embed_size = embed_size
         self.dec_hidden_size = hidden_size
         self.num_layers = num_layers
         self.batch_size = batch_size
         self.lstm_cell = Stack_FLSTMCell(input_size=hidden_size + embed_size, hidden_size=hidden_size,
-                                         weights=lstm_weights, num_layers=num_layers)
-        self.Wa, self.Wc, self.Ws = attn_weights[0]
+                                         num_layers=num_layers)
         self.log_softmax = nn.LogSoftmax(dim=1)
         self.softmax = nn.Softmax(dim=2)
         
@@ -50,7 +47,8 @@ class Decoder:
         attn = torch.zeros(h_0.shape[1:], device=device)
         return h_0, c_0, attn
 
-    def __call__(self, src_encodings: Tensor, decoder_init_state: Tensor, tgt_sent_idx: Tensor) -> Tensor:
+    def __call__(self, src_encodings: Tensor, decoder_init_state: Tensor, tgt_sent_idx: Tensor,
+                 embedding, lstm_weights, attn_weights) -> Tensor:
         """
         Given source encodings, compute the log-likelihood of predicting the gold-standard target
         sentence tokens
@@ -73,13 +71,13 @@ class Decoder:
         scores = torch.zeros(self.batch_size, device=device)
         h_t, c_t, attn = self.init_decoder_step_input(decoder_init_state)
         # dim = (batch_size, sent_len, embed_size)
-        tgt_sent_embed = self.embedding(tgt_sent_idx)
+        tgt_sent_embed = embedding(tgt_sent_idx)
         # save top words for computing bleu score
         top_subwords = torch.ones((tgt_sent_idx.shape[1], self.batch_size))
         # skip the '<s>' in the tgt_sents since the output starts from the word after '<s>'
         for i in range(1, tgt_sent_idx.shape[1]):
             decoder_input = F.dropout(decoder_input, p=self.dropout_rate, training=self.training)
-            h_t, c_t, softmax_output, attn = self.decoder_step(src_encodings, decoder_input, h_t, c_t, attn)
+            h_t, c_t, softmax_output, attn = self.decoder_step(src_encodings, decoder_input, h_t, c_t, attn, lstm_weights, attn_weights)
             # extract the top words of each sents from this batch
             top_subwords[i] = torch.argmax(softmax_output, dim=1)
             # dim = (batch_size)
@@ -93,7 +91,8 @@ class Decoder:
             decoder_input = tgt_sent_embed[:, i, :]
         return scores, top_subwords.transpose(0,1)
 
-    def decoder_step(self, src_encodings: Tensor, decoder_input: Tensor, h_t: Tensor, c_t: Tensor, attn: Tensor)\
+    def decoder_step(self, src_encodings: Tensor, decoder_input: Tensor, h_t: Tensor, c_t: Tensor, attn: Tensor,
+                     lstm_weights, attn_weights)\
             -> (Tensor, Tensor, Tensor, Tensor):
         """
         Perform one decoder step
@@ -108,16 +107,16 @@ class Decoder:
         """
         # dim = (batch_size,  num_direction * enc_hidden_size + dec_embed_size)
         cat_input = torch.cat((attn, decoder_input), 1)
-        h_t, c_t = self.lstm_cell(cat_input, h_t, c_t)
+        h_t, c_t = self.lstm_cell(cat_input, h_t, c_t, lstm_weights)
         # attn_h_t.shape = [batch_size, dec_hidden_size]
-        attn_h_t = self.global_attention(src_encodings, h_t)
+        attn_h_t = self.global_attention(src_encodings, h_t, attn_weights)
         # vocab_size_output.shape = [batch_size, vocab_size]
-        vocab_size_output = F.linear(attn_h_t, self.Ws)
+        vocab_size_output = F.linear(attn_h_t, attn_weights[0][2])
         # dim = (batch_size, vocab_size)
         softmax_output = self.log_softmax(vocab_size_output)
         return h_t, c_t, softmax_output, attn_h_t
 
-    def global_attention(self, h_s: Tensor, h_t: List[Tensor]) -> Tensor:
+    def global_attention(self, h_s: Tensor, h_t: List[Tensor], attn_weights) -> Tensor:
         """
         Calculate global attention
 
@@ -130,7 +129,7 @@ class Decoder:
         # dim = (batch_size, src_len, num_direction * enc_hidden_size)
         h_s_ = h_s.transpose(0, 1)
         # dim = (batch_size, 1, src_len)
-        score = self.general_score(h_s_, h_t_top)
+        score = self.general_score(h_s_, h_t_top, attn_weights)
         # dim = (batch_size, 1, src_len)
         a_t = self.softmax(score)
         # a_t = self.dropout(a_t)
@@ -138,9 +137,9 @@ class Decoder:
         c_t = torch.bmm(a_t, h_s_)[:, 0, :]
         # dim = (batch_size, num_direction * enc_hidden_size + dec_hidden_size)
         cat_c_h = torch.cat((c_t, h_t_top), 1)
-        return self.tanh(F.linear(cat_c_h, self.Wc))
+        return self.tanh(F.linear(cat_c_h, attn_weights[0][1]))
 
-    def general_score(self, h_s_: Tensor, h_t_top: Tensor) -> Tensor:
+    def general_score(self, h_s_: Tensor, h_t_top: Tensor, attn_weights) -> Tensor:
         """
         Calculate general attention score
 
@@ -149,7 +148,7 @@ class Decoder:
         :return: a score of size (batch_size, 1, src_len)
         """
         # dim = (batch_size, src_len, num_direction * enc_hidden_size)
-        W_a_h_s = F.linear(h_s_, self.Wa)
+        W_a_h_s = F.linear(h_s_, attn_weights[0][1])
         # dim = (batch_size, num_direction * enc_hidden_size, src_len)
         W_a_h_s = W_a_h_s.transpose(1, 2)
         return torch.bmm(h_t_top.unsqueeze(1), W_a_h_s)

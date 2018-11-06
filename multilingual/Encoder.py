@@ -13,11 +13,9 @@ class Encoder:
     The encoder is a bidiretional encoder, one can NOT be used as a single direction one
     """
 
-    def __init__(self, batch_size, embed_size, hidden_size, embedding: torch.nn.Embedding, weights: List[List[Tensor]],
-                 training, dropout_rate, num_layer=2, ):
+    def __init__(self, batch_size, embed_size, hidden_size,
+                 training, dropout_rate, num_layer=2):
         self.num_direction = 2
-        # num of cell weights must match the setting
-        assert (len(weights) == self.num_direction * num_layer)
         # init size constant
         self.batch_size = batch_size
         self.input_size = embed_size
@@ -25,11 +23,10 @@ class Encoder:
         self.num_layer = num_layer
 
         # set different layers
-        self.embedding = embedding
         self.embed_size = embed_size
-        self.in_order_cells = Stack_FLSTMCell(self.input_size, self.hidden_size, weights[:self.num_layer],
+        self.in_order_cells = Stack_FLSTMCell(self.input_size, self.hidden_size, 
                                               num_layers=num_layer)
-        self.rev_order_cells = Stack_FLSTMCell(self.input_size, self.hidden_size, weights[self.num_layer:],
+        self.rev_order_cells = Stack_FLSTMCell(self.input_size, self.hidden_size,
                                                num_layers=num_layer)
         self.training = training
         self.dropout_rate = dropout_rate
@@ -38,7 +35,7 @@ class Encoder:
         self.h_0 = torch.zeros((self.num_direction * self.num_layer, self.batch_size, self.hidden_size), device=device)
         self.c_0 = torch.zeros((self.num_direction * self.num_layer, self.batch_size, self.hidden_size), device=device)
 
-    def __call__(self, src_sent_idx: Tensor) -> Tuple[Tensor, Tuple[Tensor, Tensor]]:
+    def __call__(self, src_sent_idx: Tensor, embedding_weights, weights: List[List[Tensor]]) -> Tuple[Tensor, Tuple[Tensor, Tensor]]:
         """
         encode the sequence in bidirection
 
@@ -58,11 +55,11 @@ class Encoder:
         sent_len = src_sent_idx.shape[1]
 
         # dim = (batch_size, sent_length, embed_size)
-        embedding = self.embedding(src_sent_idx)
+        embedding = embedding_weights(src_sent_idx)
 
         # for each of the sent words, encode step by step
         for step in range(sent_len):
-            output, h_t, c_t = self.encoder_step(embedding[:, step, :], embedding[:, -step - 1, :], h_t, c_t)
+            output, h_t, c_t = self.encoder_step(embedding[:, step, :], embedding[:, -step - 1, :], h_t, c_t, weights)
             outputs.append(output)
 
         # pack the list of tensors to one single tensor
@@ -83,7 +80,7 @@ class Encoder:
         # dim = (num_layers, batch_size, num_direction * hidden_size)
         return torch.cat((in_t, rev_t), 2)
 
-    def encoder_step(self, in_x: Tensor, rev_x: Tensor, h_t: List[Tensor], c_t: List[Tensor]) \
+    def encoder_step(self, in_x: Tensor, rev_x: Tensor, h_t: List[Tensor], c_t: List[Tensor], weights) \
             -> Tuple[Tensor, List[Tensor], List[Tensor]]:
         """
         encode only one step by two direction for stacked flstm
@@ -104,8 +101,8 @@ class Encoder:
         in_x = F.dropout(in_x, p=self.dropout_rate, training=self.training)
         # one step encode for both directions
         # dim = (num_layers, batch_size, hidden_size)
-        in_h_t_1, in_c_t_1 = self.in_order_cells(in_x, h_t[:self.num_layer], c_t[:self.num_layer])
-        rev_h_t_1, rev_c_t_1 = self.in_order_cells(rev_x, h_t[self.num_layer:], c_t[self.num_layer:])
+        in_h_t_1, in_c_t_1 = self.in_order_cells(in_x, h_t[:self.num_layer], c_t[:self.num_layer], weights[:self.num_layer])
+        rev_h_t_1, rev_c_t_1 = self.in_order_cells(rev_x, h_t[self.num_layer:], c_t[self.num_layer:], weights[self.num_layer:])
         # dim = (batch_size, hidden_size)
         in_output = in_h_t_1[-1]
         rev_output = rev_h_t_1[-1]
