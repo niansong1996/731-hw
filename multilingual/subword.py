@@ -33,6 +33,9 @@ def get_corpus_pairs(src_lang_idx: int, tgt_lang_idx: int, data_type: str) \
     # pair those corresponding sents together
     src_tgt_sent_pairs = list(zip(src_sents, tgt_sents))
 
+    print('lang pair %s-%s before %d after %d' % (LANG_NAMES[src_lang_idx], LANG_NAMES[tgt_lang_idx], \
+          len(src_sents) + len(long_sent), len(src_tgt_sent_pairs)))
+
     return src_tgt_sent_pairs
 
 
@@ -70,7 +73,18 @@ def get_corpus_ids(src_lang_idx: int, tgt_lang_idx: int, data_type: str, is_tgt:
             sent = ' '.join(sent_words)
 
         # convert to subword ids
-        sent_encode = sp.EncodeAsIds(sent)
+        sent_encode = []
+        for word in sent.split(' '):
+            word_encode = sp.EncodeAsIds(word)
+            if len(word_encode) > 10:
+                sent_encode += [sp.unk_id()]
+            else:
+                sent_encode += word_encode
+
+        if not is_tgt and is_train and len(sent_encode) > 50:
+            long_sent_in_src.add(line_count)
+            continue
+
         if is_tgt:
             # add <s> and </s> to the tgt sents
             sent_encode = [sp.bos_id()] + sent_encode + [sp.eos_id()]
