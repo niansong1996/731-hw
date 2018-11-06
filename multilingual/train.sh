@@ -18,7 +18,7 @@ python nmt.py \
     --valid-niter 1000 \
     --lr 0.001 \
     --log-every 50 \
-    --batch-size 64 \
+    --batch-size 32 \
     --hidden-size 512 \
     --low-rank 3 \
     --num-layers 2 \
@@ -31,7 +31,7 @@ python nmt.py \
     --autoencode-epoch 3 \
     --lr-decay 0.5 \
     --patience 5 \
-    --max-num-trial 1
+    --max-num-trial 5
 # 2>${work_dir}/err.log
 
 for lang in az
