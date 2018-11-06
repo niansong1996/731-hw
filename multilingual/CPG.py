@@ -10,7 +10,6 @@ from docopt import docopt
 
 from config import device, LANG_INDICES
 import numpy as np
-import fastText
 from config import LANG_NAMES
 from vocab import Vocab
 
@@ -63,19 +62,6 @@ class CPG(nn.Module):
         weights_path = 'embed/%s.embed.npy' % lang
         if os.path.isfile(weights_path):
             weights_matrix = np.load(weights_path)
-        else:
-            model = fastText.load_model("embed/%s.embed.bin" % lang)
-            weights_matrix = np.zeros((self.vocab_size, self.word_embed_size))
-            weights_matrix[Vocab.UNK_ID] = self.UNK_EMBED
-            weights_matrix[Vocab.SOS_ID] = self.SOS_EMBED
-            weights_matrix[Vocab.EOS_ID] = self.EOS_EMBED
-            weights_matrix[Vocab.PAD_ID] = self.PAD_EMBED
-            for i in range(self.vocab_size):
-                word = vocab.id2word[i]
-                if word == Vocab.UNK or word == Vocab.SOS or word == Vocab.EOS or word == Vocab.PAD:
-                    continue
-                weights_matrix[i] = model.get_word_vector(word)
-            np.save(weights_path, weights_matrix)
         emb_layer = nn.Embedding(self.vocab_size, self.word_embed_size)
         emb_layer.weight = nn.Parameter(torch.from_numpy(weights_matrix).float())
         if non_trainable:
