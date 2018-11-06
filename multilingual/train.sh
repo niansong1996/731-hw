@@ -1,7 +1,7 @@
 #!/bin/sh
 
 work_dir="work_dir"
-name_prefix="multi-lang"
+name_prefix="az-tr-fasttext"
 model_name=${name_prefix}"-model.bin"
 decode=${name_prefix}"-result.txt"
 mkdir -p ${work_dir}
@@ -9,7 +9,7 @@ echo save results to ${work_dir}
 
 python nmt.py \
     train \
-    --langs 'az-en,be-en,gl-en,tr-en,ru-en,pt-en'\
+    --langs 'az-en,tr-en'\
     --lang-embed-size 8\
     --cuda \
     --vocab-size 20000 \
@@ -18,12 +18,12 @@ python nmt.py \
     --valid-niter 1000 \
     --lr 0.001 \
     --log-every 50 \
-    --batch-size 32 \
-    --hidden-size 256 \
+    --batch-size 64 \
+    --hidden-size 512 \
     --low-rank 3 \
-    --num-layers 1 \
+    --num-layers 2 \
     --max-epoch 100 \
-    --embed-size 200 \
+    --embed-size 300 \
     --uniform-init 0.1 \
     --dropout 0.2 \
     --denoising 0.2 \
@@ -34,7 +34,7 @@ python nmt.py \
     --max-num-trial 1
 # 2>${work_dir}/err.log
 
-for lang in aztr beru glpt
+for lang in az
 do
 python nmt.py decode --cuda --beam-size 5 --max-decoding-time-step 100 \
     ${work_dir}/${model_name} ${lang} en ${work_dir}/decode-${lang}.txt

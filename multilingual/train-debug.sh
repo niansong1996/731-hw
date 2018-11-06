@@ -26,7 +26,7 @@ python nmt.py \
     --low-rank 2 \
     --num-layers 1 \
     --max-epoch 100 \
-    --embed-size 200 \
+    --embed-size 300 \
     --uniform-init 0.1 \
     --dropout 0.2 \
     --clip-grad 5.0 \

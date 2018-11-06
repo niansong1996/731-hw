@@ -105,7 +105,7 @@ class Encoder:
         # one step encode for both directions
         # dim = (num_layers, batch_size, hidden_size)
         in_h_t_1, in_c_t_1 = self.in_order_cells(in_x, h_t[:self.num_layer], c_t[:self.num_layer])
-        rev_h_t_1, rev_c_t_1 = self.in_order_cells(rev_x, h_t[self.num_layer:], c_t[self.num_layer:])
+        rev_h_t_1, rev_c_t_1 = self.rev_order_cells(rev_x, h_t[self.num_layer:], c_t[self.num_layer:])
         # dim = (batch_size, hidden_size)
         in_output = in_h_t_1[-1]
         rev_output = rev_h_t_1[-1]
