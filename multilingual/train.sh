@@ -25,13 +25,13 @@ python nmt.py \
     --max-epoch 100 \
     --embed-size 256 \
     --uniform-init 0.1 \
-    --dropout 0.5 \
+    --dropout 0.2 \
     --denoising 0.2 \
     --clip-grad 5.0 \
-    --autoencode-epoch 5 \
+    --autoencode-epoch 3 \
     --lr-decay 0.5 \
-    --patience 100 \
-    --max-num-trial 1
+    --patience 5 \
+    --max-num-trial 5
 # 2>${work_dir}/err.log
 
 for lang in aztr beru glpt
