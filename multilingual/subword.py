@@ -73,13 +73,7 @@ def get_corpus_ids(src_lang_idx: int, tgt_lang_idx: int, data_type: str, is_tgt:
             sent = ' '.join(sent_words)
 
         # convert to subword ids
-        sent_encode = []
-        for word in sent.split(' '):
-            word_encode = sp.EncodeAsIds(word)
-            if len(word_encode) > 10:
-                sent_encode += [sp.unk_id()]
-            else:
-                sent_encode += word_encode
+        sent_encode = sp.EncodeAsIds(sent)
 
         if not is_tgt and is_train and len(sent_encode) > 50:
             long_sent_in_src.add(line_count)
