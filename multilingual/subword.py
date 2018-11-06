@@ -82,7 +82,7 @@ def get_corpus_ids(src_lang_idx: int, tgt_lang_idx: int, data_type: str, is_tgt:
             else:
                 sent_encode += word_encode
 
-        if not is_tgt and is_train and len(sent_encode) > 75:
+        if not is_tgt and is_train and len(sent_encode) > 50:
             long_sent_in_src.add(line_count)
             continue
 
