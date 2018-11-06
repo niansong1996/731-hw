@@ -58,12 +58,12 @@ from subword import get_corpus_pairs, get_corpus_ids, decode_corpus_ids
 from utils import batch_iter, PairedData, LangPair
 
 
-def get_data_pairs(langs: List[List[str]], data_type: str):
+def get_data_pairs(vocabs, langs: List[List[str]], data_type: str):
     data = []
     for src_name, tgt_name in langs:
         src = LANG_INDICES[src_name]
         tgt = LANG_INDICES[tgt_name]
-        data_pair = get_corpus_pairs(src, tgt, data_type)
+        data_pair = get_corpus_pairs(vocabs, src, tgt, data_type)
         data.append(PairedData(data_pair, LangPair(src, tgt)))
         print('Done loading %s data for %s-%s parallel translation' \
               % (data_type, src_name, tgt_name))
@@ -76,6 +76,13 @@ def train(args: Dict[str, str]):
     # identify translation and autoencode tasks
     langs = [p.split('-') for p in lang_pairs.split(',')]
 
+
+    # initialize the model
+    print('Model initializing...')
+    model = MultiNMT(args).to(device)
+    if args['--tune']:
+        model = model.load(args['--pretrain-model'])
+
     # load data from prev dump
     train_file = 'data/train.%s.dump' % lang_pairs
     dev_file = 'data/dev.%s.dump' % lang_pairs
@@ -84,8 +91,8 @@ def train(args: Dict[str, str]):
         dev_datasets = pickle.load(open(dev_file, 'rb'))
         print("Done reading from dump")
     else:
-        train_data = get_data_pairs(langs, 'train')
-        dev_datasets = [get_data_pairs([lang], 'dev') for lang in langs]
+        train_data = get_data_pairs(model.vocabs, langs, 'train')
+        dev_datasets = [get_data_pairs(model.vocabs, [lang], 'dev') for lang in langs]
         pickle.dump(train_data, open(train_file, 'wb'))
         pickle.dump(dev_datasets, open(dev_file, 'wb'))
 
@@ -96,12 +103,6 @@ def train(args: Dict[str, str]):
     log_every = int(args['--log-every'])
     model_save_path = args['--save-to']
     optimizer_save_path = args['--save-opt']
-
-    # initialize the model
-    print('Model initializing...')
-    model = MultiNMT(args).to(device)
-    if args['--tune']:
-        model = model.load(args['--pretrain-model'])
 
     num_trial = 0
     train_iter = patience = cum_loss = report_loss = cumulative_tgt_words = report_tgt_words = 0
@@ -193,8 +194,10 @@ def train(args: Dict[str, str]):
 
                         pair_name = ("%s-%s" % (src_lang_name, LANG_NAMES[dev_data[0].langs.tgt]))
                         dev_ppl, decodes = model.evaluate_ppl(dev_data, batch_size=128)  # dev batch size can be a bit larger
-                        reference_sents = decode_corpus_ids(lang_name=LANG_NAMES[tgt_lang], sents=decodes[0])
-                        decoded_sents = decode_corpus_ids(lang_name=LANG_NAMES[tgt_lang], sents=decodes[1])
+                        reference_sents = \
+                            decode_corpus_ids(model.vocabs, lang_name=LANG_NAMES[tgt_lang], sents=decodes[0])
+                        decoded_sents = \
+                            decode_corpus_ids(model.vocabs, lang_name=LANG_NAMES[tgt_lang], sents=decodes[1])
                         assert len(reference_sents) == len(decoded_sents)
                         dev_bleu = compute_corpus_level_bleu_score(reference_sents, decoded_sents)
 
@@ -305,12 +308,11 @@ def decode(args: Dict[str, str]):
 
     model_path = args['MODEL_PATH']
     output_file = args['OUTPUT_FILE']
-
-    test_data_src, _ = get_corpus_ids(src_lang_idx, tgt_lang_idx, data_type='test', is_tgt=False, is_train=False)
-    #test_data_tgt, _ = get_corpus_ids(src_lang_idx, tgt_lang_idx, data_type='test', is_tgt=True, is_train=False)
-
     print(f"load model from {model_path}")
     model = MultiNMT.load(model_path)
+    test_data_src, _ = get_corpus_ids(model.vocabs, src_lang_idx, tgt_lang_idx,
+                                      data_type='test', is_tgt=False, is_train=False)
+    #test_data_tgt, _ = get_corpus_ids(src_lang_idx, tgt_lang_idx, data_type='test', is_tgt=True, is_train=False)
 
     # set model to evaluate mode
     model.eval()
@@ -320,7 +322,7 @@ def decode(args: Dict[str, str]):
                              max_decoding_time_step=int(args['--max-decoding-time-step']))
 
     top_hypotheses = [hyps[0].value for hyps in hypotheses]
-    translated_text = decode_corpus_ids(lang_name=tgt_lang, sents=top_hypotheses)
+    translated_text = decode_corpus_ids(model.vocabs, lang_name=tgt_lang, sents=top_hypotheses)
 
     with open(output_file, 'w') as f:
         for sent in translated_text:

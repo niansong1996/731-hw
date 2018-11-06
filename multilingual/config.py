@@ -1,5 +1,5 @@
 import torch
-from collections import namedtuple
+from collections import namedtuple, OrderedDict
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 if torch.cuda.is_available():
@@ -7,9 +7,6 @@ if torch.cuda.is_available():
 
 Hypothesis = namedtuple('Hypothesis', ['value', 'score'])
 
-LANG_NAMES = {0: 'en',
-              1: 'az', 4: 'tr',
-              2: 'be', 5: 'ru',
-              3: 'gl', 6: 'pt'}
+LANG_NAMES = ['en', 'az', 'be', 'gl', 'tr',  'ru',  'pt']
 
-LANG_INDICES = {v: k for k, v in LANG_NAMES.items()}
+LANG_INDICES = {l: i for i, l in enumerate(LANG_NAMES)}

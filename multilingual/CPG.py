@@ -4,13 +4,19 @@ import torch
 import torch.nn as nn
 import torch.tensor as Tensor
 from functools import reduce
-from config import device
+import os.path
 
+from docopt import docopt
+
+from config import device, LANG_INDICES
+import numpy as np
+import fastText
 from config import LANG_NAMES
+from vocab import Vocab
 
 
 class CPG(nn.Module):
-    def __init__(self, shapes: List[List[Tuple[int]]], args: Dict[str, str], encoder_group: int):
+    def __init__(self, vocabs, shapes: List[List[Tuple[int]]], args: Dict[str, str], encoder_group: int):
         """
         Args:
             shapes: List[List[tuples]] a list of groups, where each tuple the
@@ -35,13 +41,46 @@ class CPG(nn.Module):
         self.Ps = nn.ModuleList([nn.Linear(self.lang_embed_size, self.low_rank, bias=False) for i in range(self.group_num)])
         self.Ws = nn.ModuleList([nn.Linear(self.low_rank, self.group_param_sizes[i], bias=False) for i in range(self.group_num)])
 
+        self.UNK_EMBED = np.random.random(size=(self.word_embed_size,))
+        self.SOS_EMBED = np.random.random(size=(self.word_embed_size,))
+        self.EOS_EMBED = np.random.random(size=(self.word_embed_size,))
+        self.PAD_EMBED = np.random.random(size=(self.word_embed_size,))
+        # lang_set = set()
+        # for pair in args['--langs'].split(','):
+        #     lang1, lang2 = pair.split('-')
+        #     lang_set.add(lang1)
+        #     lang_set.add(lang2)
+        # self.id2lang = list(lang_set)
+        # self.lang2id = {lang: i for i, lang in enumerate(self.id2lang)}
         # init language embeddings
-        self.word_embeddings = nn.ModuleList([nn.Embedding(self.vocab_size, self.word_embed_size)
-                                              for _ in range(num_lang)])
-
+        self.word_embeddings = nn.ModuleList([self.create_embed_layer(lang, vocabs[LANG_INDICES[lang]])
+                                              for lang in LANG_NAMES])
         # initialize the parameters using uniform distribution
         for param in self.parameters():
             nn.init.uniform_(param.data, a=-0.4, b=0.4)
+
+    def create_embed_layer(self, lang, vocab, non_trainable=False):
+        weights_path = 'embed/%s.embed.npy' % lang
+        if os.path.isfile(weights_path):
+            weights_matrix = np.load(weights_path)
+        else:
+            model = fastText.load_model("embed/%s.embed.bin" % lang)
+            weights_matrix = np.zeros((self.vocab_size, self.word_embed_size))
+            weights_matrix[Vocab.UNK_ID] = self.UNK_EMBED
+            weights_matrix[Vocab.SOS_ID] = self.SOS_EMBED
+            weights_matrix[Vocab.EOS_ID] = self.EOS_EMBED
+            weights_matrix[Vocab.PAD_ID] = self.PAD_EMBED
+            for i in range(self.vocab_size):
+                word = vocab.id2word[i]
+                if word == Vocab.UNK or word == Vocab.SOS or word == Vocab.EOS or word == Vocab.PAD:
+                    continue
+                weights_matrix[i] = model.get_word_vector(word)
+            np.save(weights_path, weights_matrix)
+        emb_layer = nn.Embedding(self.vocab_size, self.word_embed_size)
+        emb_layer.weight = nn.Parameter(torch.from_numpy(weights_matrix).float())
+        if non_trainable:
+            emb_layer.weight.requires_grad = False
+        return emb_layer
 
     @staticmethod
     def get_param_meta(shapes: List[List[Tuple[int]]]):

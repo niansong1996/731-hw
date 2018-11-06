@@ -1,3 +1,17 @@
+#!/usr/bin/env python
+"""
+Generate the vocabulary file for neural network training
+A vocabulary file is a mapping of tokens to their indices
+
+Usage:
+    MultiMT.py --train-src=<file> [options] VOCAB_FILE
+
+Options:
+    -h --help                  Show this screen.
+    --train-src=<file>         File of training source sentences
+    --size=<int>               vocab size [default: 50000]
+    --freq-cutoff=<int>        frequency cutoff [default: 2]
+"""
 from collections import namedtuple
 from typing import *
 
@@ -5,11 +19,13 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.tensor as Tensor
+from docopt import docopt
+import pickle
 
 from CPG import CPG
 from Decoder import Decoder
 from Encoder import Encoder
-from config import device
+from config import device, LANG_NAMES
 from utils import batch_iter, PairedData, sents_to_tensor, assert_tensor_size
 from vocab import Vocab
 
@@ -46,8 +62,12 @@ class MultiNMT(nn.Module):
         self.dec_shapes_len = len(self.dec_shapes)
         # combine enc and dec param shapes
         self.param_shapes = self.enc_shapes + self.dec_shapes
+        self.vocabs = [pickle.load(open('vocab/vocab-%s.bin' % lang, 'rb')).vocab_entry for lang in LANG_NAMES]
         # init CPG
-        self.cpg = CPG(self.param_shapes, args, self.enc_shapes_len)
+        self.cpg = CPG(self.vocabs, self.param_shapes, args, self.enc_shapes_len)
+
+    def get_vocabs(self):
+        return self.vocabs
 
     def forward(self, src_lang: int, tgt_lang: int, src_sents: List[List[int]], tgt_sents: List[List[int]]) \
             -> Tensor:
@@ -213,3 +233,17 @@ class MultiNMT(nn.Module):
                 decoded_sents[i] = list(map(int, decoded_sents[i].tolist()))
 
             return ppl, (reference_sents, decoded_sents)
+
+
+if __name__ == '__main__':
+    args = docopt(__doc__)
+
+    print('read in source sentences: %s' % args['--train-src'])
+    sents = []
+    for line in open(args['--train-src'], encoding="utf-8"):
+        sent = line.strip().split(' ')
+        sents.append(sent)
+    vocab = Vocab(sents, int(args['--size']), int(args['--freq-cutoff']))
+    print('generated vocabulary %d words' % len(vocab.vocab_entry))
+    pickle.dump(vocab, open(args['VOCAB_FILE'], 'wb'))
+    print('vocabulary saved to %s' % args['VOCAB_FILE'])
