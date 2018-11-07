@@ -81,6 +81,7 @@ def train(args: Dict[str, str]):
     print('Model initializing...')
     model = MultiNMT(args).to(device)
     if args['--tune']:
+        print('tuning mode... load model from %s' % args['--pretrain-model'])
         model = model.load(args['--pretrain-model'])
 
     # load data from prev dump
@@ -103,13 +104,6 @@ def train(args: Dict[str, str]):
     log_every = int(args['--log-every'])
     model_save_path = args['--save-to']
     optimizer_save_path = args['--save-opt']
-
-    # initialize the model
-    print('Model initializing...')
-    model = MultiNMT(args).to(device)
-    if args['--tune']:
-        print('tuning mode... load model from %s' % args['--pretrain-model'])
-        model = model.load(args['--pretrain-model'])
     num_trial = 0
     train_iter = patience = cum_loss = report_loss = cumulative_tgt_words = report_tgt_words = 0
     cumulative_examples = report_examples = epoch = valid_num = 0

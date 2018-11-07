@@ -91,13 +91,13 @@ class PairedDataBatch:
         return src_sents, tgt_sents
 
 
-def sents_to_tensor(sents: List[List[int]], device: torch.device) -> Tensor:
+def pad_sents(sents: List[List[int]], device: torch.device) -> np.ndarray:
     max_sent_len = max(map((lambda x: len(x)), sents))
     # indices are initialized with the index of '<pad>'
     for sent in sents:
         while len(sent) < max_sent_len:
             sent.append(Vocab.PAD_ID)
-    return torch.tensor(sents, dtype=torch.long, device=device)
+    return np.array(sents)
 
 
 def load_matrix(fname, vocabs, emb_dim):

@@ -1,11 +1,14 @@
 from typing import List, Tuple
 
 import torch
+
+from CPG import Embed
 from utils import assert_tensor_size
 from FLSTM import Stack_FLSTMCell
 from torch import Tensor
 from config import device
 import torch.nn.functional as F
+import numpy as np
 
 
 class Encoder:
@@ -13,7 +16,7 @@ class Encoder:
     The encoder is a bidiretional encoder, one can NOT be used as a single direction one
     """
 
-    def __init__(self, batch_size, embed_size, hidden_size, embedding: torch.nn.Embedding, weights: List[List[Tensor]],
+    def __init__(self, batch_size, embed_size, hidden_size, embedding: Embed, weights: List[List[Tensor]],
                  training, dropout_rate, num_layer=2, ):
         self.num_direction = 2
         # num of cell weights must match the setting
@@ -38,7 +41,7 @@ class Encoder:
         self.h_0 = torch.zeros((self.num_direction * self.num_layer, self.batch_size, self.hidden_size), device=device)
         self.c_0 = torch.zeros((self.num_direction * self.num_layer, self.batch_size, self.hidden_size), device=device)
 
-    def __call__(self, src_sent_idx: Tensor) -> Tuple[Tensor, Tuple[Tensor, Tensor]]:
+    def __call__(self, src_sent_idx: np.ndarray) -> Tuple[Tensor, Tuple[Tensor, Tensor]]:
         """
         encode the sequence in bidirection
 
@@ -54,11 +57,10 @@ class Encoder:
         c_t = self.c_0
         outputs = []
 
-        # get the sentence length for this batch
-        sent_len = src_sent_idx.shape[1]
-
         # dim = (batch_size, sent_length, embed_size)
         embedding = self.embedding(src_sent_idx)
+        # get the sentence length for this batch
+        sent_len = embedding.shape[1]
 
         # for each of the sent words, encode step by step
         for step in range(sent_len):

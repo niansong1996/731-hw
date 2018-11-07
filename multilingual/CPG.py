@@ -6,12 +6,55 @@ import torch.tensor as Tensor
 from functools import reduce
 import os.path
 
-from docopt import docopt
-
 from config import device, LANG_INDICES
 import numpy as np
 from config import LANG_NAMES
-from vocab import Vocab
+import fastText
+
+
+class Embed:
+    def __init__(self, lang, vocab, vocab_size, word_embed_size):
+        weights_path = 'embed/%s.embed.npy' % lang
+        self.lang = lang
+        self.vocab = vocab
+        self.vocab_size = vocab_size
+        self.word_embed_size = word_embed_size
+        self.emb_layer = None
+        if os.path.isfile(weights_path):
+            print("loading npy model for %s" % lang)
+            weights_matrix = np.load(weights_path)
+            self.emb_layer = nn.Embedding(vocab_size, word_embed_size)
+            self.emb_layer.weight = nn.Parameter(torch.from_numpy(weights_matrix).float())
+            self.emb_layer.weight.requires_grad = False
+            # print("Done loading npy model for %s" % lang)
+        else:
+            print("loading fastext model for %s" % lang)
+            self.model = fastText.load_model('embed_bkp/%s.embed.bin' % lang)
+            self.vocab = vocab
+            print("Done loading fastext model for %s" % lang)
+
+    def __getstate__(self):
+        """Return state values to be pickled."""
+        return (self.lang,  self.vocab, self.vocab_size, self.word_embed_size)
+
+    def __setstate__(self, state):
+        """Restore state from the unpickled state values."""
+        lang, vocab, vocab_size, word_embed_size = state
+        self.__init__(lang, vocab, vocab_size, word_embed_size)
+
+    def __call__(self, src_sent_idx: np.ndarray):
+        if self.emb_layer:
+            # print("getting embedding for %s from embed layer" % self.lang)
+            return self.emb_layer(torch.tensor(src_sent_idx, dtype=torch.long, device=device))
+        else:
+            # print("getting embedding for %s from fastText" % self.lang)
+            word_vecs = [self.model.get_word_vector(self.vocab.id2word[idx])
+                         for idx in src_sent_idx.reshape(-1)]
+            embed_tensor = torch.tensor(word_vecs, dtype=torch.long, device=device)
+            if isinstance(src_sent_idx[0], np.ndarray):
+                return embed_tensor.reshape(len(src_sent_idx), len(src_sent_idx[0]), -1)
+            else:
+                return embed_tensor.reshape(len(src_sent_idx), -1)
 
 
 class CPG(nn.Module):
@@ -52,16 +95,19 @@ class CPG(nn.Module):
         # self.id2lang = list(lang_set)
         # self.lang2id = {lang: i for i, lang in enumerate(self.id2lang)}
         # init language embeddings
-        self.word_embeddings = nn.ModuleList([self.create_embed_layer(lang, vocabs[LANG_INDICES[lang]])
-                                              for lang in LANG_NAMES])
+        self.word_embeddings = [Embed(lang, vocabs[LANG_INDICES[lang]], self.vocab_size, self.word_embed_size)
+                                for lang in LANG_NAMES]
         # initialize the parameters using uniform distribution
         for param in self.parameters():
             nn.init.uniform_(param.data, a=-0.4, b=0.4)
 
-    def create_embed_layer(self, lang, vocab, non_trainable=False):
+    def create_embed_layer(self, lang, non_trainable=False):
         weights_path = 'embed/%s.embed.npy' % lang
         if os.path.isfile(weights_path):
             weights_matrix = np.load(weights_path)
+        else:
+            model = fastText.load_model('embed/%s.embed.bin' % lang)
+            model.get_words()
         emb_layer = nn.Embedding(self.vocab_size, self.word_embed_size)
         emb_layer.weight = nn.Parameter(torch.from_numpy(weights_matrix).float())
         if non_trainable:

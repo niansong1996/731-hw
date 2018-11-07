@@ -8,11 +8,12 @@ from FLSTM import Stack_FLSTMCell
 
 from config import device
 from vocab import Vocab
-
+from CPG import Embed
+import numpy as np
 
 class Decoder:
     def __init__(self, batch_size, embed_size, hidden_size, num_layers,
-                 embedding: nn.Embedding, lstm_weights: List[List[Tensor]], attn_weights: List[List[Tensor]],
+                 embedding: Embed, lstm_weights: List[List[Tensor]], attn_weights: List[List[Tensor]],
                  training, dropout_rate):
         self.embedding = embedding
         self.dec_embed_size = embed_size
@@ -50,7 +51,7 @@ class Decoder:
         attn = torch.zeros(h_0.shape[1:], device=device)
         return h_0, c_0, attn
 
-    def __call__(self, src_encodings: Tensor, decoder_init_state: Tensor, tgt_sent_idx: Tensor) -> Tensor:
+    def __call__(self, src_encodings: Tensor, decoder_init_state: Tensor, tgt_sent_idx: np.ndarray) -> Tensor:
         """
         Given source encodings, compute the log-likelihood of predicting the gold-standard target
         sentence tokens
@@ -74,16 +75,17 @@ class Decoder:
         h_t, c_t, attn = self.init_decoder_step_input(decoder_init_state)
         # dim = (batch_size, sent_len, embed_size)
         tgt_sent_embed = self.embedding(tgt_sent_idx)
+        tgt_sent_tensor = torch.tensor(tgt_sent_idx, dtype=torch.long, device=device)
         # save top words for computing bleu score
-        top_subwords = torch.ones((tgt_sent_idx.shape[1], self.batch_size))
+        top_subwords = torch.ones((tgt_sent_tensor.shape[1], self.batch_size))
         # skip the '<s>' in the tgt_sents since the output starts from the word after '<s>'
-        for i in range(1, tgt_sent_idx.shape[1]):
+        for i in range(1, tgt_sent_tensor.shape[1]):
             decoder_input = F.dropout(decoder_input, p=self.dropout_rate, training=self.training)
             h_t, c_t, softmax_output, attn = self.decoder_step(src_encodings, decoder_input, h_t, c_t, attn)
             # extract the top words of each sents from this batch
             top_subwords[i] = torch.argmax(softmax_output, dim=1)
             # dim = (batch_size)
-            target_word_indices = tgt_sent_idx[:, i].reshape(self.batch_size)
+            target_word_indices = tgt_sent_tensor[:, i].reshape(self.batch_size)
             score_delta = self.criterion(softmax_output, target_word_indices)
             assert score_delta.shape[0] == self.batch_size
             # mask '<pad>' with 0

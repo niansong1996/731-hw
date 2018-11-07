@@ -26,7 +26,7 @@ from CPG import CPG
 from Decoder import Decoder
 from Encoder import Encoder
 from config import device, LANG_NAMES
-from utils import batch_iter, PairedData, sents_to_tensor, assert_tensor_size
+from utils import batch_iter, PairedData, pad_sents, assert_tensor_size
 from vocab import Vocab
 
 Hypothesis = namedtuple('Hypothesis', ['value', 'score'])
@@ -76,22 +76,22 @@ class MultiNMT(nn.Module):
 
         :param src_lang: source language index
         :param tgt_lang: target language index
-        :param src_sents: batch_size of sentences
+        :param padded_src_sents: batch_size of sentences
         :param tgt_sents: batch_size of sentences
         :return: scores with shape = [batch_size]
         """
         # [batch_size, sent_len]
-        src_sents_tensor = sents_to_tensor(src_sents, device)
+        padded_src_sents = pad_sents(src_sents, device)
         # [batch_size, sent_len]
-        tgt_sents_tensor = sents_to_tensor(tgt_sents, device)
-        assert (src_sents_tensor.shape[0] == tgt_sents_tensor.shape[0])
-        batch_size = src_sents_tensor.shape[0]
+        padded_tgt_sents = pad_sents(tgt_sents, device)
+        assert (len(padded_src_sents) == len(padded_tgt_sents))
+        batch_size = len(padded_src_sents)
         grouped_params = self.get_grouped_params(src_lang, tgt_lang)
         # encode
-        src_encodings, decoder_init_state = self.encode(batch_size, src_sents_tensor, src_lang, grouped_params)
+        src_encodings, decoder_init_state = self.encode(batch_size, padded_src_sents, src_lang, grouped_params)
         # decode
         decoder = self.get_decoder(tgt_lang, batch_size, grouped_params)
-        return decoder(src_encodings, decoder_init_state, tgt_sents_tensor)
+        return decoder(src_encodings, decoder_init_state, padded_tgt_sents)
 
     def get_grouped_params(self, src_lang: int, tgt_lang: int) -> List[List[Tensor]]:
         if src_lang > 3:
@@ -100,7 +100,7 @@ class MultiNMT(nn.Module):
         langs = [src_lang for _ in range(self.enc_shapes_len)] + [src_lang for _ in range(self.dec_shapes_len)]
         return self.cpg.get_params(langs)
 
-    def encode(self, batch_size: int, src_sent_idx: Tensor, src_lang: int, grouped_params: List[List[Tensor]]) \
+    def encode(self, batch_size: int, src_sent_idx: np.ndarray, src_lang: int, grouped_params: List[List[Tensor]]) \
             -> Tuple[Tensor, Tuple[Tensor, Tensor]]:
         """
 
@@ -138,9 +138,9 @@ class MultiNMT(nn.Module):
         with torch.no_grad():
             grouped_params = self.get_grouped_params(src_lang, tgt_lang)
             # [batch_size, sent_len]
-            src_sents_tensor = sents_to_tensor([src_sent], device)
+            padded_src_sents = pad_sents([src_sent], device)
             # src_encodings.shape = [sent_length, 1, embed_size]
-            src_encodings, decoder_init_state = self.encode(1, src_sents_tensor, src_lang, grouped_params)
+            src_encodings, decoder_init_state = self.encode(1, padded_src_sents, src_lang, grouped_params)
             h_t_0, c_t_0, attn = Decoder.init_decoder_step_input(decoder_init_state)
             # candidates for best hypotheses
             hypotheses_cand = [(Hypothesis([Vocab.SOS_ID], 0), h_t_0, c_t_0, attn)]
@@ -155,7 +155,7 @@ class MultiNMT(nn.Module):
                         new_hypotheses_cand.append((Hypothesis(sent, log_likelihood), h_t, c_t, attn))
                         continue
                     # dim = (1 (single_word), embed_size)
-                    decoder_input = decoder.embedding(torch.tensor([input_word_idx]).to(device))
+                    decoder_input = decoder.embedding([input_word_idx])
                     assert_tensor_size(decoder_input, [1, self.embed_size])
                     # softmax_output.shape = [1, vocab_size]
                     h_t, c_t, softmax_output, attn = decoder.decoder_step(src_encodings, decoder_input, h_t, c_t, attn)
