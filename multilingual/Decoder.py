@@ -30,7 +30,7 @@ class Decoder:
         self.tanh = nn.Tanh()
         self.training = training
         self.dropout_rate = dropout_rate
-        sos_batch = np.array([Vocab.SOS_ID for _ in range(batch_size)], dtype=torch.long)
+        sos_batch = np.array([Vocab.SOS_ID for _ in range(batch_size)])
         self.init_input = embedding(sos_batch)
 
     @staticmethod

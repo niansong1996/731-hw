@@ -50,7 +50,7 @@ class Embed:
             # print("getting embedding for %s from fastText" % self.lang)
             word_vecs = [self.model.get_word_vector(self.vocab.id2word[idx])
                          for idx in src_sent_idx.reshape(-1)]
-            embed_tensor = torch.tensor(word_vecs, dtype=torch.long, device=device)
+            embed_tensor = torch.tensor(word_vecs, dtype=torch.float32, device=device)
             if isinstance(src_sent_idx[0], np.ndarray):
                 return embed_tensor.reshape(len(src_sent_idx), len(src_sent_idx[0]), -1)
             else:
