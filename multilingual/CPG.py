@@ -45,7 +45,7 @@ class Embed:
     def __call__(self, src_sent_idx: np.ndarray):
         if self.emb_layer:
             # print("getting embedding for %s from embed layer" % self.lang)
-            return self.emb_layer(torch.tensor(src_sent_idx, dtype=torch.long, device=device))
+            return self.emb_layer(torch.tensor(src_sent_idx, dtype=torch.long)).to(device)
         else:
             # print("getting embedding for %s from fastText" % self.lang)
             word_vecs = [self.model.get_word_vector(self.vocab.id2word[idx])
