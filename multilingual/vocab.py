@@ -23,7 +23,7 @@ import pickle
 class VocabEntry(object):
     def __init__(self, vocab_size):
         self.word2id = dict()
-        self.unk_id = 3
+        self.unk_id = Vocab.UNK_ID
         self.word2id[Vocab.PAD] = Vocab.PAD_ID
         self.word2id[Vocab.SOS] = Vocab.SOS_ID
         self.word2id[Vocab.EOS] = Vocab.EOS_ID

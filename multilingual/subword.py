@@ -31,10 +31,12 @@ def get_corpus_pairs(vocabs, src_lang_idx: int, tgt_lang_idx: int, data_type: st
     # get src and tgt corpus ids separately
     src_sents, long_sent = get_corpus_ids(vocabs, src_lang_idx, tgt_lang_idx, data_type, False)
     tgt_sents, _ = get_corpus_ids(vocabs, src_lang_idx, tgt_lang_idx, data_type, True, long_sent=long_sent)
-
+    print("original # sents: %d" % len(src_sents))
     # pair those corresponding sents together
-    src_tgt_sent_pairs = list(zip(src_sents, tgt_sents))
-
+    src_tgt_sent_pairs = list(filter(lambda p: len(p[0]) / len(p[1]) > 0.3 or
+                                               len(p[1]) < 8,
+                                     zip(src_sents, tgt_sents)))
+    print("filtered # sents: %d" % len(src_tgt_sent_pairs))
     return src_tgt_sent_pairs
 
 
@@ -80,7 +82,11 @@ def decode_corpus_ids(vocabs, lang_name: str, sents: List[List[int]]) -> List[st
     vocab = vocabs[LANG_INDICES[lang_name]]
     decoded_sents = []
     for id_list in sents:
-        word_list = [vocab.id2word[w] for w in id_list]
+        try:
+            end = id_list.index(Vocab.EOS_ID) - 1
+        except ValueError:
+            end = len(id_list)
+        word_list = [vocab.id2word[w] for w in id_list[1:end]]  # skip <s>, stop at </s>
         if len(word_list) > 0:
             word_list[0] = word_list[0][0].upper() + word_list[0][1:]
         i = 1
