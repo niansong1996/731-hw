@@ -58,7 +58,7 @@ class Encoder:
         outputs = []
 
         # dim = (batch_size, sent_length, embed_size)
-        embedding = self.embedding(src_sent_idx)
+        embedding = self.embedding(torch.tensor(src_sent_idx, dtype=torch.long, device=device))
         # get the sentence length for this batch
         sent_len = embedding.shape[1]
 

@@ -155,7 +155,7 @@ class MultiNMT(nn.Module):
                         new_hypotheses_cand.append((Hypothesis(sent, log_likelihood), h_t, c_t, attn))
                         continue
                     # dim = (1 (single_word), embed_size)
-                    decoder_input = decoder.embedding([input_word_idx])
+                    decoder_input = decoder.embedding(torch.tensor([input_word_idx], dtype=torch.long, device=device))
                     assert_tensor_size(decoder_input, [1, self.embed_size])
                     # softmax_output.shape = [1, vocab_size]
                     h_t, c_t, softmax_output, attn = decoder.decoder_step(src_encodings, decoder_input, h_t, c_t, attn)

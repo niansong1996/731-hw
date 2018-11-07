@@ -31,7 +31,7 @@ class Decoder:
         self.training = training
         self.dropout_rate = dropout_rate
         sos_batch = np.array([Vocab.SOS_ID for _ in range(batch_size)])
-        self.init_input = embedding(sos_batch)
+        self.init_input = embedding(torch.tensor(sos_batch, dtype=torch.long, device=device))
 
     @staticmethod
     def init_decoder_step_input(decoder_init_state: Tuple[Tensor, Tensor]) \
@@ -74,8 +74,8 @@ class Decoder:
         scores = torch.zeros(self.batch_size, device=device)
         h_t, c_t, attn = self.init_decoder_step_input(decoder_init_state)
         # dim = (batch_size, sent_len, embed_size)
-        tgt_sent_embed = self.embedding(tgt_sent_idx)
         tgt_sent_tensor = torch.tensor(tgt_sent_idx, dtype=torch.long, device=device)
+        tgt_sent_embed = self.embedding(tgt_sent_tensor)
         # save top words for computing bleu score
         top_subwords = torch.ones((tgt_sent_tensor.shape[1], self.batch_size))
         # skip the '<s>' in the tgt_sents since the output starts from the word after '<s>'
