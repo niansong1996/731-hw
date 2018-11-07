@@ -14,6 +14,7 @@ class Encoder(torch.nn.Module):
     """
 
     def __init__(self, batch_size, embed_size, hidden_size, training, dropout_rate, num_layer=2):
+        super(Encoder, self).__init__()
         self.num_direction = 2
         # init size constant
         self.batch_size = batch_size

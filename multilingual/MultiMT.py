@@ -32,12 +32,12 @@ class MultiNMT(nn.Module):
         self.num_lang = len(LANG_INDICES)
 
         # init embedding, encoder, decoder
-        self.word_embeddings = nn.ModuleList([nn.Embedding(self.vocab_size, self.word_embed_size)
+        self.word_embeddings = nn.ModuleList([nn.Embedding(self.vocab_size, self.embed_size)
                                               for _ in range(self.num_lang)])
         self.encoder = Encoder(self.batch_size, self.embed_size, self.hidden_size,
                           self.training, self.dropout_rate, num_layer=self.num_layers)
         self.decoder = Decoder(self.vocab_size, self.batch_size, self.embed_size, self.decoder_hidden_size, self.num_layers,
-                          self.word_embedding(0), training=self.training, dropout_rate=self.dropout_rate)
+                          self.word_embeddings[0], training=self.training, dropout_rate=self.dropout_rate)
 
     def forward(self, src_lang: int, tgt_lang: int, src_sents: List[List[int]], tgt_sents: List[List[int]]) \
             -> Tensor:

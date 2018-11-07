@@ -69,7 +69,7 @@ def get_corpus_ids(src_lang_idx: int, tgt_lang_idx: int, data_type: str, is_tgt:
         if src_lang_idx == tgt_lang_idx and not is_tgt:
             # denoising autoencoder
             sent_words = sent.split(' ')
-            np.random.shuffle(sent_words)
+            #np.random.shuffle(sent_words)
             sent = ' '.join(sent_words)
 
         # convert to subword ids

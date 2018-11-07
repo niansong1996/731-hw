@@ -10,9 +10,10 @@ from config import device
 from vocab import Vocab
 
 
-class Decoder:
+class Decoder(nn.Module):
     def __init__(self, vocab_size, batch_size, embed_size, hidden_size, num_layers,
                  embedding: nn.Embedding, training, dropout_rate):
+        super(Decoder, self).__init__()
         self.vocab_size = vocab_size
         self.embedding = embedding
         self.dec_embed_size = embed_size
@@ -31,7 +32,7 @@ class Decoder:
         self.tanh = nn.Tanh()
         self.training = training
         self.dropout_rate = dropout_rate
-        sos_batch = torch.tensor([Vocab.SOS_ID for _ in range(batch_size)], dtype=torch.long).to(device)
+        sos_batch = torch.tensor([Vocab.SOS_ID for _ in range(batch_size)], dtype=torch.long)
         self.init_input = embedding(sos_batch)
 
     @staticmethod
@@ -49,7 +50,7 @@ class Decoder:
         h_0 = decoder_init_state[0]
         c_0 = decoder_init_state[1]
         # [batch_size, num_direction * enc_hidden_size]
-        attn = torch.zeros(h_0.shape[1:], device=device)
+        attn = torch.zeros(h_0.shape[1:])
         return h_0, c_0, attn
 
     def __call__(self, src_encodings: Tensor, decoder_init_state: Tensor, tgt_sent_idx: Tensor) -> Tensor:

@@ -21,16 +21,16 @@ python nmt.py \
     --batch-size 64 \
     --hidden-size 256 \
     --low-rank 3 \
-    --num-layers 1 \
+    --num-layers 2 \
     --max-epoch 100 \
     --embed-size 256 \
     --uniform-init 0.1 \
     --dropout 0.2 \
     --denoising 0.2 \
     --clip-grad 5.0 \
-    --autoencode-epoch 3 \
+    --autoencode-epoch 100 \
     --lr-decay 0.5 \
-    --patience 5 \
+    --patience 10 \
     --max-num-trial 5
 # 2>${work_dir}/err.log
 

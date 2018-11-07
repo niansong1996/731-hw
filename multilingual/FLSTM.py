@@ -5,6 +5,7 @@ import torch.tensor as Tensor
 import torch.nn as nn
 
 from utils import assert_tensor_size
+from config import device
 
 
 def unpack_weight(weight, input_size, hidden_size):
@@ -29,10 +30,9 @@ def unpack_weight(weight, input_size, hidden_size):
     return W_x, W_h, b_x, b_h
 
 
-class Stack_FLSTMCell:
+class Stack_FLSTMCell(torch.nn.Module):
     def __init__(self, input_size, hidden_size, num_layers=1):
-        assert (len(weights) == num_layers)
-
+        super(Stack_FLSTMCell, self).__init__()
         # init the size constants
         self.input_size = input_size
         self.hidden_size = hidden_size
@@ -68,7 +68,7 @@ class Stack_FLSTMCell:
         # do a forward pass sequentially with each layer
         for i in range(self.num_layers):
             cell = self.cells[i]
-            h, c = cell(input_x, h_0[i], c_0[i])
+            h, c = cell(input_x, (h_0[i], c_0[i]))
 
             # get the results
             input_x = h
