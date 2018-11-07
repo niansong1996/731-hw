@@ -8,16 +8,13 @@ from config import device
 import torch.nn.functional as F
 
 
-class Encoder:
+class Encoder(torch.nn.Module):
     """
     The encoder is a bidiretional encoder, one can NOT be used as a single direction one
     """
 
-    def __init__(self, batch_size, embed_size, hidden_size, embedding: torch.nn.Embedding, weights: List[List[Tensor]],
-                 training, dropout_rate, num_layer=2, ):
+    def __init__(self, batch_size, embed_size, hidden_size, training, dropout_rate, num_layer=2):
         self.num_direction = 2
-        # num of cell weights must match the setting
-        assert (len(weights) == self.num_direction * num_layer)
         # init size constant
         self.batch_size = batch_size
         self.input_size = embed_size
@@ -25,12 +22,9 @@ class Encoder:
         self.num_layer = num_layer
 
         # set different layers
-        self.embedding = embedding
         self.embed_size = embed_size
-        self.in_order_cells = Stack_FLSTMCell(self.input_size, self.hidden_size, weights[:self.num_layer],
-                                              num_layers=num_layer)
-        self.rev_order_cells = Stack_FLSTMCell(self.input_size, self.hidden_size, weights[self.num_layer:],
-                                               num_layers=num_layer)
+        self.in_order_cells = Stack_FLSTMCell(self.input_size, self.hidden_size, num_layers=num_layer)
+        self.rev_order_cells = Stack_FLSTMCell(self.input_size, self.hidden_size, num_layers=num_layer)
         self.training = training
         self.dropout_rate = dropout_rate
 
@@ -38,7 +32,7 @@ class Encoder:
         self.h_0 = torch.zeros((self.num_direction * self.num_layer, self.batch_size, self.hidden_size), device=device)
         self.c_0 = torch.zeros((self.num_direction * self.num_layer, self.batch_size, self.hidden_size), device=device)
 
-    def __call__(self, src_sent_idx: Tensor) -> Tuple[Tensor, Tuple[Tensor, Tensor]]:
+    def __call__(self, src_sent_idx: Tensor, word_embedding) -> Tuple[Tensor, Tuple[Tensor, Tensor]]:
         """
         encode the sequence in bidirection
 
@@ -58,7 +52,7 @@ class Encoder:
         sent_len = src_sent_idx.shape[1]
 
         # dim = (batch_size, sent_length, embed_size)
-        embedding = self.embedding(src_sent_idx)
+        embedding = word_embedding(src_sent_idx)
 
         # for each of the sent words, encode step by step
         for step in range(sent_len):

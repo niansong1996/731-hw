@@ -6,10 +6,9 @@ import torch
 import torch.nn as nn
 import torch.tensor as Tensor
 
-from CPG import CPG
 from Decoder import Decoder
 from Encoder import Encoder
-from config import device
+from config import device, LANG_INDICES
 from utils import batch_iter, PairedData, sents_to_tensor, assert_tensor_size
 from vocab import Vocab
 
@@ -20,6 +19,7 @@ class MultiNMT(nn.Module):
     def __init__(self, args: Dict[str, str]):
         super(MultiNMT, self).__init__()
         # init size constants
+        self.batch_size = int(args['--batch-size'])
         self.embed_size = int(args['--embed-size'])
         self.hidden_size = int(args['--hidden-size'])
         self.vocab_size = int(args['--vocab-size'])
@@ -27,27 +27,17 @@ class MultiNMT(nn.Module):
         self.dropout_rate = float(args['--dropout'])
         self.denoising_rate = float(args['--denoising'])
         self.NUM_DIR = 2
-        # init encoder param shapes
-        self.enc_in_lstm_shapes = MultiNMT.get_shapes_flstm(self.embed_size, self.hidden_size, self.num_layers)
-        self.enc_rev_lstm_shapes = MultiNMT.get_shapes_flstm(self.embed_size, self.hidden_size, self.num_layers)
-        self.enc_shapes = self.enc_in_lstm_shapes + self.enc_rev_lstm_shapes
-        self.enc_shapes_len = len(self.enc_shapes)
-        # init decoder param shapes
         self.decoder_hidden_size = self.NUM_DIR * self.hidden_size
         self.decoder_input_size = self.decoder_hidden_size + self.embed_size
-        self.dec_lstm_shapes = MultiNMT.get_shapes_flstm(self.decoder_input_size, self.decoder_hidden_size,
-                                                         self.num_layers)
-        self.dec_lstm_shapes_len = len(self.dec_lstm_shapes)
-        decoder_W_a_shape = (self.decoder_hidden_size, self.NUM_DIR * self.hidden_size)
-        decoder_W_c_shape = (self.decoder_hidden_size, self.NUM_DIR * self.hidden_size + self.decoder_hidden_size)
-        decoder_W_s_shape = (self.vocab_size, self.decoder_hidden_size)
-        self.dec_attn_shapes = [[decoder_W_a_shape, decoder_W_c_shape, decoder_W_s_shape]]
-        self.dec_shapes = self.dec_lstm_shapes + self.dec_attn_shapes
-        self.dec_shapes_len = len(self.dec_shapes)
-        # combine enc and dec param shapes
-        self.param_shapes = self.enc_shapes + self.dec_shapes
-        # init CPG
-        self.cpg = CPG(self.param_shapes, args, self.enc_shapes_len)
+        self.num_lang = len(LANG_INDICES)
+
+        # init embedding, encoder, decoder
+        self.word_embeddings = nn.ModuleList([nn.Embedding(self.vocab_size, self.word_embed_size)
+                                              for _ in range(self.num_lang)])
+        self.encoder = Encoder(self.batch_size, self.embed_size, self.hidden_size,
+                          self.training, self.dropout_rate, num_layer=self.num_layers)
+        self.decoder = Decoder(self.vocab_size, self.batch_size, self.embed_size, self.decoder_hidden_size, self.num_layers,
+                          self.word_embedding(0), training=self.training, dropout_rate=self.dropout_rate)
 
     def forward(self, src_lang: int, tgt_lang: int, src_sents: List[List[int]], tgt_sents: List[List[int]]) \
             -> Tensor:
@@ -65,40 +55,10 @@ class MultiNMT(nn.Module):
         # [batch_size, sent_len]
         tgt_sents_tensor = sents_to_tensor(tgt_sents, device)
         assert (src_sents_tensor.shape[0] == tgt_sents_tensor.shape[0])
-        batch_size = src_sents_tensor.shape[0]
-        grouped_params = self.get_grouped_params(src_lang, tgt_lang)
         # encode
-        src_encodings, decoder_init_state = self.encode(batch_size, src_sents_tensor, src_lang, grouped_params)
+        src_encodings, decoder_init_state = self.encoder(src_sents_tensor, self.word_embeddings[src_lang])
         # decode
-        decoder = self.get_decoder(tgt_lang, batch_size, grouped_params)
-        return decoder(src_encodings, decoder_init_state, tgt_sents_tensor)
-
-    def get_grouped_params(self, src_lang: int, tgt_lang: int) -> List[List[Tensor]]:
-        # create a list of language indices corresponding each param group
-        langs = [src_lang for _ in range(self.enc_shapes_len)] + [src_lang for _ in range(self.dec_shapes_len)]
-        return self.cpg.get_params(langs)
-
-    def encode(self, batch_size: int, src_sent_idx: Tensor, src_lang: int, grouped_params: List[List[Tensor]]) \
-            -> Tuple[Tensor, Tuple[Tensor, Tensor]]:
-        """
-
-        :param src_sent_idx: source sentence word indices dim = (batch_size, sent_len)
-        :param src_lang: source language index
-        :param grouped_params: a list of groups of parameters in tensor form
-        :return: outputs: shape = [sent_length, batch_size, num_direction * hidden_size]
-            h_t, c_t: shape = [num_layers, batch_size, num_direction * hidden_size]
-        """
-        enc_weights = grouped_params[:self.enc_shapes_len]
-        encoder = Encoder(batch_size, self.embed_size, self.hidden_size, self.cpg.get_embedding(src_lang),
-                          enc_weights, self.training, self.dropout_rate, num_layer=self.num_layers)
-        return encoder(src_sent_idx)
-
-    def get_decoder(self, tgt_lang: int, batch_size: int, grouped_params: List[List[Tensor]]) -> Decoder:
-        dec_lstm_weights = grouped_params[self.enc_shapes_len:self.enc_shapes_len + self.dec_lstm_shapes_len]
-        attn_weights = grouped_params[self.enc_shapes_len + self.dec_lstm_shapes_len:]
-        return Decoder(batch_size, self.embed_size, self.decoder_hidden_size, self.num_layers,
-                       self.cpg.get_embedding(tgt_lang), dec_lstm_weights, attn_weights, training=self.training,
-                       dropout_rate=self.dropout_rate)
+        return self.decoder(src_encodings, decoder_init_state, tgt_sents_tensor)
 
     def beam_search(self, src_sent: List[int], src_lang: int, tgt_lang: int, beam_size: int=5,
                     max_decoding_time_step: int=70) -> Tensor:

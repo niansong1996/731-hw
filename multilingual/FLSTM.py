@@ -30,7 +30,7 @@ def unpack_weight(weight, input_size, hidden_size):
 
 
 class Stack_FLSTMCell:
-    def __init__(self, input_size, hidden_size, weights: List[List[Tensor]], num_layers=1):
+    def __init__(self, input_size, hidden_size, num_layers=1):
         assert (len(weights) == num_layers)
 
         # init the size constants
@@ -43,7 +43,7 @@ class Stack_FLSTMCell:
         for i in range(num_layers):
             # only the input size of the first layer is the input size of the decoder
             cell_input_size = self.input_size if i == 0 else self.hidden_size
-            cell = FLSTMCell(cell_input_size, self.hidden_size, weights[i])
+            cell = torch.nn.LSTMCell(cell_input_size, self.hidden_size)
             self.cells.append(cell)
 
     def __call__(self, X: Tensor, h_0: List[Tensor], c_0: List[Tensor]) \

@@ -11,17 +11,19 @@ from vocab import Vocab
 
 
 class Decoder:
-    def __init__(self, batch_size, embed_size, hidden_size, num_layers,
-                 embedding: nn.Embedding, lstm_weights: List[List[Tensor]], attn_weights: List[List[Tensor]],
-                 training, dropout_rate):
+    def __init__(self, vocab_size, batch_size, embed_size, hidden_size, num_layers,
+                 embedding: nn.Embedding, training, dropout_rate):
+        self.vocab_size = vocab_size
         self.embedding = embedding
         self.dec_embed_size = embed_size
         self.dec_hidden_size = hidden_size
         self.num_layers = num_layers
         self.batch_size = batch_size
         self.lstm_cell = Stack_FLSTMCell(input_size=hidden_size + embed_size, hidden_size=hidden_size,
-                                         weights=lstm_weights, num_layers=num_layers)
-        self.Wa, self.Wc, self.Ws = attn_weights[0]
+                                         num_layers=num_layers)
+        self.Wa = nn.Linear(self.dec_hidden_size, self.dec_hidden_size, bias=False)
+        self.Wc = nn.Linear(2*self.dec_hidden_size, self.dec_hidden_size, bias=False)
+        self.Ws = nn.Linear(self.dec_hidden_size, self.vocab_size, bias=False)
         self.log_softmax = nn.LogSoftmax(dim=1)
         self.softmax = nn.Softmax(dim=2)
         
@@ -112,7 +114,7 @@ class Decoder:
         # attn_h_t.shape = [batch_size, dec_hidden_size]
         attn_h_t = self.global_attention(src_encodings, h_t)
         # vocab_size_output.shape = [batch_size, vocab_size]
-        vocab_size_output = F.linear(attn_h_t, self.Ws)
+        vocab_size_output = self.Ws(attn_h_t)
         # dim = (batch_size, vocab_size)
         softmax_output = self.log_softmax(vocab_size_output)
         return h_t, c_t, softmax_output, attn_h_t
@@ -138,7 +140,7 @@ class Decoder:
         c_t = torch.bmm(a_t, h_s_)[:, 0, :]
         # dim = (batch_size, num_direction * enc_hidden_size + dec_hidden_size)
         cat_c_h = torch.cat((c_t, h_t_top), 1)
-        return self.tanh(F.linear(cat_c_h, self.Wc))
+        return self.tanh(self.Wc(cat_c_h))
 
     def general_score(self, h_s_: Tensor, h_t_top: Tensor) -> Tensor:
         """
@@ -149,7 +151,7 @@ class Decoder:
         :return: a score of size (batch_size, 1, src_len)
         """
         # dim = (batch_size, src_len, num_direction * enc_hidden_size)
-        W_a_h_s = F.linear(h_s_, self.Wa)
+        W_a_h_s = self.Wa(h_s_)
         # dim = (batch_size, num_direction * enc_hidden_size, src_len)
         W_a_h_s = W_a_h_s.transpose(1, 2)
         return torch.bmm(h_t_top.unsqueeze(1), W_a_h_s)
