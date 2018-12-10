@@ -1,8 +1,8 @@
 #!/bin/sh
 
 vocab="vocab.bin"
-train_src="train.all-en.all.txt"
-train_tgt="train.all-en.en.txt"
+train_src="../multilingual/data/train.all-en.all.txt"
+train_tgt="../multilingual/data/train.all-en.en.txt"
 dev_src="../multilingual/data/dev.all-en.all.txt"
 dev_tgt="../multilingual/data/dev.all-en.en.txt"
 
