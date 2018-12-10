@@ -19,7 +19,7 @@ from docopt import docopt
 
 def train(lang, vocab_size):
     spm.SentencePieceTrainer. \
-        Train('--pad_id=3 --character_coverage=0.9995 --input=data/%s_mono.txt --model_prefix=subword_files/%s --vocab_size=%d' % (lang, lang, vocab_size))
+        Train('--pad_id=3 --character_coverage=0.9995 --input=../multilingual/data/%s_mono.txt --model_prefix=subword_files/%s --vocab_size=%d' % (lang, lang, vocab_size))
 
 
 def get_corpus_pairs(src_lang_idx: int, tgt_lang_idx: int, data_type: str) \
@@ -40,7 +40,7 @@ def get_corpus_ids(file_path, lang_name, is_tgt: bool, skip_long=True, long_sent
 
     # load the subword models for encoding these sents to indices
     sp = spm.SentencePieceProcessor()
-    sp.Load('../multilingual/subword_files/%s.model' % lang_name)
+    sp.Load('subword_files/%s.model' % lang_name)
 
     # read corpus for corpus
     line_count = 0
@@ -65,7 +65,7 @@ def get_corpus_ids(file_path, lang_name, is_tgt: bool, skip_long=True, long_sent
 
 def decode_corpus_ids(lang_name: str, sents: List[List[int]]) -> List[List[str]]:
     sp = spm.SentencePieceProcessor()
-    sp.Load('../multilingual/subword_files/%s.model' % lang_name)
+    sp.Load('subword_files/%s.model' % lang_name)
 
     decoded_sents = []
     for line in sents:
