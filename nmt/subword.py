@@ -19,7 +19,7 @@ from docopt import docopt
 
 def train(lang, vocab_size):
     spm.SentencePieceTrainer. \
-        Train('--pad_id=3 --character_coverage=1.0 --input=data/%s_mono.txt --model_prefix=subword_files/%s --vocab_size=%d' % (lang, lang, vocab_size))
+        Train('--pad_id=3 --character_coverage=0.9995 --input=data/%s_mono.txt --model_prefix=subword_files/%s --vocab_size=%d' % (lang, lang, vocab_size))
 
 
 def get_corpus_pairs(src_lang_idx: int, tgt_lang_idx: int, data_type: str) \

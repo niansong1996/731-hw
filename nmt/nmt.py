@@ -431,7 +431,7 @@ def train(args: Dict[str, str]):
 
 
     model = NMT(embed_size=int(args['--embed-size']),
-                vocab_size=20000,
+                vocab_size=32000,
                 hidden_size=int(args['--hidden-size']),
                 dropout_rate=float(args['--dropout'])).to(device)
 
