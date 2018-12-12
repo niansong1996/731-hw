@@ -14,6 +14,7 @@ Options:
 from typing import List, Tuple, Set
 
 import sentencepiece as spm
+import numpy as np
 from docopt import docopt
 
 
@@ -45,21 +46,25 @@ def get_corpus_ids(file_path, lang_name, is_tgt: bool, skip_long=True, long_sent
     # read corpus for corpus
     line_count = 0
     long_sent_in_src = set()
+    line_lens = []
     for line in open(file_path, encoding="utf-8"):
         sent = line.strip()
         line_count += 1
+        sent_encode = sp.EncodeAsIds(sent)
         if is_tgt:
             if line_count in long_sent:
                 continue
         else:
-            if skip_long and len(sent.split(' ')) > 50:
+            line_lens.append(len(sent_encode))
+            if skip_long and len(sent_encode) > 100:
                 long_sent_in_src.add(line_count)
                 continue
-        sent_encode = sp.EncodeAsIds(sent)
         if is_tgt:
             # add <s> and </s> to the tgt sents
             sent_encode = [sp.bos_id()] + sent_encode + [sp.eos_id()]
         sents.append(sent_encode)
+    if len(line_lens) > 0:
+        print(np.histogram(line_lens, bins=np.arange(max(line_lens), step=10), density=True))
     return sents, long_sent_in_src
 
 
@@ -85,3 +90,4 @@ if __name__ == '__main__':
 
     train(lang, vocab_size)
     print('Done for %s : ' % lang)
+
